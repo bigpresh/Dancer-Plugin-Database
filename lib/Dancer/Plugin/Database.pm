@@ -70,7 +70,19 @@ sub _get_connection {
 # Check the connection is alive
 sub _check_connection {
     my $dbh = shift;
-    ...
+    return unless $dbh;
+    if (my $result = $dbh->ping) {
+        if (int($result)) {
+            # DB driver itself claims all is OK, trust it:
+            return true;
+        } else {
+            # It was "0 but true", meaning the default DBI ping implementation
+            # TODO: determine what to do here; try 'select 1' or something?
+            # For now, play it safe and claim the connection is dead, so we
+            # reconnect
+            return;
+        }
+    }
 }
 
 

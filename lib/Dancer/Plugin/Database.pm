@@ -92,18 +92,31 @@ sub get_connection {
 
     dance;
 
+Database connection details are read from your Dancer application config - see
+below.
+
+
 =head1 DESCRIPTION
 
 Provides an easy way to obtain a connected DBI database handle by simply calling
 the database keyword within your L<Dancer> application.
 
-Connection details will be taken from your application config file, and should
-be specified as, for example: 
+Takes care of ensuring that the database handle is still connected and valid.
+If the handle was last asked for more than C<connection_check_threshold> seconds
+ago, it will perform a simple no-op query against the database and check that it
+worked; if not, a new connection will be obtained.  This avoids any problems for
+a long-running script where the connection to the database might go away.
+
+=head1 CONFIGURATION
+
+Connection details will be taken from your Dancer application config file, and
+should be specified as, for example: 
 
     plugins:
         database:
             driver: mysql
-            dbname: test'
+            database: test'
+            host: localhost
             username: 'myusername'
             password: 'mypassword'
             connectivity-check-threshold: 10
@@ -119,10 +132,24 @@ Calling C<database> will return a connected database handle; the first time it i
 called, the plugin will establish a connection to the database, and return a
 reference to the DBI object.
 
+If you prefer, you can also supply a pre-crafted DSN; in that case, it will be
+used as-is, and the driver/database/host settings will be ignored.  This may be
+useful if you're using some DBI driver which requires a peculiar DSN.
+
 
 =head1 AUTHOR
 
 David Precious, C<< <davidp at preshweb.co.uk> >>
+
+
+=head1 CONTRIBUTING
+
+This module is developed on Github at:
+
+L<http://github.com/bigpresh/Dancer-Plugin-Database>
+
+Feel free to fork the repo and submit pull requests!
+
 
 =head1 BUGS
 
@@ -163,8 +190,6 @@ L<http://search.cpan.org/dist/Dancer-Plugin-Database/>
 =back
 
 
-=head1 ACKNOWLEDGEMENTS
-
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -175,6 +200,14 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
+
+
+=head1 SEE ALSO
+
+L<Dancer>
+
+L<DBI>
+
 
 
 =cut

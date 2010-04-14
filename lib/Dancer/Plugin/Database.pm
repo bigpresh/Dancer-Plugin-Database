@@ -24,11 +24,11 @@ register database => sub {
             < $settings->{connection_check_threshold}) {
             return $dbh;
         } else {
-            if (check_connection($dbh)) {
+            if (_check_connection($dbh)) {
                 $last_connection_check = time;
                 return $dbh;
             } else {
-                return $dbh = get_connection();
+                return $dbh = _get_connection();
             }
         }
     } else {
@@ -38,7 +38,7 @@ register database => sub {
 
 register_plugin;
 
-sub get_connection {
+sub _get_connection {
 
     # Assemble the DSN:
     my $dsn;
@@ -67,7 +67,11 @@ sub get_connection {
 
 
 
-
+# Check the connection is alive
+sub _check_connection {
+    my $dbh = shift;
+    ...
+}
 
 
 =head1 SYNOPSIS

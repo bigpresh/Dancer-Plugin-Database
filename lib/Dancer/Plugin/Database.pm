@@ -150,7 +150,7 @@ useful if you're using some DBI driver which requires a peculiar DSN.
 
 =head1 AUTHOR
 
-David Precious, C<< <davidp at preshweb.co.uk> >>
+David Precious, C<< <davidp@preshweb.co.uk> >>
 
 
 =head1 CONTRIBUTING
@@ -199,7 +199,6 @@ L<http://cpanratings.perl.org/d/Dancer-Plugin-Database>
 L<http://search.cpan.org/dist/Dancer-Plugin-Database/>
 
 =back
-
 
 
 =head1 LICENSE AND COPYRIGHT

@@ -1,6 +1,5 @@
 package Dancer::Plugin::Database;
 
-use warnings;
 use strict;
 use Dancer::Plugin;
 use DBI;
@@ -8,10 +7,6 @@ use DBI;
 =head1 NAME
 
 Dancer::Plugin::Database - easy database connections for Dancer
-
-=head1 VERSION
-
-Version 0.01
 
 =cut
 

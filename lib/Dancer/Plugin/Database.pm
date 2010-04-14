@@ -74,7 +74,7 @@ sub _check_connection {
     if (my $result = $dbh->ping) {
         if (int($result)) {
             # DB driver itself claims all is OK, trust it:
-            return true;
+            return 1;
         } else {
             # It was "0 but true", meaning the default DBI ping implementation
             # TODO: determine what to do here; try 'select 1' or something?

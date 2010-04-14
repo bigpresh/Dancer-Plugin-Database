@@ -32,7 +32,7 @@ register database => sub {
             }
         }
     } else {
-        return $dbh = get_connection();
+        return $dbh = _get_connection();
     }
 };
 

@@ -6,7 +6,7 @@ use DBI;
 
 =head1 NAME
 
-Dancer::Plugin::Database - easy database connections for Dancer
+Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 

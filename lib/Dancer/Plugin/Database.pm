@@ -10,7 +10,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my $dbh;
 my $last_connection_check;
@@ -124,10 +124,10 @@ Connection details will be taken from your Dancer application config file, and
 should be specified as, for example: 
 
     plugins:
-        database:
-            driver: mysql
-            database: test'
-            host: localhost
+        Database:
+            driver: 'mysql'
+            database: 'test'
+            host: 'localhost'
             username: 'myusername'
             password: 'mypassword'
             connectivity-check-threshold: 10

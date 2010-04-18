@@ -1,5 +1,13 @@
 Revision history for Dancer-Plugin-Database
 
+0.02    2010-04-18
+        Documentation fixes, thanks to "mrpants" on Github:
+        - Plugin names in config.yml are case-sensitive for current CPAN
+          releases of Dancer; my commit fdc3f3 makes it case-insenitive, but
+          that hasn't hit CPAN yet, so people using CPAN releases could be
+          confused
+        - stray trailing single-quote in example config
+
 0.01    2010-04-14
         Initial version developed.
 

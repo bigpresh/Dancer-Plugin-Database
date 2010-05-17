@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database
 
+0.03    2010-05-17
+        - Fix warning where $last_connection_check was initially undefined but
+          used in numeric comparison.  Thanks to Tadzik for reporting.
+
 0.02    2010-04-18
         Documentation fixes, thanks to "mrpants" on Github:
         - Plugin names in config.yml are case-sensitive for current CPAN

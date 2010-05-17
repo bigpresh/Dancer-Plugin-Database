@@ -10,7 +10,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 my $dbh;
 my $last_connection_check;
@@ -19,7 +19,6 @@ $settings->{connection_check_threshold} ||= 30;
 
 register database => sub {
     if ($dbh) {
-    
         if (time - $last_connection_check
             < $settings->{connection_check_threshold}) {
             return $dbh;
@@ -62,6 +61,7 @@ sub _get_connection {
             "Database connection failed - " . $DBI::errstr
         );
     }
+    $last_connection_check = time;
     return $dbh;
 }
 

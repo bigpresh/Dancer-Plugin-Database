@@ -77,11 +77,15 @@ sub _check_connection {
             return 1;
         } else {
             # It was "0 but true", meaning the default DBI ping implementation
-            # TODO: determine what to do here; try 'select 1' or something?
-            # For now, play it safe and claim the connection is dead, so we
-            # reconnect
-            return;
+            # Implement our own basic check, by performing a real simple query.
+            my $ok;
+            eval {
+                $ok = $dbh->do('select 1');
+            };
+            return $ok;
         }
+    } else {
+        return;
     }
 }
 

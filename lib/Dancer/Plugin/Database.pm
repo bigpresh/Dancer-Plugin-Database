@@ -27,6 +27,7 @@ register database => sub {
                 $last_connection_check = time;
                 return $dbh;
             } else {
+                if ($dbh) { $dbh->disconnect; }
                 return $dbh = _get_connection();
             }
         }

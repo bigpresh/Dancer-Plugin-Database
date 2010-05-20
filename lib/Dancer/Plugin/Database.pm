@@ -10,7 +10,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 my $dbh;
 my $last_connection_check;
@@ -27,6 +27,9 @@ register database => sub {
                 $last_connection_check = time;
                 return $dbh;
             } else {
+                Dancer::Logger->debug(
+                    "Database connection went away, reconnecting"
+                );
                 if ($dbh) { $dbh->disconnect; }
                 return $dbh = _get_connection();
             }

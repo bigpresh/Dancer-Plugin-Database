@@ -1,5 +1,12 @@
 Revision history for Dancer-Plugin-Database
 
+0.04    2010-05-20
+        - If DBD driver does not implement ping(), perform our own connection
+          check by performing a simple query.  This will check that the DB
+          connection is still alive, and avoid needless re-connects, which are
+          expensive.  Also seems to fix a problem Tadzik saw with a warning from
+          DBD::SQLite when the old handle was thrown away.
+
 0.03    2010-05-17
         - Fix warning where $last_connection_check was initially undefined but
           used in numeric comparison.  Thanks to Tadzik for reporting.

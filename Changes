@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-Database
 
+0.06    2010-06-15
+        - Stupid typo fix in documentation for features added in 0.05.  I wish
+          I'd spotted this mistake before releasing 0.05, rather than just
+          after!
+
 0.05    2010-06-15
         - Allow parameters to be passed to DBI->connect call (e.g. RaiseError),
           and support providing a set of statements to execute upon connection.

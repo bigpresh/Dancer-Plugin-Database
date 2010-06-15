@@ -10,7 +10,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 my $dbh;
 my $last_connection_check;
@@ -146,7 +146,7 @@ should be specified as, for example:
             username: 'myusername'
             password: 'mypassword'
             connectivity-check-threshold: 10
-            parameters:
+            dbi_params:
                 RaiseError: 1
                 AutoCommit: 1
             on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
@@ -158,7 +158,7 @@ still have a connection to the database, and will reconnect if not.  This
 handles cases where the database handle hasn't been used for a while and the
 underlying connection has gone away.
 
-The C<parameters> setting is also optional, and if specified, should be settings
+The C<dbi_params> setting is also optional, and if specified, should be settings
 which can be passed to C<< DBI->connect >> as its third argument; see the L<DBI>
 documentation for these.
 

@@ -10,7 +10,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 my $dbh;
 my $last_connection_check;
@@ -57,14 +57,21 @@ sub _get_connection {
     }
 
     my $dbh = DBI->connect($dsn, 
-        $settings->{username}, $settings->{password}
+        $settings->{username}, $settings->{password}, $settings->{dbi_params}
     );
 
     if (!$dbh) {
         Dancer::Logger->error(
             "Database connection failed - " . $DBI::errstr
         );
+    } elsif (exists $settings->{on_connect_do}) {
+        for (@{ $settings->{on_connect_do} }) {
+            $dbh->do($_) or Dancer::Logger->error(
+                "Failed to perform on-connect command $_"
+            );
+        }
     }
+
     $last_connection_check = time;
     return $dbh;
 }
@@ -139,6 +146,10 @@ should be specified as, for example:
             username: 'myusername'
             password: 'mypassword'
             connectivity-check-threshold: 10
+            parameters:
+                RaiseError: 1
+                AutoCommit: 1
+            on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
 
 The C<connectivity-check-threshold> setting is optional, if not provided, it
 will default to 30 seconds.  If the database keyword was last called more than
@@ -147,13 +158,26 @@ still have a connection to the database, and will reconnect if not.  This
 handles cases where the database handle hasn't been used for a while and the
 underlying connection has gone away.
 
+The C<parameters> setting is also optional, and if specified, should be settings
+which can be passed to C<< DBI->connect >> as its third argument; see the L<DBI>
+documentation for these.
+
+The optional C<on_connect_do> setting is an array of queries which should be
+performed when a connection is established; if given, each query will be
+performed using C<< $dbh->do >>.
+
+If you prefer, you can also supply a pre-crafted DSN using the C<dsn> setting;
+in that case, it will be used as-is, and the driver/database/host settings will 
+be ignored.  This may be useful if you're using some DBI driver which requires 
+a peculiar DSN.
+
+=head1 GETTING A DATABASE HANDLE
+
 Calling C<database> will return a connected database handle; the first time it is
 called, the plugin will establish a connection to the database, and return a
-reference to the DBI object.
-
-If you prefer, you can also supply a pre-crafted DSN; in that case, it will be
-used as-is, and the driver/database/host settings will be ignored.  This may be
-useful if you're using some DBI driver which requires a peculiar DSN.
+reference to the DBI object.  On subsequent calls, the same DBI connection
+object will be returned, unless it has been found to be no longer usable (the
+connection has gone away), in which case a fresh connection will be obtained.
 
 
 =head1 AUTHOR

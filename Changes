@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-Database
 
+0.05    2010-06-15
+        - Allow parameters to be passed to DBI->connect call (e.g. RaiseError),
+          and support providing a set of statements to execute upon connection.
+          Thanks to Igor Bujna for providing this feature!
+
 0.04    2010-05-20
         - If DBD driver does not implement ping(), perform our own connection
           check by performing a simple query.  This will check that the DB

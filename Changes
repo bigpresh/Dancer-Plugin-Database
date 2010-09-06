@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-Database
 
+0.07    2010-09-06
+        - Extra params in DSN (database, host, port) should be separated with
+          semi-colons, not colons.  Thanks to Steve Atkins for reporting this.
+        - Documentation update to reflect use of $dbh->ping
+
 0.06    2010-06-15
         - Stupid typo fix in documentation for features added in 0.05.  I wish
           I'd spotted this mistake before releasing 0.05, rather than just

@@ -49,11 +49,13 @@ sub _get_connection {
         $dsn = $settings->{dsn};
     } else {
         $dsn = "dbi:" . $settings->{driver};
+        my @extra_args;
         for (qw(database host port)) {
             if (exists $settings->{$_}) {
-                $dsn .= ":$_=". $settings->{$_};
+                push @extra_args, $_ . "=" . $settings->{$_};
             }
         }
+        $dsn .= ':' . join(';', @extra_args) if @extra_args;
     }
 
     my $dbh = DBI->connect($dsn, 
@@ -129,8 +131,10 @@ the database keyword within your L<Dancer> application.
 
 Takes care of ensuring that the database handle is still connected and valid.
 If the handle was last asked for more than C<connection_check_threshold> seconds
-ago, it will perform a simple no-op query against the database and check that it
-worked; if not, a new connection will be obtained.  This avoids any problems for
+ago, it will check that the connection is still alive, using either the 
+C<< $dbh->ping >> method if the DBD driver supports it, or performing a simple
+no-op query against the database if not.  If the connection has gone away, a new
+connection will be obtained and returned.  This avoids any problems for
 a long-running script where the connection to the database might go away.
 
 =head1 CONFIGURATION
@@ -183,6 +187,7 @@ connection has gone away), in which case a fresh connection will be obtained.
 =head1 AUTHOR
 
 David Precious, C<< <davidp@preshweb.co.uk> >>
+
 
 
 =head1 CONTRIBUTING

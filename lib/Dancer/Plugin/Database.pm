@@ -50,6 +50,16 @@ sub _get_connection {
     } else {
         $dsn = "dbi:" . $settings->{driver};
         my @extra_args;
+
+        # DBD::SQLite wants 'dbname', not 'database', so special-case this
+        # (DBI's documentation recommends that DBD::* modules should understand
+        # 'database', but DBD::SQLite doesn't; let's make things easier for our
+        # users by handling this for them):
+        if ($settings->{driver} eq 'SQLite' 
+            && $settings->{database} && !$settings->{dbname}) {
+            $settings->{database} = delete $settings->{dbname};
+        }
+
         for (qw(database host port)) {
             if (exists $settings->{$_}) {
                 push @extra_args, $_ . "=" . $settings->{$_};

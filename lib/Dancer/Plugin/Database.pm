@@ -31,7 +31,7 @@ register database => sub {
                 $handle->{last_connection_check} = time;
                 return $handle->{dbh};
             } else {
-                Dancer::Logger->debug(
+                Dancer::Logger::debug(
                     "Database connection went away, reconnecting"
                 );
                 if ($handle->{dbh}) { $handle->{dbh}->disconnect; }
@@ -148,7 +148,7 @@ sub _get_settings {
             $return_settings = { %$settings };
         } else {
             # OK, didn't match anything
-            Dancer::Logger->error(
+            Dancer::Logger::error(
                 "Asked for a database handle named '$name' but no matching  "
                ."connection details found in config"
             );

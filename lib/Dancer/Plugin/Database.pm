@@ -10,38 +10,56 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.08_01';
 
 my $dbh;
 my $last_connection_check;
 my $settings = plugin_setting;
-$settings->{connection_check_threshold} ||= 30;
+my %handles;
 
 register database => sub {
-    if ($dbh) {
-        if (time - $last_connection_check
+    my $name = shift || 'DPA_DEFAULT';
+    my $handle = $handles{$name};
+    my $settings = _get_settings($name);
+
+    if ($handle->{dbh}) {
+        if (time - $handle->{last_connection_check}
             < $settings->{connection_check_threshold}) {
-            return $dbh;
+            return $handle->{dbh};
         } else {
-            if (_check_connection($dbh)) {
-                $last_connection_check = time;
-                return $dbh;
+            if (_check_connection($handle->{dbh})) {
+                $handle->{last_connection_check} = time;
+                return $handle->{dbh};
             } else {
                 Dancer::Logger->debug(
                     "Database connection went away, reconnecting"
                 );
-                if ($dbh) { $dbh->disconnect; }
-                return $dbh = _get_connection();
+                if ($handle->{dbh}) { $handle->{dbh}->disconnect; }
+                return $handles{$name}->{dbh}= _get_connection();
             }
         }
     } else {
-        return $dbh = _get_connection();
+        # Get a new connection
+        if (!$settings) {
+            Dancer::Logger::error(
+                "No DB settings named $name, so cannot connect"
+            );
+            return;
+        }
+        if ($handle->{dbh} = _get_connection($settings)) {
+            $handle->{last_connection_check} = time;
+            return $handle->{dbh};
+        } else {
+            return;
+        }
     }
 };
 
 register_plugin;
 
+# Given the settings to use, try to get a database connection
 sub _get_connection {
+    my $settings = shift;
 
     # Assemble the DSN:
     my $dsn;
@@ -73,18 +91,17 @@ sub _get_connection {
     );
 
     if (!$dbh) {
-        Dancer::Logger->error(
+        Dancer::Logger::error(
             "Database connection failed - " . $DBI::errstr
         );
     } elsif (exists $settings->{on_connect_do}) {
         for (@{ $settings->{on_connect_do} }) {
-            $dbh->do($_) or Dancer::Logger->error(
+            $dbh->do($_) or Dancer::Logger::error(
                 "Failed to perform on-connect command $_"
             );
         }
     }
 
-    $last_connection_check = time;
     return $dbh;
 }
 
@@ -110,6 +127,41 @@ sub _check_connection {
     } else {
         return;
     }
+}
+
+sub _get_settings {
+    my $name = shift;
+    my $return_settings;
+
+    # If no name given, just return the default settings
+    # (Take a copy and remove the connections key, so we have only the main
+    # connection details)
+    if (!defined $name || $name eq 'DPA_DEFAULT') { 
+        $return_settings = { %$settings };
+    } else {
+        # If there are no named connections in the config, bail now:
+        return unless exists $settings->{connections};
+
+
+        # OK, find a matching config for this name:
+        if (my $settings = $settings->{connections}{$name}) {
+            $return_settings = { %$settings };
+        } else {
+            # OK, didn't match anything
+            Dancer::Logger->error(
+                "Asked for a database handle named '$name' but no matching  "
+               ."connection details found in config"
+            );
+        }
+    }
+    
+    # We should have soemthing to return now; remove any unrelated connections
+    # (only needed if this is the default connection), and make sure we have a
+    # connection_check_threshold, then return what we found
+    delete $return_settings->{connections};
+    $return_settings->{connection_check_threshold} ||= 30;
+    return $return_settings;
+
 }
 
 
@@ -185,6 +237,31 @@ in that case, it will be used as-is, and the driver/database/host settings will
 be ignored.  This may be useful if you're using some DBI driver which requires 
 a peculiar DSN.
 
+
+=head2 DEFINING MULTIPLE CONNECTIONS
+
+If you need to connect to multiple databases, this is easy - just list them in
+your config under C<connections> as shown below:
+
+    plugins:
+        Database:
+            connections:
+                foo:
+                    driver: "SQLite"
+                    database: "foo.sqlite"
+                bar:
+                    driver: "mysql"
+                    host: "localhost"
+                    ....
+
+Then, you can call the C<database> keyword with the name of the database
+connection you want, for example:
+
+    my $foo_dbh = database('foo');
+    my $bar_dbh = database('bar');
+
+
+
 =head1 GETTING A DATABASE HANDLE
 
 Calling C<database> will return a connected database handle; the first time it is
@@ -193,6 +270,10 @@ reference to the DBI object.  On subsequent calls, the same DBI connection
 object will be returned, unless it has been found to be no longer usable (the
 connection has gone away), in which case a fresh connection will be obtained.
 
+If you have declared named connections as described above in 'DEFINING MULTIPLE
+CONNECTIONS', then calling the database() keyword with the name of the
+connection as specified in the config file will get you a database handle
+connected with those details.
 
 =head1 AUTHOR
 
@@ -207,6 +288,11 @@ This module is developed on Github at:
 L<http://github.com/bigpresh/Dancer-Plugin-Database>
 
 Feel free to fork the repo and submit pull requests!
+
+
+=head1 ACKNOWLEDGEMENTS
+
+Igor Bujna
 
 
 =head1 BUGS
@@ -246,6 +332,8 @@ L<http://cpanratings.perl.org/d/Dancer-Plugin-Database>
 L<http://search.cpan.org/dist/Dancer-Plugin-Database/>
 
 =back
+
+You can find the author on IRC in the channel C<#dancer> on <irc.perl.org>.
 
 
 =head1 LICENSE AND COPYRIGHT

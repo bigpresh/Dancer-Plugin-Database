@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-Database
 
+0.08    2010-09-14
+        - Bugfix - make SQLite DWIMmery from previous version actually work.
+
 0.07    2010-09-06
         - Extra params in DSN (database, host, port) should be separated with
           semi-colons, not colons.  Thanks to Steve Atkins for reporting this.

@@ -10,7 +10,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 my $dbh;
 my $last_connection_check;
@@ -57,10 +57,10 @@ sub _get_connection {
         # users by handling this for them):
         if ($settings->{driver} eq 'SQLite' 
             && $settings->{database} && !$settings->{dbname}) {
-            $settings->{database} = delete $settings->{dbname};
+            $settings->{dbname} = delete $settings->{database};
         }
 
-        for (qw(database host port)) {
+        for (qw(database dbname host port)) {
             if (exists $settings->{$_}) {
                 push @extra_args, $_ . "=" . $settings->{$_};
             }

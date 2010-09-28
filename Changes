@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-Database
 
+0.09    2010-09-28
+        - Allow definition of multiple connections, and accept a param to the
+          database() keyword to specify which connection you need a handle for.
+          This was released as 0.08_01 for testing.
+
 0.08    2010-09-14
         - Bugfix - make SQLite DWIMmery from previous version actually work.
 

@@ -10,16 +10,18 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.08_01';
+our $VERSION = '0.09';
 
-my $dbh;
-my $last_connection_check;
 my $settings = plugin_setting;
 my %handles;
+# Hashref used as key for default handle, so we don't have a magic value that
+# the user could use for one of their connection names and cause problems
+# (Kudos to Igor Bujna for the idea)
+my $def_handle = {};
 
 register database => sub {
-    my $name = shift || 'DPA_DEFAULT';
-    my $handle = $handles{$name};
+    my $name = shift;
+    my $handle = defined($name) ? $handles{$name} : $def_handle;
     my $settings = _get_settings($name);
 
     if ($handle->{dbh}) {
@@ -35,7 +37,7 @@ register database => sub {
                     "Database connection went away, reconnecting"
                 );
                 if ($handle->{dbh}) { $handle->{dbh}->disconnect; }
-                return $handles{$name}->{dbh}= _get_connection();
+                return $handle->{dbh}= _get_connection();
             }
         }
     } else {
@@ -71,8 +73,10 @@ sub _get_connection {
 
         # DBD::SQLite wants 'dbname', not 'database', so special-case this
         # (DBI's documentation recommends that DBD::* modules should understand
-        # 'database', but DBD::SQLite doesn't; let's make things easier for our
-        # users by handling this for them):
+        # 'database', but older versions of DBD::SQLite didn't; let's make 
+        # things easier for our users by handling this for them):
+        # (DBD::SQLite will support 'database', too, as of 1.32 when it's
+        # released)
         if ($settings->{driver} eq 'SQLite' 
             && $settings->{database} && !$settings->{dbname}) {
             $settings->{dbname} = delete $settings->{database};
@@ -136,7 +140,7 @@ sub _get_settings {
     # If no name given, just return the default settings
     # (Take a copy and remove the connections key, so we have only the main
     # connection details)
-    if (!defined $name || $name eq 'DPA_DEFAULT') { 
+    if (!defined $name) {
         $return_settings = { %$settings };
     } else {
         # If there are no named connections in the config, bail now:

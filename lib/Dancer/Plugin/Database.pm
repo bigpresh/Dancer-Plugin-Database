@@ -12,7 +12,10 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 our $VERSION = '0.09';
 
-my $settings = plugin_setting;
+my $settings = undef;
+
+sub _load_db_settings { $settings = plugin_setting; }
+
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that
 # the user could use for one of their connection names and cause problems
@@ -21,6 +24,9 @@ my $def_handle = {};
 
 register database => sub {
     my $name = shift;
+
+    _load_db_settings() if (!$settings);
+    
     my $handle = defined($name) ? $handles{$name} : $def_handle;
     my $settings = _get_settings($name);
 
@@ -178,9 +184,8 @@ sub _get_settings {
     get '/widget/view/:id' => sub {
         my $sth = database->prepare(
             'select * from widgets where id = ?',
-            {}, params->{id}
         );
-        $sth->execute;
+        $sth->execute(params->{id});
         template 'display_widget', { widget => $sth->fetchrow_hashref };
     };
 

@@ -10,15 +10,19 @@ use t::lib::TestApp;
 use Dancer ':syntax';
 use Dancer::Test;
 
+eval { require DBD::SQLite };
+if ($@) {
+    plan skip_all => 'DBD::SQLite required to run these tests';
+}
+
 my $dir = tempdir( CLEANUP => 1 );
 my $db = File::Spec->catfile( $dir, 'test.db' );
 
-my $dsn = "dbi:SQLite:$db";
+my $dsn = "dbi:SQLite:dbname=$db";
 
 my $dbh;
 
-eval { $dbh = DBI->connect($dsn) }
-  or plan skip_all => 'DBD::SQLite is needed for this test';
+$dbh = DBI->connect($dsn);
 
 my @sql = (
     q/create table users (id INTEGER, name VARCHAR(64))/,

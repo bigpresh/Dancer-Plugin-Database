@@ -10,7 +10,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.09_1';
 
 my $settings = undef;
 
@@ -303,6 +303,7 @@ Feel free to fork the repo and submit pull requests!
 
 Igor Bujna
 
+Franck Cuny
 
 =head1 BUGS
 

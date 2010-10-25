@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-Database
 
+0.09_1  2010-10-25
+        - Add some proper tests [Franck Cuny]
+
 0.09    2010-09-28
         - Allow definition of multiple connections, and accept a param to the
           database() keyword to specify which connection you need a handle for.

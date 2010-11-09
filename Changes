@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-Database
 
+0.11  2010-11-09 (CoD Black Ops day!)
+        - Bugfix: pass connection settings when reconnecting, too.
+
 0.10  2010-10-30
         - Add some proper tests [Franck Cuny]
 

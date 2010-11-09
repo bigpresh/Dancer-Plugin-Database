@@ -21,7 +21,7 @@ setting plugins => { Database => { dsn => $dsn, } };
 response_status_is [ GET => '/prepare_db' ], 200, 'db is created';
 
 response_status_is    [ GET => '/' ], 200,   "GET / is found";
-response_content_like [ GET => '/' ], qr/2/, "content looks god for /";
+response_content_like [ GET => '/' ], qr/2/, "content looks good for /";
 
 response_status_is [ GET => '/user/1' ], 200, 'GET /user/1 is found';
 

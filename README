@@ -1,47 +1,165 @@
-Dancer-Plugin-Database
+NAME
+    Dancer::Plugin::Database - easy database connections for Dancer
+    applications
 
-A plugin for Dancer applications, providing easy database connection handling.
+SYNOPSIS
+        use Dancer;
+        use Dancer::Plugin::Database;
 
-See http://www.perldancer.org/ for details on Dancer.
+        # Calling the database keyword will get you a connected DBI handle:
+        get '/widget/view/:id' => sub {
+            my $sth = database->prepare(
+                'select * from widgets where id = ?',
+            );
+            $sth->execute(params->{id});
+            template 'display_widget', { widget => $sth->fetchrow_hashref };
+        };
 
-INSTALLATION
+        dance;
 
-To install this module, run the following commands:
+    Database connection details are read from your Dancer application config
+    - see below.
 
-	perl Makefile.PL
-	make
-	make test
-	make install
+DESCRIPTION
+    Provides an easy way to obtain a connected DBI database handle by simply
+    calling the database keyword within your Dancer application.
 
-SUPPORT AND DOCUMENTATION
+    Takes care of ensuring that the database handle is still connected and
+    valid. If the handle was last asked for more than
+    `connection_check_threshold' seconds ago, it will check that the
+    connection is still alive, using either the `$dbh->ping' method if the
+    DBD driver supports it, or performing a simple no-op query against the
+    database if not. If the connection has gone away, a new connection will
+    be obtained and returned. This avoids any problems for a long-running
+    script where the connection to the database might go away.
 
-After installing, you can find documentation for this module with the
-perldoc command.
+CONFIGURATION
+    Connection details will be taken from your Dancer application config
+    file, and should be specified as, for example:
 
-    perldoc Dancer::Plugin::Database
+        plugins:
+            Database:
+                driver: 'mysql'
+                database: 'test'
+                host: 'localhost'
+                username: 'myusername'
+                password: 'mypassword'
+                connectivity-check-threshold: 10
+                dbi_params:
+                    RaiseError: 1
+                    AutoCommit: 1
+                on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
 
-You can also look for information at:
+    The `connectivity-check-threshold' setting is optional, if not provided,
+    it will default to 30 seconds. If the database keyword was last called
+    more than this number of seconds ago, a quick check will be performed to
+    ensure that we still have a connection to the database, and will
+    reconnect if not. This handles cases where the database handle hasn't
+    been used for a while and the underlying connection has gone away.
 
-    RT, CPAN's request tracker
+    The `dbi_params' setting is also optional, and if specified, should be
+    settings which can be passed to `DBI->connect' as its third argument;
+    see the DBI documentation for these.
+
+    The optional `on_connect_do' setting is an array of queries which should
+    be performed when a connection is established; if given, each query will
+    be performed using `$dbh->do'.
+
+    If you prefer, you can also supply a pre-crafted DSN using the `dsn'
+    setting; in that case, it will be used as-is, and the
+    driver/database/host settings will be ignored. This may be useful if
+    you're using some DBI driver which requires a peculiar DSN.
+
+  DEFINING MULTIPLE CONNECTIONS
+    If you need to connect to multiple databases, this is easy - just list
+    them in your config under `connections' as shown below:
+
+        plugins:
+            Database:
+                connections:
+                    foo:
+                        driver: "SQLite"
+                        database: "foo.sqlite"
+                    bar:
+                        driver: "mysql"
+                        host: "localhost"
+                        ....
+
+    Then, you can call the `database' keyword with the name of the database
+    connection you want, for example:
+
+        my $foo_dbh = database('foo');
+        my $bar_dbh = database('bar');
+
+GETTING A DATABASE HANDLE
+    Calling `database' will return a connected database handle; the first
+    time it is called, the plugin will establish a connection to the
+    database, and return a reference to the DBI object. On subsequent calls,
+    the same DBI connection object will be returned, unless it has been
+    found to be no longer usable (the connection has gone away), in which
+    case a fresh connection will be obtained.
+
+    If you have declared named connections as described above in 'DEFINING
+    MULTIPLE CONNECTIONS', then calling the database() keyword with the name
+    of the connection as specified in the config file will get you a
+    database handle connected with those details.
+
+AUTHOR
+    David Precious, `<davidp@preshweb.co.uk>'
+
+CONTRIBUTING
+    This module is developed on Github at:
+
+    http://github.com/bigpresh/Dancer-Plugin-Database
+
+    Feel free to fork the repo and submit pull requests!
+
+ACKNOWLEDGEMENTS
+    Igor Bujna
+
+    Franck Cuny
+
+BUGS
+    Please report any bugs or feature requests to
+    `bug-dancer-plugin-database at rt.cpan.org', or through the web
+    interface at
+    http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer-Plugin-Database. I
+    will be notified, and then you'll automatically be notified of progress
+    on your bug as I make changes.
+
+SUPPORT
+    You can find documentation for this module with the perldoc command.
+
+        perldoc Dancer::Plugin::Database
+
+    You can also look for information at:
+
+    * RT: CPAN's request tracker
         http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dancer-Plugin-Database
 
-    AnnoCPAN, Annotated CPAN documentation
+    * AnnoCPAN: Annotated CPAN documentation
         http://annocpan.org/dist/Dancer-Plugin-Database
 
-    CPAN Ratings
+    * CPAN Ratings
         http://cpanratings.perl.org/d/Dancer-Plugin-Database
 
-    Search CPAN
+    * Search CPAN
         http://search.cpan.org/dist/Dancer-Plugin-Database/
 
+    You can find the author on IRC in the channel `#dancer' on
+    <irc.perl.org>.
 
 LICENSE AND COPYRIGHT
+    Copyright 2010 David Precious.
 
-Copyright (C) 2010 David Precious
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of either: the GNU General Public License as published
+    by the Free Software Foundation; or the Artistic License.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+    See http://dev.perl.org/licenses/ for more information.
 
-See http://dev.perl.org/licenses/ for more information.
+SEE ALSO
+    Dancer
+
+    DBI
 

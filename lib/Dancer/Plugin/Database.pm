@@ -164,11 +164,20 @@ sub _get_settings {
             );
         }
     }
-    
+
     # We should have soemthing to return now; remove any unrelated connections
     # (only needed if this is the default connection), and make sure we have a
-    # connection_check_threshold, then return what we found
+    # connection_check_threshold, then return what we found.  In previous
+    # versions the documentation contained a typo mentioning
+    # connectivity-check-threshold, so support that as an alias.
     delete $return_settings->{connections};
+    if (exists $return_settings->{'connectivity-check-threshold'}
+        && !exists $return_settings->{connection_check_threshold})
+    {
+        $return_settings->{connection_check_threshold}
+            = delete $return_settings->{'connectivity-check-threshold'};
+    }
+
     $return_settings->{connection_check_threshold} ||= 30;
     return $return_settings;
 

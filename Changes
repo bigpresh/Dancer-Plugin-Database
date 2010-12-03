@@ -1,9 +1,14 @@
 Revision history for Dancer-Plugin-Database
 
-0.11  2010-11-09 (CoD Black Ops day!)
+0.12    2010-12-03
+        - Documentation mentioned connectivity-check-threshold instead of the
+          correct connection_check_threshold.  Thanks to bessarabov for catching
+          this and submitting corrections via GitHub!
+
+0.11    2010-11-09 (CoD Black Ops day!)
         - Bugfix: pass connection settings when reconnecting, too.
 
-0.10  2010-10-30
+0.10    2010-10-30
         - Add some proper tests [Franck Cuny]
 
 0.09    2010-09-28

@@ -220,13 +220,13 @@ should be specified as, for example:
             host: 'localhost'
             username: 'myusername'
             password: 'mypassword'
-            connectivity-check-threshold: 10
+            connection_check_threshold: 10
             dbi_params:
                 RaiseError: 1
                 AutoCommit: 1
             on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
 
-The C<connectivity-check-threshold> setting is optional, if not provided, it
+The C<connection_check_threshold> setting is optional, if not provided, it
 will default to 30 seconds.  If the database keyword was last called more than
 this number of seconds ago, a quick check will be performed to ensure that we
 still have a connection to the database, and will reconnect if not.  This

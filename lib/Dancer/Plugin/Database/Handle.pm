@@ -41,24 +41,7 @@ values are, well, the values), insert a row in the table.
 
 sub quick_insert {
     my ($self, $table_name, $data) = @_;
-    if (!$table_name || ref $table_name) {
-        carp "Expected table name as a straight scalar";
-        return;
-    }
-    if (!$data || ref $data ne 'HASH') {
-        carp "Expected hashref of data";
-        return;
-    }
-    # Quote the table name, no SQL injection here thank you:
-    $tablename = $self->quote_identifier($tablename);
-    my $field_list = join ',', map { $self->quote($_) } keys %$data;
-    my $placeholders = join ',', map { "?" } values %$data;
-    my $sql = "INSERT INTO $table_name ($field_list) VALUES($placeholders)";
-    Dancer::Logger::debug(
-        "Executing query $sql with params: " . join ',', values %$data
-    );
-    return $self->do($sql, undef, values %$data);
-
+    return $self->_quick_query('INSERT', $table_name, $data);
 }
 
 =item quick_update
@@ -93,28 +76,59 @@ values were interpolated directly.)
 
 sub quick_update {
     my ($self, $table_name, $where, $data) = @_;
+    return $self->_quick_query('UPDATE', $table_name, $data, $where);
+}
+
+sub _quick_query {
+    my ($self, $type, $table_name, $data, $where) = @_;
     
+    if ($type !~ m{^ (INSERT|UPDATE|DELETE) $}x) {
+        carp "Unrecognised query type $type!";
+        return;
+    }
     if (!$table_name || ref $table_name) {
         carp "Expected table name as a straight scalar";
         return;
     }
-    if (!$where || ref $where ne 'HASH') {
-        carp "Expected a hashref of where conditions";
-        return;
-    }
-    if (!$data || ref $where ne 'HASH') {
+    if (!$data || ref $data ne 'HASH') {
         carp "Expected a hashref of changes";
         return;
     }
+    if (($type eq 'UPDATE' || $type eq 'DELETE')
+        && (!$where || ref $where ne 'HASH')) {
+        carp "Expected a hashref of where conditions";
+        return;
+    }
+
     $table_name = $self->quote_identifier($table_name);
-    my $changes = join ',', 
-        map { $self->quote_identifier($_) . '=?' } keys %$data;
-    my $where_cond = join ',', 
-        map { $self->quote_identifier($_) . '=?' } keys %$where;
-    my $sql = "UPDATE $table_name SET $changes WHERE $where_cond";
-    Dancer::Logger::debug("Executing query: $sql with params: " 
-        . join ',', values %$data, values %$where);
-    return $self->do($sql, undef, values %$data, values %$where);
+    my @bind_params;
+    my $sql = {
+        INSERT => "INSERT INTO $table_name ",
+        UPDATE => "UPDATE $table_name SET ",
+        DELETE => "DELETE FROM $table_name ",
+    }->{$type};
+    if ($type eq 'INSERT') {
+        $sql .= "("
+            . join(',', map { $self->quote($_) } keys %$data)
+            . ") VALUES ("
+            . join(',', map { "?" } values %$data)
+            . ")";
+        push @bind_params, values %$data;
+    }
+    if ($type eq 'UPDATE') {
+        $sql .= join ',', map { $self->quote_identifier($_) .'=?' } keys %$data;
+        push @bind_params, values %$data;
+    }
+    
+    if ($type eq 'UPDATE' || $type eq 'DELETE') {
+        $sql .= " WHERE " . join " AND ",
+            map { $self->quote_identifier($_) . '=?' } keys %$where;
+        push @bind_params, values %$where;
+    }
+    Dancer::Logger::debug(
+        "Executing query $sql with params " . join ',', @bind_params
+    );
+    return $self->do($sql, undef, @bind_params);
 }
 
 

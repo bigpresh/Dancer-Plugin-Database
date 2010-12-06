@@ -79,6 +79,21 @@ sub quick_update {
     return $self->_quick_query('UPDATE', $table_name, $data, $where);
 }
 
+
+=item quick_delete
+
+  database->quick_delete($table, {  id => 42 });
+
+Given a table name and a hashref to describe the rows which should be deleted,
+delete them.
+
+=cut
+
+sub quick_delete {
+    my ($self, $table_name, $where) = @_;
+    return $self->_quick_query('DELETE', $table_name, undef, $where);
+}
+
 sub _quick_query {
     my ($self, $type, $table_name, $data, $where) = @_;
     
@@ -90,7 +105,9 @@ sub _quick_query {
         carp "Expected table name as a straight scalar";
         return;
     }
-    if (!$data || ref $data ne 'HASH') {
+    if (($type eq 'INSERT' || $type eq 'UPDATE')
+        && (!$data || ref $data ne 'HASH')) 
+    {
         carp "Expected a hashref of changes";
         return;
     }

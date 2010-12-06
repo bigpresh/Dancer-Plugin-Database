@@ -3,6 +3,7 @@ package Dancer::Plugin::Database;
 use strict;
 use Dancer::Plugin;
 use DBI;
+use Dancer::Plugin::Database::Handle;
 
 =head1 NAME
 
@@ -112,7 +113,9 @@ sub _get_connection {
         }
     }
 
-    return $dbh;
+    # Re-bless it as a Dancer::Plugin::Database::Handle object, to provide nice
+    # extra features:
+    return bless $dbh, 'Dancer::Plugin::Database::Handle';
 }
 
 

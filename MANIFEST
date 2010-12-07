@@ -3,6 +3,7 @@ MANIFEST
 Makefile.PL
 README
 lib/Dancer/Plugin/Database.pm
+lib/Dancer/Plugin/Database/Handle.pm
 t/00-load.t
 t/01-basic.t
 t/manifest.t

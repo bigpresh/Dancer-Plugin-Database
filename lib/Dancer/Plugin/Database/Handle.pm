@@ -4,6 +4,7 @@ use Carp;
 use DBI;
 use base qw(DBI::db);
 
+our $VERSION = '0.01';
 
 =head1 NAME
 
@@ -150,6 +151,11 @@ sub _quick_query {
 
 
 =back
+
+All of the convenience methods provided take care to quote table and column
+names using DBI's C<quote_identifier>, and use parameterised queries to avoid
+SQL injection attacks.  See L<http://www.bobbytables.com/> for why this is
+important, if you're not familiar with it.
 
 
 =head1 AUTHOR

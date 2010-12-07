@@ -11,7 +11,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '0.12';
+our $VERSION = '0.12_01';
 
 my $settings = undef;
 
@@ -219,7 +219,7 @@ Provides an easy way to obtain a connected DBI database handle by simply calling
 the database keyword within your L<Dancer> application
 
 Returns a L<Dancer::Plugin::Database::Handle> object, which is a subclass of
-L<DBI>'s L<DBI::db> connection handle object, so it does everything you'd expect
+L<DBI>'s C<DBI::db> connection handle object, so it does everything you'd expect
 to do with DBI, but also adds a few convenience methods.  See the documentation
 for L<Dancer::Plugin::Database::Handle> for full details of those.
 

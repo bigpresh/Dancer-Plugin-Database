@@ -39,7 +39,7 @@ response_status_is    [ GET => '/quick_insert/42/Bob' ], 200,
 response_content_like [ GET => '/user/42' ], qr/Bob/,
     "quick_insert created a record successfully";
 
-response_status_is    [ GET => '/quick_update/42/Billy/' ], 200,
+response_status_is    [ GET => '/quick_update/42/Billy' ], 200,
     "quick_update returned OK status";
 response_content_like [ GET => '/user/42' ], qr/Billy/,
     "quick_update updated a record successfully";

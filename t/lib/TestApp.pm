@@ -26,7 +26,7 @@ get '/user/:id' => sub {
     my $sth = database->prepare('select * from users where id = ?');
     $sth->execute( params->{id} );
     my $user = $sth->fetch();
-    $user->[1];
+    $user->[1] || "No such user";
 };
 
 del '/user/:id' => sub {
@@ -34,5 +34,29 @@ del '/user/:id' => sub {
     $sth->execute( params->{id} );
     'ok';
 };
+
+
+# Routes to exercise some of the extended features:
+get '/quick_insert/:id/:name' => sub {
+    database->quick_insert('users',
+        { id => params->{id}, name => params->{name} },
+    );
+    'ok';
+};
+
+get '/quick_update/:id/:name' => sub {
+    database->quick_update('users',
+        { id => params->{id}     },
+        { name => params->{name} },
+    );
+    'ok';
+};
+
+get '/quick_delete/:id' => sub {
+    database->quick_delete('users', { id => params->{id} });
+    'ok';
+};
+
+
 
 1;

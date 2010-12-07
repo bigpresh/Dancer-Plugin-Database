@@ -12,7 +12,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 8;
+plan tests => 14;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -32,4 +32,21 @@ response_content_like [ GET => '/user/2' ], qr/bigpresh/,
 
 response_status_is [ DELETE => '/user/2' ], 200, 'DELETE /user/2 is ok';
 response_content_like [ GET => '/' ], qr/1/, 'content looks good for /';
+
+# Exercise the extended features (quick_update et al)
+response_status_is    [ GET => '/quick_insert/42/Bob' ], 200, 
+    "quick_insert returned OK status";
+response_content_like [ GET => '/user/42' ], qr/Bob/,
+    "quick_insert created a record successfully";
+
+response_status_is    [ GET => '/quick_update/42/Billy/' ], 200,
+    "quick_update returned OK status";
+response_content_like [ GET => '/user/42' ], qr/Billy/,
+    "quick_update updated a record successfully";
+
+response_status_is    [ GET => '/quick_delete/42' ], 200,
+    "quick_delete returned OK status";
+response_content_like [ GET => '/user/42' ], qr/No such user/,
+    "quick_delete deleted a record successfully";
+
 

@@ -1,0 +1,6 @@
+This directory is empty on purpose, and this file is here solely so that git
+tracks it, as git won't track empty directories (mostly because it doesn't track
+directories at all, only the files in them).
+
+This otherwise-empty directory is needed to avoid a strange bug on Windows 
+systems where Cwd::realpath() croaks if they don't exist.

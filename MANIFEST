@@ -10,6 +10,6 @@ t/manifest.t
 t/pod-coverage.t
 t/pod.t
 t/lib/TestApp.pm
-t/lib/public
-t/lib/views
-t/lib/lib
+t/lib/public/.placeholder
+t/lib/views/.placeholder
+t/lib/lib/.placeholder

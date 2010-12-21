@@ -1,10 +1,14 @@
 Revision history for Dancer-Plugin-Database
 
+0.91    2010-12-21
+        - Whoah - didn't "use strict" in Dancer::Plugin::Database::Handle!
+          Last tweak release, then I'll push 1.00 out soon.
+
 0.90    2010-12-10
         - New features quick_insert, quick_update, quick_delete.  The database
           keyword now returns a Dancer::Plugin::Database::Handle object, which
           is a subclass of DBI::db so does everything you'd expect a DBI
-          connection handle to do, but add extra convenience methods.
+          connection handle to do, but adds extra convenience methods.
         - Fixed test failures on Windows systems.
 
        (Large version bump due to new features; assuming there are no reports of

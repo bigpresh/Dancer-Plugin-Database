@@ -27,7 +27,7 @@ Subclassed DBI connection handle with added features
 
 =head1 Added features
 
-A C<Dancer::Plugin::Database::Handle> object is a subclassed L<DBI::st> L<DBI>
+A C<Dancer::Plugin::Database::Handle> object is a subclassed L<DBI::db> L<DBI>
 database handle, with the following added convenience methods:
 
 =over 4

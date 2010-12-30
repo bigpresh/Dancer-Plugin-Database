@@ -33,7 +33,7 @@ register database => sub {
 
     # Update settings from configuration file with those from application
     if ( ref $arg eq 'HASH' ) {
-        for my $key (%$arg) {
+        for my $key ( keys %$arg ) {
             $settings->{$key} = $arg->{$key};
         }
     }

@@ -24,12 +24,22 @@ my %handles;
 my $def_handle = {};
 
 register database => sub {
-    my $name = shift;
+    my $arg = shift;
+    my $name;
 
     _load_db_settings() if (!$settings);
-    
-    my $handle = defined($name) ? $handles{$name} : $def_handle;
-    my $settings = _get_settings($name);
+
+    # Update settings from configuration file with those from application
+    if ( ref $arg eq 'HASH' ) {
+        for my $key (%$arg) {
+            $settings->{$key} = $arg->{$key};
+        }
+    }
+    else {
+        $name = $arg;
+        $handle = defined($name) ? $handles{$name} : $def_handle;
+        $settings = _get_settings($name);
+    }
 
     if ($handle->{dbh}) {
         if (time - $handle->{last_connection_check}

@@ -25,7 +25,9 @@ my $def_handle = {};
 
 register database => sub {
     my $arg = shift;
+
     my $name;
+    my $handle;
 
     _load_db_settings() if (!$settings);
 
@@ -36,8 +38,8 @@ register database => sub {
         }
     }
     else {
-        $name = $arg;
-        $handle = defined($name) ? $handles{$name} : $def_handle;
+        $name     = $arg;
+        $handle   = defined($name) ? $handles{$name} : $def_handle;
         $settings = _get_settings($name);
     }
 

@@ -12,7 +12,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 14;
+plan tests => 16;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -49,4 +49,9 @@ response_status_is    [ GET => '/quick_delete/42' ], 200,
 response_content_like [ GET => '/user/42' ], qr/No such user/,
     "quick_delete deleted a record successfully";
 
+# Test that runtime configuration gives us a handle, too:
+response_status_is    [ GET => '/runtime_config' ], 200,
+    "runtime_config returned OK status";
+response_content_like [ GET => '/runtime_config' ], qr/ok/,
+    "runtime_config got a usable database handle";
 

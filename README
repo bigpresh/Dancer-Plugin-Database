@@ -31,7 +31,7 @@ DESCRIPTION
     calling the database keyword within your Dancer application
 
     Returns a Dancer::Plugin::Database::Handle object, which is a subclass
-    of DBI's DBI::db connection handle object, so it does everything you'd
+    of DBI's `DBI::db' connection handle object, so it does everything you'd
     expect to do with DBI, but also adds a few convenience methods. See the
     documentation for Dancer::Plugin::Database::Handle for full details of
     those.
@@ -103,6 +103,15 @@ CONFIGURATION
         my $foo_dbh = database('foo');
         my $bar_dbh = database('bar');
 
+RUNTIME CONFIGURATION
+    You can pass a hashref to the `database()' keyword to provide
+    configuration details to override any in the config file at runtime if
+    desired, for instance:
+
+        my $dbh = database({ driver => 'SQLite', database => $filename });
+
+    (Thanks to Alan Haggai for this feature.)
+
 GETTING A DATABASE HANDLE
     Calling `database' will return a connected database handle; the first
     time it is called, the plugin will establish a connection to the
@@ -115,6 +124,9 @@ GETTING A DATABASE HANDLE
     MULTIPLE CONNECTIONS', then calling the database() keyword with the name
     of the connection as specified in the config file will get you a
     database handle connected with those details.
+
+    You can also pass a hashref of settings if you wish to provide settings
+    at runtime.
 
 CONVENIENCE FEATURES (quick_update, quick_insert, quick_delete)
     The handle returned by the `database' keyword is a
@@ -150,6 +162,8 @@ ACKNOWLEDGEMENTS
 
     Franck Cuny
 
+    Alan Haggai
+
 BUGS
     Please report any bugs or feature requests to
     `bug-dancer-plugin-database at rt.cpan.org', or through the web
@@ -181,7 +195,7 @@ SUPPORT
     <irc.perl.org>.
 
 LICENSE AND COPYRIGHT
-    Copyright 2010 David Precious.
+    Copyright 2010-11 David Precious.
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of either: the GNU General Public License as published

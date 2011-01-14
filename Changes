@@ -1,8 +1,11 @@
 Revision history for Dancer-Plugin-Database
 
-0.91_01 2011-01-10
-        - Apply Alan Haggai's changes to allow a hashref of settings to be
+1.00    2011-01-10
+        - Bumping to 1.00 to signify being ready for production use, for users
+          who have a mistrust of 0.x version numbers.
+        - Applied Alan Haggai's changes to allow a hashref of settings to be
           passed to the database() keyword at runtime.  Thanks Alan!
+          (This was released as 0.91_01 for testing first.)
 
 0.91    2010-12-21
         - Whoah - didn't "use strict" in Dancer::Plugin::Database::Handle!

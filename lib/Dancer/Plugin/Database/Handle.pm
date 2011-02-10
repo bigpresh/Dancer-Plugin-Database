@@ -112,7 +112,7 @@ sub _quick_query {
         carp "Expected a hashref of changes";
         return;
     }
-    if (($type =~ m{INSERT|UPDATE|DELETE})
+    if (($type =~ m{^ (SELECT|UPDATE|DELETE) $}x)
         && (!$where || ref $where ne 'HASH')) {
         carp "Expected a hashref of where conditions";
         return;

@@ -11,7 +11,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 my $settings = undef;
 
@@ -26,26 +26,42 @@ my $def_handle = {};
 register database => sub {
     my $arg = shift;
 
-    my $name;
-    my $handle;
-
     _load_db_settings() if (!$settings);
 
-    # Update settings from configuration file with those from application
-    if ( ref $arg eq 'HASH' ) {
-        for my $key ( keys %$arg ) {
-            $settings->{$key} = $arg->{$key};
+    # The key to use to store this handle in %handles.  This will be either the
+    # name supplied to database(), the hashref supplied to database() (thus, as
+    # long as the same hashref of settings is passed, the same handle will be
+    # reused) or $def_handle if database() is called without args:
+    my $handle_key;
+    my $conn_details; # connection settings to use.
+    my $handle;
+
+
+    # Accept a hashref of settings to use, if desired.  If so, we use this
+    # hashref to look for the handle, too, so as long as the same hashref is
+    # passed to the database() keyword, we'll reuse the same handle:
+    if (ref $arg eq 'HASH') {
+        $handle_key = $arg;
+        $conn_details = $arg;
+    } else {
+        $handle_key = defined $arg ? $arg : $def_handle;
+        $conn_details = _get_settings($arg);
+        if (!$conn_details) {
+            Dancer::Logger::error(
+                "No DB settings for " . ($arg || "default connection")
+            );
+            return;
         }
     }
-    else {
-        $name     = $arg;
-        $handle   = defined($name) ? $handles{$name} : $def_handle;
-        $settings = _get_settings($name);
-    }
 
+    # OK, see if we have a matching handle
+    $handle = $handles{$handle_key} || {};
+    
     if ($handle->{dbh}) {
-        if (time - $handle->{last_connection_check}
-            < $settings->{connection_check_threshold}) {
+        if ($conn_details->{connection_check_threshold} &&
+            time - $handle->{last_connection_check}
+            < $conn_details->{connection_check_threshold}) 
+        {
             return $handle->{dbh};
         } else {
             if (_check_connection($handle->{dbh})) {
@@ -56,19 +72,15 @@ register database => sub {
                     "Database connection went away, reconnecting"
                 );
                 if ($handle->{dbh}) { $handle->{dbh}->disconnect; }
-                return $handle->{dbh}= _get_connection($settings);
+                return $handle->{dbh}= _get_connection($conn_details);
+
             }
         }
     } else {
         # Get a new connection
-        if (!$settings) {
-            Dancer::Logger::error(
-                "No DB settings named $name, so cannot connect"
-            );
-            return;
-        }
-        if ($handle->{dbh} = _get_connection($settings)) {
+        if ($handle->{dbh} = _get_connection($conn_details)) {
             $handle->{last_connection_check} = time;
+            $handles{$handle_key} = $handle;
             return $handle->{dbh};
         } else {
             return;
@@ -159,8 +171,6 @@ sub _get_settings {
     my $return_settings;
 
     # If no name given, just return the default settings
-    # (Take a copy and remove the connections key, so we have only the main
-    # connection details)
     if (!defined $name) {
         $return_settings = { %$settings };
     } else {
@@ -180,12 +190,10 @@ sub _get_settings {
         }
     }
 
-    # We should have soemthing to return now; remove any unrelated connections
-    # (only needed if this is the default connection), and make sure we have a
+    # We should have soemthing to return now; make sure we have a
     # connection_check_threshold, then return what we found.  In previous
     # versions the documentation contained a typo mentioning
     # connectivity-check-threshold, so support that as an alias.
-    delete $return_settings->{connections};
     if (exists $return_settings->{'connectivity-check-threshold'}
         && !exists $return_settings->{connection_check_threshold})
     {

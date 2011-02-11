@@ -11,7 +11,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '1.01';
+our $VERSION = '1.10';
 
 my $settings = undef;
 

@@ -1,5 +1,13 @@
 Revision history for Dancer-Plugin-Database
 
+1.10    2011-02-11
+        - New feature quick_select
+        - Fix bug RT #65651, quick_insert generating SQL which MySQL/Postgres
+          didn't accept due to use of quote() rather than quote_identifier(),
+          thanks to Christian Sánchez and Michael Stiller
+        - Fix GH #5 - named connections not working properly - thanks to
+          "crayon"
+
 1.00    2011-01-10
         - Bumping to 1.00 to signify being ready for production use, for users
           who have a mistrust of 0.x version numbers.

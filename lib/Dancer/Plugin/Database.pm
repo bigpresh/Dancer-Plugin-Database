@@ -340,7 +340,7 @@ You can also pass a hashref of settings if you wish to provide settings at
 runtime.
 
 
-=head1 CONVENIENCE FEATURES (quick_update, quick_insert, quick_delete)
+=head1 CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
 
 The handle returned by the C<database> keyword is a
 L<Dancer::Plugin::Database::Handle> object, which subclasses the C<DBI::db> DBI
@@ -349,6 +349,12 @@ handle, but extra convenience methods are provided, as documented in the POD for
 L<Dancer::Plugin::Database::Handle>.
 
 Examples:
+
+  # Quickly fetch the (first) row whose ID is 42 as a hashref:
+  my $row = database->quick_select($table_name, { id => 42 });
+
+  # Fetch all badgers as an array of hashrefs:
+  my @badgMellivoraers = database->quick_select('animals', { genus => 'Mellivora' });
 
   # Update the row where the 'id' column is '42', setting the 'foo' column to
   # 'Bar':

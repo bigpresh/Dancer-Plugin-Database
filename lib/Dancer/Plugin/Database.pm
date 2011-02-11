@@ -227,6 +227,12 @@ sub _get_settings {
         database->quick_insert('people', { name => params->{name} });
     };
 
+    get '/users/:id' => sub {
+        template 'display_user', {
+            person => database->quick_select('users', id => params->{id}),
+        };
+    };
+
     dance;
 
 Database connection details are read from your Dancer application config - see

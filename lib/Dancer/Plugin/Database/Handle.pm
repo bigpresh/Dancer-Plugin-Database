@@ -128,7 +128,7 @@ sub _quick_query {
     }->{$type};
     if ($type eq 'INSERT') {
         $sql .= "("
-            . join(',', map { $self->quote($_) } keys %$data)
+            . join(',', map { $self->quote_identifier($_) } keys %$data)
             . ") VALUES ("
             . join(',', map { "?" } values %$data)
             . ")";

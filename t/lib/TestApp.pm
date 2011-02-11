@@ -57,6 +57,10 @@ get '/quick_delete/:id' => sub {
     'ok';
 };
 
+get '/quick_select/:id' => sub {
+    to_json(database->quick_select('users', { id => params->{id} }));
+};
+
 # Check we can get a handle by passing a hashref of settings, too:
 get '/runtime_config' => sub {
     my $dbh = database({ driver => 'SQLite', database => ':memory'});

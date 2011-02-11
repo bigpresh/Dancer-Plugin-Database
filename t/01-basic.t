@@ -12,7 +12,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 16;
+plan tests => 17;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -38,6 +38,9 @@ response_status_is    [ GET => '/quick_insert/42/Bob' ], 200,
     "quick_insert returned OK status";
 response_content_like [ GET => '/user/42' ], qr/Bob/,
     "quick_insert created a record successfully";
+
+response_content_like [ GET => '/quick_select/42' ], qr/Bob/,
+    "quick_select returned the record created by quick_insert";
 
 response_status_is    [ GET => '/quick_update/42/Billy' ], 200,
     "quick_update returned OK status";

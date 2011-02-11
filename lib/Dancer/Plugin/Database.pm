@@ -390,6 +390,10 @@ Franck Cuny
 
 Alan Haggai
 
+Christian Sánchez
+
+Michael Stiller
+
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-dancer-plugin-database at rt.cpan.org>, or through

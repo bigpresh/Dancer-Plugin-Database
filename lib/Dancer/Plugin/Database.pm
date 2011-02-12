@@ -364,7 +364,7 @@ Examples:
 
   # Update the row where the 'id' column is '42', setting the 'foo' column to
   # 'Bar':
-  database->quick_update($table_name, { id => 42 }, { foo => 'Bar');
+  database->quick_update($table_name, { id => 42 }, { foo => 'Bar' });
 
   # Insert a new row, using a named connection (see above)
   database('connectionname')->quick_insert($table_name, { foo => 'Bar' });

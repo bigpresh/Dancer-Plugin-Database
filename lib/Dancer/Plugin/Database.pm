@@ -360,7 +360,7 @@ Examples:
   my $row = database->quick_select($table_name, { id => 42 });
 
   # Fetch all badgers as an array of hashrefs:
-  my @badgMellivoraers = database->quick_select('animals', { genus => 'Mellivora' });
+  my @badgers = database->quick_select('animals', { genus => 'Mellivora' });
 
   # Update the row where the 'id' column is '42', setting the 'foo' column to
   # 'Bar':

@@ -229,7 +229,7 @@ sub _get_settings {
 
     get '/users/:id' => sub {
         template 'display_user', {
-            person => database->quick_select('users', id => params->{id}),
+            person => database->quick_select('users', { id => params->{id} }),
         };
     };
 

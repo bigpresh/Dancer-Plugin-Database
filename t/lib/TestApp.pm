@@ -6,9 +6,10 @@ use Dancer::Plugin::Database;
 get '/prepare_db' => sub {
 
     my @sql = (
-        q/create table users (id INTEGER, name VARCHAR(64))/,
-        q/insert into users values (1, 'sukria')/,
-        q/insert into users values (2, 'bigpresh')/,
+        q/create table users (id INTEGER, name VARCHAR, category VARCHAR)/,
+        q/insert into users values (1, 'sukria', 'admin')/,
+        q/insert into users values (2, 'bigpresh', 'admin')/,
+        q/insert into users values (3, 'badger', 'animal')/,
     );
 
     database->do($_) for @sql;
@@ -39,7 +40,7 @@ del '/user/:id' => sub {
 # Routes to exercise some of the extended features:
 get '/quick_insert/:id/:name' => sub {
     database->quick_insert('users',
-        { id => params->{id}, name => params->{name} },
+        { id => params->{id}, name => params->{name}, category => 'user' },
     );
     'ok';
 };
@@ -58,7 +59,13 @@ get '/quick_delete/:id' => sub {
 };
 
 get '/quick_select/:id' => sub {
-    to_json(database->quick_select('users', { id => params->{id} }));
+    my $row = database->quick_select('users', { id => params->{id} });
+    return to_json($row || { error => 'No matching user' });
+};
+
+get '/quick_select_many' => sub {
+        my @users = database->quick_select('users', {  category => 'admin' });
+        return join ',', sort map { $_->{name} } @users;
 };
 
 # Check we can get a handle by passing a hashref of settings, too:

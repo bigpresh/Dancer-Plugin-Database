@@ -1,5 +1,11 @@
 Revision history for Dancer-Plugin-Database
 
+{{$NEXT}}
+        - New feature - automatically enable UTF-8 support if the app's charset
+          setting is set to 'UTF-8' and we know how to enable UTF-8 support for
+          the database driver in use.  This can be disabled with the new
+          auto_utf8 setting in the plugin's config.
+
 1.11    2011-02-18
         - Fix bug RT #65825 - quick_select didn't actually use the where clause
           correctly.

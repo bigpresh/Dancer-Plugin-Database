@@ -21,6 +21,12 @@ SYNOPSIS
             database->quick_insert('people', { name => params->{name} });
         };
 
+        get '/users/:id' => sub {
+            template 'display_user', {
+                person => database->quick_select('users', { id => params->{id} }),
+            };
+        };
+
         dance;
 
     Database connection details are read from your Dancer application config
@@ -128,7 +134,7 @@ GETTING A DATABASE HANDLE
     You can also pass a hashref of settings if you wish to provide settings
     at runtime.
 
-CONVENIENCE FEATURES (quick_update, quick_insert, quick_delete)
+CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
     The handle returned by the `database' keyword is a
     Dancer::Plugin::Database::Handle object, which subclasses the `DBI::db'
     DBI connection handle. This means you can use it just like you'd
@@ -137,9 +143,15 @@ CONVENIENCE FEATURES (quick_update, quick_insert, quick_delete)
 
     Examples:
 
+      # Quickly fetch the (first) row whose ID is 42 as a hashref:
+      my $row = database->quick_select($table_name, { id => 42 });
+
+      # Fetch all badgers as an array of hashrefs:
+      my @badgers = database->quick_select('animals', { genus => 'Mellivora' });
+
       # Update the row where the 'id' column is '42', setting the 'foo' column to
       # 'Bar':
-      database->quick_update($table_name, { id => 42 }, { foo => 'Bar');
+      database->quick_update($table_name, { id => 42 }, { foo => 'Bar' });
 
       # Insert a new row, using a named connection (see above)
       database('connectionname')->quick_insert($table_name, { foo => 'Bar' });
@@ -157,12 +169,20 @@ CONTRIBUTING
 
     Feel free to fork the repo and submit pull requests!
 
+    Feedback and bug reports are always appreciated. Even a quick mail to
+    let me know the module is useful to you would be very nice - it's nice
+    to know if code is being actively used.
+
 ACKNOWLEDGEMENTS
     Igor Bujna
 
     Franck Cuny
 
     Alan Haggai
+
+    Christian Sánchez
+
+    Michael Stiller
 
 BUGS
     Please report any bugs or feature requests to

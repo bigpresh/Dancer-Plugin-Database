@@ -11,7 +11,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 my $settings = undef;
 
@@ -387,6 +387,9 @@ L<http://github.com/bigpresh/Dancer-Plugin-Database>
 
 Feel free to fork the repo and submit pull requests!
 
+Feedback and bug reports are always appreciated.  Even a quick mail to let me
+know the module is useful to you would be very nice - it's nice to know if code
+is being actively used.
 
 =head1 ACKNOWLEDGEMENTS
 

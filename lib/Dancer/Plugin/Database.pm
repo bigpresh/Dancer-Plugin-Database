@@ -2,6 +2,7 @@ package Dancer::Plugin::Database;
 
 use strict;
 use Dancer::Plugin;
+use Dancer::Config;
 use DBI;
 use Dancer::Plugin::Database::Handle;
 
@@ -124,9 +125,9 @@ sub _get_connection {
     # If the app is configured to use UTF-8, the user will want text from the
     # database in UTF-8 to Just Work, so if we know how to make that happen, do
     # so, unless they've set the auto_utf8 plugin setting to a false value.
-    my $app_charset = setting('charset');
+    my $app_charset = Dancer::Config::setting('charset');
     my $auto_utf8 = exists $settings->{auto_utf8} ?  $settings->{auto_utf8} : 1;
-    if ($app_charset eq 'UTF-8' && $auto_utf8) {
+    if (lc $app_charset eq 'utf-8' && $auto_utf8) {
         
         # The option to pass to the DBI->connect call depends on the driver:
         my %param_for_driver = (
@@ -135,6 +136,9 @@ sub _get_connection {
             Pg     => 'pg_enable_utf8',
         );
         if (my $param = $param_for_driver{ $settings->{driver} }) {
+            Dancer::Logger::debug(
+                "Adding $param to DBI connection params to enable UTF-8 support"
+            );
             $settings->{dbi_params}{$param} = 1;
         }
     }
@@ -347,7 +351,7 @@ details to override any in the config file at runtime if desired, for instance:
 
 (Thanks to Alan Haggai for this feature.)
 
-=head AUTOMATIC UTF-8 SUPPORT
+=head1 AUTOMATIC UTF-8 SUPPORT
 
 As of version 1.20, if your application is configured to use UTF-8 (you've
 defined the C<charset> setting in your app config as C<UTF-8>) then support for

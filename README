@@ -118,6 +118,15 @@ RUNTIME CONFIGURATION
 
     (Thanks to Alan Haggai for this feature.)
 
+AUTOMATIC UTF-8 SUPPORT
+    As of version 1.20, if your application is configured to use UTF-8
+    (you've defined the `charset' setting in your app config as `UTF-8')
+    then support for UTF-8 for the database connection will be enabled, if
+    we know how to do so for the database driver in use.
+
+    If you do not want this behaviour, set `auto_utf8' to a false value when
+    providing the connection details.
+
 GETTING A DATABASE HANDLE
     Calling `database' will return a connected database handle; the first
     time it is called, the plugin will establish a connection to the

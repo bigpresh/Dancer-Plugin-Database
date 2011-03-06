@@ -152,6 +152,7 @@ sub _get_connection {
         Dancer::Logger::error(
             "Database connection failed - " . $DBI::errstr
         );
+        return;
     } elsif (exists $settings->{on_connect_do}) {
         for (@{ $settings->{on_connect_do} }) {
             $dbh->do($_) or Dancer::Logger::error(

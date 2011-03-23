@@ -158,7 +158,12 @@ sub _quick_query {
     }
 
     Dancer::Logger::debug(
-        "Executing $type query $sql with params " . join ',', @bind_params
+        "Executing $type query $sql with params " . join ',', 
+        map { 
+            $_ =~ /^[[:ascii:]]+$/ ? 
+                length $_ > 50 ? substr($_, 0, 47) . '...' : $_
+            : "[non-ASCII data not logged]" 
+        } @bind_params
     );
 
     # Select queries, in scalar context, return the first matching row; in list

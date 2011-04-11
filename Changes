@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-Database
 
+1.22    2011-04-11
+        - Bugfix: don't needlessly use to_json() in tests, as Dancer doesn't
+          depend on JSON.pm, so tests will fail if it's not available.
+          Reported in RT #66204 by Johnathan (JAWNSY) - thanks!
+
 1.21    2011-03-06
         - Bugfix: return undef if connection fails, rather than attempting to
           re-bless and blowing up. Fixes GH-7, thanks to Nick Hibma

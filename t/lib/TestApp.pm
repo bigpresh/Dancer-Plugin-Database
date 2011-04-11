@@ -60,7 +60,8 @@ get '/quick_delete/:id' => sub {
 
 get '/quick_select/:id' => sub {
     my $row = database->quick_select('users', { id => params->{id} });
-    return to_json($row || { error => 'No matching user' });
+    return $row ? join(',', values %$row) 
+        : "No matching user"; 
 };
 
 get '/quick_select_many' => sub {

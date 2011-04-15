@@ -67,6 +67,7 @@ CONFIGURATION
                     RaiseError: 1
                     AutoCommit: 1
                 on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
+                log_queries: 1
 
     The `connection_check_threshold' setting is optional, if not provided,
     it will default to 30 seconds. If the database keyword was last called
@@ -82,6 +83,14 @@ CONFIGURATION
     The optional `on_connect_do' setting is an array of queries which should
     be performed when a connection is established; if given, each query will
     be performed using `$dbh->do'.
+
+    The optional `log_queries' setting enables logging of queries generated
+    by the helper functions `quick_insert' et al in
+    Dancer::Plugin::Database::Handle. If you enable it, generated queries
+    will be logged at 'debug' level. Be aware that they will contain the
+    data you're passing to/from the database, so be careful not to enable
+    this option in production, where you could inadvertently log sensitive
+    information.
 
     If you prefer, you can also supply a pre-crafted DSN using the `dsn'
     setting; in that case, it will be used as-is, and the

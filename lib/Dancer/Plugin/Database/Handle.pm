@@ -157,14 +157,18 @@ sub _quick_query {
         $sql .= ' LIMIT 1';
     }
 
-    Dancer::Logger::debug(
-        "Executing $type query $sql with params " . join ',', 
-        map { 
-            $_ =~ /^[[:ascii:]]+$/ ? 
-                length $_ > 50 ? substr($_, 0, 47) . '...' : $_
-            : "[non-ASCII data not logged]" 
-        } @bind_params
-    );
+    # Dancer::Plugin::Database will have looked at the log_queries setting and
+    # stashed it away for us to see:
+    if ($self->{_private_log_queries}) {
+        Dancer::Logger::debug(
+            "Executing $type query $sql with params " . join ',', 
+            map { 
+                $_ =~ /^[[:ascii:]]+$/ ? 
+                    length $_ > 50 ? substr($_, 0, 47) . '...' : $_
+                : "[non-ASCII data not logged]" 
+            } @bind_params
+        );
+    }
 
     # Select queries, in scalar context, return the first matching row; in list
     # context, they return a list of matching rows.

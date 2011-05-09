@@ -162,10 +162,11 @@ sub _quick_query {
     if ($self->{private_dancer_plugin_database}{log_queries}) {
         Dancer::Logger::debug(
             "Executing $type query $sql with params " . join ',', 
-            map { 
+            map {
+                defined $_ ? 
                 $_ =~ /^[[:ascii:]]+$/ ? 
                     length $_ > 50 ? substr($_, 0, 47) . '...' : $_
-                : "[non-ASCII data not logged]" 
+                : "[non-ASCII data not logged]" : 'undef'
             } @bind_params
         );
     }

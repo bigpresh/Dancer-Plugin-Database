@@ -159,7 +159,7 @@ sub _quick_query {
 
     # Dancer::Plugin::Database will have looked at the log_queries setting and
     # stashed it away for us to see:
-    if ($self->{_private_log_queries}) {
+    if ($self->{private_dancer_plugin_database}{log_queries}) {
         Dancer::Logger::debug(
             "Executing $type query $sql with params " . join ',', 
             map { 

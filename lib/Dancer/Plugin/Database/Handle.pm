@@ -145,7 +145,9 @@ sub _quick_query {
         push @bind_params, values %$data;
     }
     
-    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT') {
+    if (($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT') 
+        && keys %$where)
+    {
         $sql .= " WHERE " . join " AND ",
             map { $self->quote_identifier($_) . '=?' } keys %$where;
         push @bind_params, values %$where;

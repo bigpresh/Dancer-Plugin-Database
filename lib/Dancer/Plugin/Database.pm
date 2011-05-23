@@ -12,7 +12,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '1.24';
+our $VERSION = '1.30';
 
 my $settings = undef;
 
@@ -423,6 +423,9 @@ Examples:
   # Delete the row with id 42:
   database->quick_delete($table_name, { id => 42 });
 
+  # Fetch all rows from a table (since version 1.30):
+  database->quick_select($table_name, {});
+
 
 =head1 AUTHOR
 
@@ -455,6 +458,8 @@ Christian Sánchez
 Michael Stiller
 
 Martin J Evans
+
+Carlos Sosa
 
 =head1 BUGS
 

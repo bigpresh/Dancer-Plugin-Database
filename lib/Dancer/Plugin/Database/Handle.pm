@@ -5,7 +5,7 @@ use Carp;
 use DBI;
 use base qw(DBI::db);
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 NAME
 
@@ -24,8 +24,12 @@ Subclassed DBI connection handle with added convenience features
   # Updating a record where id = 42:
   database->quick_update($tablename, { id => 42 }, { foo => 'New value' });
 
-  # Fetching a row quickly
+  # Fetching a single row quickly in scalar context
   my $employee = database->quick_select('employees', { id => $emp_id });
+
+  # Fetching multiple rows in list context - passing an empty hashref to signify
+  # no where clause (i.e. return all rows -  so "select * from $table_name"):
+  my @all_employees = database->quick_select('employees', {});
 
 
 =head1 Added features
@@ -224,6 +228,13 @@ Will result in:
 (Actually, parameterised queries will be used, with placeholders, so SQL
 injection attacks will not work, but it's easier to illustrate as though the
 values were interpolated directly.  Don't worry, they're not.))
+
+You can pass an empty hashref if you  want all rows, e.g.:
+
+  database->quick_select('mytable', {});
+
+... is the same as C<"SELECT * FROM 'mytable'">
+
 
 TODO: this isn't very flexible; it would be nice to easily use other logic
 combinations, and other comparisons other than a straightforward equality

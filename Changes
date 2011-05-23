@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-Database
 
+1.30    2011-05-23
+        - Allow passing an empty hashref for where clause to signify that no
+          where clause is desired (i.e. return all rows).
+          Requested by Carlos Sosa (gnusosa) - thanks!
+
 1.24    2011-05-09
         - Bugfixes in logging - avoid DBI swallowing up the param I'd wrongly
           named, and avoid warnings if any params are undef.

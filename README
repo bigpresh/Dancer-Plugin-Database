@@ -177,6 +177,9 @@ CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
       # Delete the row with id 42:
       database->quick_delete($table_name, { id => 42 });
 
+      # Fetch all rows from a table (since version 1.30):
+      database->quick_select($table_name, {});
+
 AUTHOR
     David Precious, `<davidp@preshweb.co.uk>'
 
@@ -201,6 +204,10 @@ ACKNOWLEDGEMENTS
     Christian Sánchez
 
     Michael Stiller
+
+    Martin J Evans
+
+    Carlos Sosa
 
 BUGS
     Please report any bugs or feature requests to

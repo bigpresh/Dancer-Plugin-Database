@@ -55,8 +55,14 @@ register database => sub {
         }
     }
 
+    # To be fork safe and thread safe, use a combination of the PID and TID (if
+    # running with use threads) to make sure no two processes/threads share
+    # handles.  Implementation based on DBIx::Connector by David E. Wheeler.
+    my $pid_tid = $$;
+    $pid_tid .= '_' . threads->tid if $INC{'threads.pm'};
+
     # OK, see if we have a matching handle
-    $handle = $handles{$handle_key} || {};
+    $handle = $handles{$pid_tid}{$handle_key} || {};
     
     if ($handle->{dbh}) {
         if ($conn_details->{connection_check_threshold} &&
@@ -81,7 +87,7 @@ register database => sub {
         # Get a new connection
         if ($handle->{dbh} = _get_connection($conn_details)) {
             $handle->{last_connection_check} = time;
-            $handles{$handle_key} = $handle;
+            $handles{$pid_tid}{$handle_key} = $handle;
             return $handle->{dbh};
         } else {
             return;

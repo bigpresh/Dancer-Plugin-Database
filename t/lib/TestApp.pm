@@ -75,4 +75,9 @@ get '/runtime_config' => sub {
     $dbh ? 'ok' : '';
 };
 
+# Check we get the same handle each time we call database()
+get '/handles_cached' => sub {
+    database() eq database() and return "Same handle returned";
+};
+
 1;

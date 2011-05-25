@@ -12,7 +12,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 19;
+plan tests => 20;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -66,3 +66,6 @@ response_status_is    [ GET => '/runtime_config' ], 200,
 response_content_like [ GET => '/runtime_config' ], qr/ok/,
     "runtime_config got a usable database handle";
 
+# Test that we get the same handle each time we call the database() keyword
+# (i.e., that handles are cached appropriately)
+response_content_like [ GET => '/handles_cached' ], qr/Same handle returned/;

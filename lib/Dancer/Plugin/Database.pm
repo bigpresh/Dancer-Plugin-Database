@@ -472,6 +472,9 @@ Carlos Sosa
 
 Matt S Trout
 
+Matthew Vickers
+
+
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-dancer-plugin-database at rt.cpan.org>, or through

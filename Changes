@@ -1,5 +1,12 @@
 Revision history for Dancer-Plugin-Database
 
+1.40    2011-05-xx
+        - Be fork/thread-safe - don't allow processes/threads to share handles.
+          Thanks to Matt S Trout for pointing this out on IRC - cheers mst.
+        - If we're given a pre-assembled DSN, extract the driver from it to
+          avoid a warning, and to allow auto UTF-8 to work.
+          Thanks to Matthew Vickers (mvickers) for bringing this up.
+
 1.30    2011-05-23
         - Allow passing an empty hashref for where clause to signify that no
           where clause is desired (i.e. return all rows).

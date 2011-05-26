@@ -118,7 +118,7 @@ sub _get_connection {
         # things easier for our users by handling this for them):
         # (DBD::SQLite will support 'database', too, as of 1.32 when it's
         # released)
-        if (driver eq 'SQLite' 
+        if ($driver eq 'SQLite' 
             && $settings->{database} && !$settings->{dbname}) {
             $settings->{dbname} = delete $settings->{database};
         }

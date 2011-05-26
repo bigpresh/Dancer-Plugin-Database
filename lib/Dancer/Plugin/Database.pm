@@ -103,10 +103,13 @@ sub _get_connection {
 
     # Assemble the DSN:
     my $dsn;
+    my $driver;
     if ($settings->{dsn}) {
         $dsn = $settings->{dsn};
+        ($driver) = $dsn =~ m{dbi:([^:]+)};
     } else {
         $dsn = "dbi:" . $settings->{driver};
+        $driver = $settings->{driver};
         my @extra_args;
 
         # DBD::SQLite wants 'dbname', not 'database', so special-case this
@@ -115,7 +118,7 @@ sub _get_connection {
         # things easier for our users by handling this for them):
         # (DBD::SQLite will support 'database', too, as of 1.32 when it's
         # released)
-        if ($settings->{driver} eq 'SQLite' 
+        if (driver eq 'SQLite' 
             && $settings->{database} && !$settings->{dbname}) {
             $settings->{dbname} = delete $settings->{database};
         }
@@ -141,7 +144,7 @@ sub _get_connection {
             mysql  => 'mysql_enable_utf8',
             Pg     => 'pg_enable_utf8',
         );
-        if (my $param = $param_for_driver{ $settings->{driver} }) {
+        if (my $param = $param_for_driver{$driver}) {
             Dancer::Logger::debug(
                 "Adding $param to DBI connection params to enable UTF-8 support"
             );

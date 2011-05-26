@@ -133,7 +133,7 @@ sub _get_connection {
     # so, unless they've set the auto_utf8 plugin setting to a false value.
     my $app_charset = Dancer::Config::setting('charset');
     my $auto_utf8 = exists $settings->{auto_utf8} ?  $settings->{auto_utf8} : 1;
-    if (lc $app_charset eq 'utf-8' && $auto_utf8) {
+    if (lc $app_charset eq 'utf-8' && $auto_utf8 && exists($settings->{driver}) ) {
         
         # The option to pass to the DBI->connect call depends on the driver:
         my %param_for_driver = (

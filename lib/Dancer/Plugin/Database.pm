@@ -298,6 +298,11 @@ no-op query against the database if not.  If the connection has gone away, a new
 connection will be obtained and returned.  This avoids any problems for
 a long-running script where the connection to the database might go away.
 
+Care is taken that handles are not shared across processes/threads, so this
+should be thread-safe with no issues with transactions etc.  (Thanks to Matt S
+Trout for pointing out the previous lack of thread safety.  Inspiration was
+drawn from DBIx::Connector.)
+
 =head1 CONFIGURATION
 
 Connection details will be taken from your Dancer application config file, and

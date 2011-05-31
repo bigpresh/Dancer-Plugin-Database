@@ -480,6 +480,8 @@ Matt S Trout
 
 Matthew Vickers
 
+Christian Walde
+
 
 =head1 BUGS
 

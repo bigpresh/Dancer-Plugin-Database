@@ -313,6 +313,7 @@ should be specified as, for example:
             driver: 'mysql'
             database: 'test'
             host: 'localhost'
+            port: 3306
             username: 'myusername'
             password: 'mypassword'
             connection_check_threshold: 10

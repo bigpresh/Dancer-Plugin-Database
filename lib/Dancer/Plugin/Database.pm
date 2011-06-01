@@ -454,7 +454,9 @@ This module is developed on Github at:
 
 L<http://github.com/bigpresh/Dancer-Plugin-Database>
 
-Feel free to fork the repo and submit pull requests!
+Feel free to fork the repo and submit pull requests!  Also, it makes sense to 
+L<watch the repo|https://github.com/bigpresh/Dancer-Plugin-Database/toggle_watch> 
+on GitHub for updates.
 
 Feedback and bug reports are always appreciated.  Even a quick mail to let me
 know the module is useful to you would be very nice - it's nice to know if code

@@ -9,7 +9,7 @@ our $VERSION = '0.06';
 
 =head1 NAME
 
-Dancer::Plugin::Database::Handle
+Dancer::Plugin::Database::Handle - subclassed DBI connection handle
 
 =head1 DESCRIPTION
 

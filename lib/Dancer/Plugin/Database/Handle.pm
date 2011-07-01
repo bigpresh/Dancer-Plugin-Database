@@ -152,9 +152,43 @@ sub _quick_query {
     if (($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT') 
         && keys %$where)
     {
-        $sql .= " WHERE " . join " AND ",
-            map { $self->quote_identifier($_) . '=?' } keys %$where;
-        push @bind_params, values %$where;
+        my @conditions;
+
+        # Operators we'll accept - we need to prevent SQL injection, but we
+        # can't quote them, so whitelist what's OK:
+        my %known_operator = map { $_ => 1 }
+            qw( = != < > <= >= LIKE like );
+        
+        for my $field (keys %$where) {
+            my $value = $where->{$field};
+            my $quoted_field = $self->quote_identifier($field);
+            if (!ref $value) {
+                if (!defined $value) {
+                    push @conditions, "$quoted_field IS NULL";
+                } else {
+                    push @conditions, "$quoted_field = ?";
+                    push @bind_params, $value;
+                }
+            } elsif (ref $value  eq 'ARRAY') {
+                push @conditions, "$quoted_field IN ("
+                    . join(',', map { "?" } @$value) . ")";
+                push @bind_params, @$value;
+            } elsif (ref $value eq 'HASH') {
+                for my $operator (keys %$value) {
+                    if (!$known_operator{uc $operator}) {
+                        Dancer::Logger::error(
+                            "Unrecognised operator '$operator'!"
+                        );
+                        return;
+                    }
+                    my $operand = $value->{$operator};
+                    push @conditions, "$quoted_field $operator ?";
+                    push @bind_params, $operand;
+                }
+            }
+        }
+        # OK, assemble that all:
+        $sql .= "WHERE " . join " AND ", @conditions;
     }
     
     # If it's a select query and we're called in scalar context, we'll only
@@ -229,18 +263,44 @@ Will result in:
 injection attacks will not work, but it's easier to illustrate as though the
 values were interpolated directly.  Don't worry, they're not.))
 
+You can also provide an arrayref if you want a set of acceptable values, for
+instance:
+
+  { author => [ qw(Bob Billy Mary) ] }
+
+... will result in e.g.:
+
+  WHERE author IN ('Bob', 'Billy', 'Mary')
+
+(Except done with placeholders, as mentioned above)
+
+
 You can pass an empty hashref if you  want all rows, e.g.:
 
   database->quick_select('mytable', {});
 
 ... is the same as C<"SELECT * FROM 'mytable'">
 
+=head2 Match/comparison logic
 
-TODO: this isn't very flexible; it would be nice to easily use other logic
-combinations, and other comparisons other than a straightforward equality
-comparison.  However, supporting this abstraction without the syntax used
-becoming a real mess can be... awkward.  Accepting a pre-written SQL 'WHERE'
-clause would be one option.  Any thoughts on this would be appreciated!
+The default for a straight scalar value as described above is a straightforward
+match with C<=>, or an C<IN> clause if given an arrayref.
+
+If you need to control the operator used for comparison, you can do so by
+passing a hashref of C<operator => value>, for example:
+
+  { price => { '>' => 15 } }
+
+  { name => { 'LIKE' => 'Bob %' } }
+
+An C<undef> value will result in an "IS NULL" in the SQL, for instance:
+
+  { completed_date => undef }
+
+... would result in:
+
+  ... WHERE completed date IS NULL
+
 
 
 =head1 AUTHOR

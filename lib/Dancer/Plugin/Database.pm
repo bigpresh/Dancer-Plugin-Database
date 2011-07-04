@@ -57,7 +57,9 @@ register database => sub {
 
     # To be fork safe and thread safe, use a combination of the PID and TID (if
     # running with use threads) to make sure no two processes/threads share
-    # handles.  Implementation based on DBIx::Connector by David E. Wheeler.
+    # handles.  Implementation based on DBIx::Connector by David E. Wheeler,
+    # which takes it from from DBIx::Class, so thanks go to the
+    # L<DBI::Class contributors|DBIx::Class/contributors>
     my $pid_tid = $$;
     $pid_tid .= '_' . threads->tid if $INC{'threads.pm'};
 

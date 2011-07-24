@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-Database
 
+1.41    2011-07-24
+        - support where clauses with undef values. (Alberto Simões)
+
 1.40    2011-05-29
         - Be fork/thread-safe - don't allow processes/threads to share handles.
           Thanks to Matt S Trout for pointing this out on IRC - cheers mst.

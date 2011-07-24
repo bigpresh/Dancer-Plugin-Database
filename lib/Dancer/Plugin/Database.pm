@@ -484,6 +484,7 @@ Matthew Vickers
 
 Christian Walde
 
+Alberto Simões
 
 =head1 BUGS
 

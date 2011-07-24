@@ -264,3 +264,4 @@ SEE ALSO
 
     DBI
 
+    Dancer::Plugin::SimpleCRUD

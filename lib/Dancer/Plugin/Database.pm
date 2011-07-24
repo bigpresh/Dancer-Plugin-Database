@@ -544,7 +544,7 @@ L<Dancer>
 
 L<DBI>
 
-
+L<Dancer::Plugin::SimpleCRUD>
 
 =cut
 

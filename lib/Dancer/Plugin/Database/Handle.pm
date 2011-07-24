@@ -153,8 +153,12 @@ sub _quick_query {
         && keys %$where)
     {
         $sql .= " WHERE " . join " AND ",
-            map { $self->quote_identifier($_) . '=?' } keys %$where;
-        push @bind_params, values %$where;
+            map {
+                defined($where->{$_}) ?
+                  $self->quote_identifier($_) . '=?' :
+                    $self->quote_identifier($_) . ' IS NULL'
+                } keys %$where;
+        push @bind_params, grep defined, values %$where;
     }
     
     # If it's a select query and we're called in scalar context, we'll only

@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database
 
+1.42    2011-08-19
+        - Don't produce spurious messages about enabling UTF-8 support when
+          we have already done it (PR 9 from James Aitken (LoonyPandora))
+
 1.41    2011-07-24
         - support where clauses with undef values. (Alberto Simões)
 

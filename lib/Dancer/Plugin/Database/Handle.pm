@@ -202,8 +202,10 @@ sub _quick_query {
 
 =item disconnect
 
-This method could be used for closing DBI connection for cleaning cache tables of DBI::db
+This method could be used for closing DBI connection for cleaning a cache tables inside Dancer::Plugin::Database for this dbh
 
+    database->disconnect;
+  
 =cut
 
 sub disconnect {

@@ -200,6 +200,19 @@ sub _quick_query {
     }
 }
 
+=item disconnect
+
+This method could be used for closing DBI connection for cleaning cache tables of DBI::db
+
+=cut
+
+sub disconnect {
+    my $dbh = shift;
+    
+    delete $dbh->{private_dancer_database}{hash}{$dbh->{private_dancer_database}{key}};
+    $dbh->SUPER::disconnect;
+}
+
 
 =back
 

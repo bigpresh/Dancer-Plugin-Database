@@ -88,6 +88,10 @@ register database => sub {
         if ($handle->{dbh} = _get_connection($conn_details)) {
             $handle->{last_connection_check} = time;
             $handles{$pid_tid}{$handle_key} = $handle;
+            
+            # This is used into $handle->{dbh}{private_dancer_database}::disconnect for delete from %handles (by using hash & key)
+            # FIXME I don't know should i use use Scalar::Util::weaken against memory leaks any refs here or not? I think no but i can make mistake // Perlover
+            $handle->{dbh}{private_dancer_database} = { hash => $handles{$pid_tid}, key => $handle_key };
             return $handle->{dbh};
         } else {
             return;

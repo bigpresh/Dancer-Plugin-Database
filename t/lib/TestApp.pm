@@ -64,6 +64,13 @@ get '/quick_select/:id' => sub {
         : "No matching user"; 
 };
 
+get '/quick_select/:id/:parm' => sub {
+    my $row = database->quick_select('users', { id => params->{id} }, 
+         [ 'id', params->{parm} ]);
+    return $row ? join(',', values %$row) 
+        : "No matching user"; 
+};
+
 get '/quick_select_many' => sub {
         my @users = database->quick_select('users', {  category => 'admin' });
         return join ',', sort map { $_->{name} } @users;

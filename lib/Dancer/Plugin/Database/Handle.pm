@@ -88,20 +88,26 @@ sub quick_delete {
   my $row  = database->quick_select($table, { id => 42 });
   my @rows = database->quick_select($table, { id => 42 });
 
+  -or-
+
+  my $row  = database->quick_select($table, { id => 42 }, [ 'foo', 'bar' ]);
+  my @row  = database->quick_select($table, { id => 42 }, [ 'foo', 'bar' ]);
+
 Given a table name and a hashref of where clauses (see below for explanation),
-returns either the first matching row as a hashref, if called in scalar context,
-or a list of matching rows as hashrefs, if called in list context.
+and an optional list of columns to return, returns either the first matching 
+row as a hashref if called in scalar context, or a list of matching rows 
+as hashrefs if called in list context.
 
 =cut
 
 sub quick_select {
-    my ($self, $table_name, $where) = @_;
+    my ($self, $table_name, $where, $data) = @_;
     # Make sure to call _quick_query in the same context we were called.
     # This is a little ugly, rewrite this perhaps.
     if (wantarray) {
-        return ($self->_quick_query('SELECT', $table_name, undef, $where));
+        return ($self->_quick_query('SELECT', $table_name, $data, $where));
     } else {
-        return $self->_quick_query('SELECT', $table_name, undef, $where);
+        return $self->_quick_query('SELECT', $table_name, $data, $where);
     }
 }
 
@@ -128,10 +134,22 @@ sub _quick_query {
         return;
     }
 
+    my $select_params = '*';
+    if ($type eq 'SELECT' && $data) {
+        if (ref $data ne 'ARRAY') {
+            carp 'Expected arrayref of data';
+            return;
+        }
+        else {
+            $select_params = join(',', map { $self->quote_identifier($_) } @$data);
+        }
+    }
+
     $table_name = $self->quote_identifier($table_name);
     my @bind_params;
+
     my $sql = {
-        SELECT => "SELECT * FROM $table_name ",
+        SELECT => "SELECT $select_params FROM $table_name ",
         INSERT => "INSERT INTO $table_name ",
         UPDATE => "UPDATE $table_name SET ",
         DELETE => "DELETE FROM $table_name ",

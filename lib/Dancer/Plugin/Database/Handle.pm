@@ -111,6 +111,30 @@ sub quick_select {
     }
 }
 
+=item quick_lookup
+
+  my $id  = database->quick_lookup($table, { email => $params->{'email'} }, 'userid' );
+
+This is a bit of syntactic sugar when you just want to lookup a specific
+field, such as when you're converting an email address to a userid (say
+during a login handler.)
+
+This call always returns a single scalar value, not a hashref of the
+entire row (or partial row) like most of the other methods in this library. 
+
+Returns undef when there's no matching row or no such field found in 
+the results.
+
+=cut
+
+sub quick_lookup {
+    my ($self, $table_name, $where, $data) = @_;
+
+    my $row = $self->_quick_query('SELECT', $table_name, [$data], $where);
+
+    return ( $row && exists $row->{$data} ) ? $row->{$data} : undef;
+}
+
 sub _quick_query {
     my ($self, $type, $table_name, $data, $where) = @_;
     

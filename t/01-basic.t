@@ -12,7 +12,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 22;
+plan tests => 23;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -51,6 +51,8 @@ response_content_like [ GET => '/quick_select/1/category' ], qr/admin/,
 response_content_like [ GET => '/quick_select/2/name' ], qr/bigpresh/,
   'content looks good for /quick_select/2/name';
 
+response_content_like [ GET => '/quick_lookup/bigpresh' ], qr/2/,
+  'content looks good for /quick_lookup/bigpresh';
 
 response_content_like  [ GET => '/quick_select_many' ], 
     qr/\b bigpresh,sukria \b/x,

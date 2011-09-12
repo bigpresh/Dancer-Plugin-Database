@@ -153,8 +153,8 @@ sub _quick_query {
         return;
     }
     if (($type =~ m{^ (SELECT|UPDATE|DELETE) $}x)
-        && (!$where || ref $where ne 'HASH')) {
-        carp "Expected a hashref of where conditions";
+        && (!$where)) {
+        carp "Expected where conditions";
         return;
     }
 
@@ -191,16 +191,52 @@ sub _quick_query {
         push @bind_params, values %$data;
     }
 
-    if (($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT') 
-        && keys %$where)
+    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT') 
     {
-        $sql .= " WHERE " . join " AND ",
-            map {
-                defined($where->{$_}) ?
-                  $self->quote_identifier($_) . '=?' :
-                    $self->quote_identifier($_) . ' IS NULL'
-                } keys %$where;
-        push @bind_params, grep {defined $_} values %$where;
+        if (!ref $where) {
+            $sql .= " WHERE " . $where;
+        }
+        elsif ( ref $where eq 'HASH' ) {
+            my @stmts;
+            foreach my $k ( keys %$where ) {
+                my $clause .= $self->quote_identified($k);
+                my $v = $where->{$k};
+                if ( ! defined $v ) {
+                    $clause .= ' IS NULL';
+                }
+                elsif ( ref $v eq 'ARRAY' ) {
+                    $clause .= ' IN (' . join ',', map { '?' } @$v . ')';
+                    push @bind_params, @$v;
+                }
+                else {
+                    my $op = substr($v, 0, 1);
+                    my $value = substr($v, 1);
+                    if ( $op eq '%' ) {
+                        $clause .= ' LIKE %?';
+                    }
+                    elsif ( $op eq '!' ) {
+                        $clause .= ' IS NOT ?';
+                    }
+                    elsif ( $op =~ m{ (\>|\<) }x ) {
+                        $clause .= " $op ? ";
+                    }
+                    else {
+                        $clause .= '=?';
+                        # First character is chopped off to look for an
+                        # operator, so use original value when we
+                        # push the bound value for this case.
+                        $value = $v if ( $op ne ' ' ); 
+                    }
+                    push @bind_params, $value;
+                }
+                push @stmts, $clause;
+            }
+            $sql .= " WHERE " . join " AND ", @stmts if keys %$where;
+        }
+        else {
+            carp "Can't handle ref " . ref $where . " for where";
+            return;
+        }
     }
 
     # If it's a select query and we're called in scalar context, we'll only
@@ -287,13 +323,52 @@ You can pass an empty hashref if you  want all rows, e.g.:
 
 ... is the same as C<"SELECT * FROM 'mytable'">
 
+You can also specify an operator as the first character of the value. 
+Currently recognized operators are:
 
-TODO: this isn't very flexible; it would be nice to easily use other logic
-combinations, and other comparisons other than a straightforward equality
-comparison.  However, supporting this abstraction without the syntax used
-becoming a real mess can be... awkward.  Accepting a pre-written SQL 'WHERE'
-clause would be one option.  Any thoughts on this would be appreciated!
+=over
 
+=item '%'
+
+ { foo => '%bar' } 
+
+... same as C<WHERE foo LIKE '%bar'>
+
+=item '!'
+ 
+ { foo => '!bar' } 
+
+... same as C<WHERE foo IS NOT 'bar'>
+
+=item '>'
+
+ { foo => '>42' } 
+
+... same as C<WHERE foo E<gt> '42'>
+ 
+=item '<'
+
+ { foo => '<42' } 
+
+... same as C<WHERE foo E<lt> '42'>
+
+=back
+
+These operators B<do not> stack.  If you pass '!%bar' as a value, it will be
+converted to C<WHERE foo IS NOT '%bar'>. If you need to find a literal
+'>', '<', '!', or '%' as the first character, use a space i.e., ' >' as 
+the first character. It will be correctly trimmed in the final SQL query.
+
+If you pass in an arrayref as the value, you can get a set clause as in the
+following example:
+
+ { foo => [ 'bar', 'baz', 'quux' ] } 
+
+... it's the same as C<WHERE foo IN ('bar', 'baz', 'quux')>
+
+If that's not flexible enough, you can pass in your own scalar WHERE clause 
+string B<BUT> there's no automatic sanitation on that - if you suffer 
+from a SQL injection attack - don't blame me!
 
 =head1 AUTHOR
 

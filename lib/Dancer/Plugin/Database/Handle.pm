@@ -199,37 +199,31 @@ sub _quick_query {
         elsif ( ref $where eq 'HASH' ) {
             my @stmts;
             foreach my $k ( keys %$where ) {
-                my $clause .= $self->quote_identified($k);
                 my $v = $where->{$k};
-                if ( ! defined $v ) {
-                    $clause .= ' IS NULL';
-                }
-                elsif ( ref $v eq 'ARRAY' ) {
-                    $clause .= ' IN (' . join ',', map { '?' } @$v . ')';
-                    push @bind_params, @$v;
+                if ( ref $v eq 'HASH' ) {
+                    my $not = delete $v->{'not'};
+                    foreach my $op ( keys %$v ) {
+                        push @stmts, $self->quote_identifier($k) . 
+                            $self->_get_where_sql($op, $not);
+                        push @bind_params, 
+                            defined $v->{$op} ? $v->{$op} : 'NULL';
+                    }
                 }
                 else {
-                    my $op = substr($v, 0, 1);
-                    my $value = substr($v, 1);
-                    if ( $op eq '%' ) {
-                        $clause .= ' LIKE %?';
+                    my $clause .= $self->quote_identifier($k);
+                    if ( ! defined $v ) {
+                        $clause .= ' IS NULL';
                     }
-                    elsif ( $op eq '!' ) {
-                        $clause .= ' IS NOT ?';
-                    }
-                    elsif ( $op =~ m{ (\>|\<) }x ) {
-                        $clause .= " $op ? ";
-                    }
-                    else {
+                    elsif ( ! ref $v ) {
                         $clause .= '=?';
-                        # First character is chopped off to look for an
-                        # operator, so use original value when we
-                        # push the bound value for this case.
-                        $value = $v if ( $op ne ' ' ); 
+                        push @bind_params, $v;
                     }
-                    push @bind_params, $value;
+                    elsif ( ref $v eq 'ARRAY' ) {
+                        $clause .= ' IN (' . (join ',', map { '?' } @$v) . ')';
+                        push @bind_params, @$v;
+                    }
+                    push @stmts, $clause;
                 }
-                push @stmts, $clause;
             }
             $sql .= " WHERE " . join " AND ", @stmts if keys %$where;
         }
@@ -278,6 +272,26 @@ sub _quick_query {
     }
 }
 
+sub _get_where_sql {
+    my ($self, $op, $not) = @_;
+
+    $op = lc $op;
+
+    return ' IS NOT ?' if ( $op eq 'is' && $not );
+
+    my %st = (
+        'like' => ' LIKE ?',
+        'is' => ' IS ?',
+        'ge' => ' >= ?',
+        'gt' => ' > ?',
+        'le' => ' <= ?',
+        'lt' => ' < ?',
+        'eq' => ' = ?',
+        'ne' => ' != ?',
+    );
+
+    return $not ? ' NOT' . $st{$op} : $st{$op};
+}
 
 =back
 
@@ -323,48 +337,62 @@ You can pass an empty hashref if you  want all rows, e.g.:
 
 ... is the same as C<"SELECT * FROM 'mytable'">
 
-You can also specify an operator as the first character of the value. 
-Currently recognized operators are:
-
-=over
-
-=item '%'
-
- { foo => '%bar' } 
-
-... same as C<WHERE foo LIKE '%bar'>
-
-=item '!'
- 
- { foo => '!bar' } 
-
-... same as C<WHERE foo IS NOT 'bar'>
-
-=item '>'
-
- { foo => '>42' } 
-
-... same as C<WHERE foo E<gt> '42'>
- 
-=item '<'
-
- { foo => '<42' } 
-
-... same as C<WHERE foo E<lt> '42'>
-
-=back
-
-These operators B<do not> stack.  If you pass '!%bar' as a value, it will be
-converted to C<WHERE foo IS NOT '%bar'>. If you need to find a literal
-'>', '<', '!', or '%' as the first character, use a space i.e., ' >' as 
-the first character. It will be correctly trimmed in the final SQL query.
-
 If you pass in an arrayref as the value, you can get a set clause as in the
 following example:
 
  { foo => [ 'bar', 'baz', 'quux' ] } 
 
 ... it's the same as C<WHERE foo IN ('bar', 'baz', 'quux')>
+
+If you need additional flexibility, you can build fairly complex where 
+clauses by passing a hashref of condition operators and values as the 
+value to the column field key.
+
+Currently recognized operators are:
+
+=over
+
+=item 'like'
+
+ { foo => { 'like' => '%bar%' } } 
+
+... same as C<WHERE foo LIKE '%bar%'>
+
+=item 'ge' / 'gt'
+ 
+ 'greater than' or 'greater or equal to'
+  
+ { foo => { 'ge' => '42' } } 
+
+... same as C<WHERE foo >= '42'>
+
+=item 'lt' / 'le'
+
+ 'less than' or 'less or equal to'
+
+ { foo => { 'lt' => '42' } } 
+
+... same as C<WHERE foo E<lt> '42'>
+ 
+=item 'eq' / 'ne' / 'is'
+
+ 'equal' or 'not equal' or 'is'
+
+ { foo => { 'ne' => 'bar' } }
+
+... same as C<WHERE foo != 'bar'>
+
+=back
+
+You can also include a key named 'not' with a true value in the hashref 
+which will (attempt) to negate the other operator(s). 
+
+ { foo => { 'like' => '%bar%', 'not' => 1 } }
+
+... same as C<WHERE foo NOT LIKE '%bar%'>
+
+If you use undef as the value for an operator hashref it will be 
+replaced with 'NULL' in the query.
 
 If that's not flexible enough, you can pass in your own scalar WHERE clause 
 string B<BUT> there's no automatic sanitation on that - if you suffer 

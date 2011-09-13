@@ -12,7 +12,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 20;
+plan tests => 26;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -45,6 +45,23 @@ response_content_like   [ GET => '/quick_select/42' ], qr/Bob/,
     "quick_select returned the record created by quick_insert";
 response_content_unlike [ GET => '/quick_select/69' ], qr/Bob/,
     "quick_select doesn't return non-matching record";
+
+response_content_like [ GET => '/quick_select/1/category' ], qr/admin/,
+  'content looks good for /quick_select/1/category';
+response_content_like [ GET => '/quick_select/2/name' ], qr/bigpresh/,
+  'content looks good for /quick_select/2/name';
+
+response_content_like [ GET => '/quick_lookup/bigpresh' ], qr/2/,
+  'content looks good for /quick_lookup/bigpresh';
+
+response_content_like   [ GET => '/complex_where/42' ], qr/Bob/,
+    "Complex where clause succeeded";
+
+response_content_like   [ GET => '/complex_not/42' ], qr/sukria/,
+    "Complex not where clause succeeded";
+
+response_content_like   [ GET => '/set_op/2' ], qr/bigpresh/,
+    "set operation where clause succeeded";
 
 response_content_like  [ GET => '/quick_select_many' ], 
     qr/\b bigpresh,sukria \b/x,

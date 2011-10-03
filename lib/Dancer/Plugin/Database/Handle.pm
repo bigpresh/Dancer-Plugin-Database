@@ -88,21 +88,51 @@ sub quick_delete {
   my $row  = database->quick_select($table, { id => 42 });
   my @rows = database->quick_select($table, { id => 42 });
 
+  -or-
+
+  my $row  = database->quick_select($table, { id => 42 }, [ 'foo', 'bar' ]);
+  my @row  = database->quick_select($table, { id => 42 }, [ 'foo', 'bar' ]);
+
 Given a table name and a hashref of where clauses (see below for explanation),
-returns either the first matching row as a hashref, if called in scalar context,
-or a list of matching rows as hashrefs, if called in list context.
+and an optional list of columns to return, returns either the first matching 
+row as a hashref if called in scalar context, or a list of matching rows 
+as hashrefs if called in list context.
 
 =cut
 
 sub quick_select {
-    my ($self, $table_name, $where) = @_;
+    my ($self, $table_name, $where, $data) = @_;
     # Make sure to call _quick_query in the same context we were called.
     # This is a little ugly, rewrite this perhaps.
     if (wantarray) {
-        return ($self->_quick_query('SELECT', $table_name, undef, $where));
+        return ($self->_quick_query('SELECT', $table_name, $data, $where));
     } else {
-        return $self->_quick_query('SELECT', $table_name, undef, $where);
+        return $self->_quick_query('SELECT', $table_name, $data, $where);
     }
+}
+
+=item quick_lookup
+
+  my $id  = database->quick_lookup($table, { email => $params->{'email'} }, 'userid' );
+
+This is a bit of syntactic sugar when you just want to lookup a specific
+field, such as when you're converting an email address to a userid (say
+during a login handler.)
+
+This call always returns a single scalar value, not a hashref of the
+entire row (or partial row) like most of the other methods in this library. 
+
+Returns undef when there's no matching row or no such field found in 
+the results.
+
+=cut
+
+sub quick_lookup {
+    my ($self, $table_name, $where, $data) = @_;
+
+    my $row = $self->_quick_query('SELECT', $table_name, [$data], $where);
+
+    return ( $row && exists $row->{$data} ) ? $row->{$data} : undef;
 }
 
 sub _quick_query {
@@ -123,15 +153,27 @@ sub _quick_query {
         return;
     }
     if (($type =~ m{^ (SELECT|UPDATE|DELETE) $}x)
-        && (!$where || ref $where ne 'HASH')) {
-        carp "Expected a hashref of where conditions";
+        && (!$where)) {
+        carp "Expected where conditions";
         return;
+    }
+
+    my $select_params = '*';
+    if ($type eq 'SELECT' && $data) {
+        if (ref $data ne 'ARRAY') {
+            carp 'Expected arrayref of data';
+            return;
+        }
+        else {
+            $select_params = join(',', map { $self->quote_identifier($_) } @$data);
+        }
     }
 
     $table_name = $self->quote_identifier($table_name);
     my @bind_params;
+
     my $sql = {
-        SELECT => "SELECT * FROM $table_name ",
+        SELECT => "SELECT $select_params FROM $table_name ",
         INSERT => "INSERT INTO $table_name ",
         UPDATE => "UPDATE $table_name SET ",
         DELETE => "DELETE FROM $table_name ",
@@ -149,16 +191,46 @@ sub _quick_query {
         push @bind_params, values %$data;
     }
 
-    if (($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT') 
-        && keys %$where)
+    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT') 
     {
-        $sql .= " WHERE " . join " AND ",
-            map {
-                defined($where->{$_}) ?
-                  $self->quote_identifier($_) . '=?' :
-                    $self->quote_identifier($_) . ' IS NULL'
-                } keys %$where;
-        push @bind_params, grep {defined $_} values %$where;
+        if (!ref $where) {
+            $sql .= " WHERE " . $where;
+        }
+        elsif ( ref $where eq 'HASH' ) {
+            my @stmts;
+            foreach my $k ( keys %$where ) {
+                my $v = $where->{$k};
+                if ( ref $v eq 'HASH' ) {
+                    my $not = delete $v->{'not'};
+                    foreach my $op ( keys %$v ) {
+                        push @stmts, $self->quote_identifier($k) . 
+                            $self->_get_where_sql($op, $not);
+                        push @bind_params, 
+                            defined $v->{$op} ? $v->{$op} : 'NULL';
+                    }
+                }
+                else {
+                    my $clause .= $self->quote_identifier($k);
+                    if ( ! defined $v ) {
+                        $clause .= ' IS NULL';
+                    }
+                    elsif ( ! ref $v ) {
+                        $clause .= '=?';
+                        push @bind_params, $v;
+                    }
+                    elsif ( ref $v eq 'ARRAY' ) {
+                        $clause .= ' IN (' . (join ',', map { '?' } @$v) . ')';
+                        push @bind_params, @$v;
+                    }
+                    push @stmts, $clause;
+                }
+            }
+            $sql .= " WHERE " . join " AND ", @stmts if keys %$where;
+        }
+        else {
+            carp "Can't handle ref " . ref $where . " for where";
+            return;
+        }
     }
 
     # If it's a select query and we're called in scalar context, we'll only
@@ -200,6 +272,26 @@ sub _quick_query {
     }
 }
 
+sub _get_where_sql {
+    my ($self, $op, $not) = @_;
+
+    $op = lc $op;
+
+    return ' IS NOT ?' if ( $op eq 'is' && $not );
+
+    my %st = (
+        'like' => ' LIKE ?',
+        'is' => ' IS ?',
+        'ge' => ' >= ?',
+        'gt' => ' > ?',
+        'le' => ' <= ?',
+        'lt' => ' < ?',
+        'eq' => ' = ?',
+        'ne' => ' != ?',
+    );
+
+    return $not ? ' NOT' . $st{$op} : $st{$op};
+}
 
 =back
 
@@ -245,13 +337,66 @@ You can pass an empty hashref if you  want all rows, e.g.:
 
 ... is the same as C<"SELECT * FROM 'mytable'">
 
+If you pass in an arrayref as the value, you can get a set clause as in the
+following example:
 
-TODO: this isn't very flexible; it would be nice to easily use other logic
-combinations, and other comparisons other than a straightforward equality
-comparison.  However, supporting this abstraction without the syntax used
-becoming a real mess can be... awkward.  Accepting a pre-written SQL 'WHERE'
-clause would be one option.  Any thoughts on this would be appreciated!
+ { foo => [ 'bar', 'baz', 'quux' ] } 
 
+... it's the same as C<WHERE foo IN ('bar', 'baz', 'quux')>
+
+If you need additional flexibility, you can build fairly complex where 
+clauses by passing a hashref of condition operators and values as the 
+value to the column field key.
+
+Currently recognized operators are:
+
+=over
+
+=item 'like'
+
+ { foo => { 'like' => '%bar%' } } 
+
+... same as C<WHERE foo LIKE '%bar%'>
+
+=item 'ge' / 'gt'
+ 
+ 'greater than' or 'greater or equal to'
+  
+ { foo => { 'ge' => '42' } } 
+
+... same as C<WHERE foo >= '42'>
+
+=item 'lt' / 'le'
+
+ 'less than' or 'less or equal to'
+
+ { foo => { 'lt' => '42' } } 
+
+... same as C<WHERE foo E<lt> '42'>
+ 
+=item 'eq' / 'ne' / 'is'
+
+ 'equal' or 'not equal' or 'is'
+
+ { foo => { 'ne' => 'bar' } }
+
+... same as C<WHERE foo != 'bar'>
+
+=back
+
+You can also include a key named 'not' with a true value in the hashref 
+which will (attempt) to negate the other operator(s). 
+
+ { foo => { 'like' => '%bar%', 'not' => 1 } }
+
+... same as C<WHERE foo NOT LIKE '%bar%'>
+
+If you use undef as the value for an operator hashref it will be 
+replaced with 'NULL' in the query.
+
+If that's not flexible enough, you can pass in your own scalar WHERE clause 
+string B<BUT> there's no automatic sanitation on that - if you suffer 
+from a SQL injection attack - don't blame me!
 
 =head1 AUTHOR
 

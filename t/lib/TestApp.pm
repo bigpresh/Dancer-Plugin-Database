@@ -64,6 +64,38 @@ get '/quick_select/:id' => sub {
         : "No matching user"; 
 };
 
+get '/quick_select/:id/:parm' => sub {
+    my $row = database->quick_select('users', { id => params->{id} }, 
+         [ 'id', params->{parm} ]);
+    return $row ? join(',', values %$row) 
+        : "No matching user"; 
+};
+
+get '/quick_lookup/:name' => sub {
+    my $id = database->quick_lookup('users', { name => params->{name} },
+        'id');
+
+    return $id;
+};
+
+get '/complex_where/:id' => sub {
+    my $row = database->quick_select('users', { id => { 'gt' => '4' } });
+    return $row ? join(',', values %$row) 
+        : "No matching user"; 
+};
+
+get '/complex_not/:id' => sub {
+    my $row = database->quick_select('users', { category => { 'is' => undef, 'not' => 1 } });
+    return $row ? join(',', values %$row) 
+        : "No matching user"; 
+};
+
+get '/set_op/:id' => sub {
+    my $row = database->quick_select('users', { id => [ params->{id} ] });
+    return $row ? join(',', values %$row) 
+        : "No matching user"; 
+};
+
 get '/quick_select_many' => sub {
         my @users = database->quick_select('users', {  category => 'admin' });
         return join ',', sort map { $_->{name} } @users;

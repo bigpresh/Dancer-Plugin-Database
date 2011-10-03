@@ -65,7 +65,7 @@ register database => sub {
     $handle = $handles{$pid_tid}{$handle_key} || {};
     
     if ($handle->{dbh}) {
-        if ($conn_details->{connection_check_threshold} &&
+        if ($handle->{dbh}{Active} && $conn_details->{connection_check_threshold} &&
             time - $handle->{last_connection_check}
             < $conn_details->{connection_check_threshold}) 
         {
@@ -78,7 +78,7 @@ register database => sub {
                 Dancer::Logger::debug(
                     "Database connection went away, reconnecting"
                 );
-                if ($handle->{dbh}) { $handle->{dbh}->disconnect; }
+                if ($handle->{dbh}) { eval { $handle->{dbh}->disconnect } }
                 return $handle->{dbh}= _get_connection($conn_details);
 
             }
@@ -192,7 +192,7 @@ sub _get_connection {
 sub _check_connection {
     my $dbh = shift;
     return unless $dbh;
-    if (my $result = $dbh->ping) {
+    if ($dbh->{Active} && (my $result = $dbh->ping)) {
         if (int($result)) {
             # DB driver itself claims all is OK, trust it:
             return 1;

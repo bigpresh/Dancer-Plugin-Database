@@ -12,7 +12,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '1.42_01';
+our $VERSION = '1.50';
 
 my $settings = undef;
 
@@ -490,6 +490,9 @@ Christian Walde
 Alberto Simões
 
 James Aitken (LoonyPandora)
+
+Mark Allen (mrallen1)
+
 
 =head1 BUGS
 

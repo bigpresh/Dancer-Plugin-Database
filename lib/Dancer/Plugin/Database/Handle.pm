@@ -402,6 +402,9 @@ from a SQL injection attack - don't blame me!
 
 David Precious C< <<davidp@preshweb.co.uk >> >
 
+=head1 ACKNOWLEDGMENTS
+
+See L<Dancer::Plugin::Database/ACKNOWLEDGMENTS>
 
 =head1 SEE ALSO
 

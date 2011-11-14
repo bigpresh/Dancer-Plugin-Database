@@ -6,6 +6,8 @@ use Dancer::Config;
 use DBI;
 use Dancer::Plugin::Database::Handle;
 
+=encoding utf8
+
 =head1 NAME
 
 Dancer::Plugin::Database - easy database connections for Dancer applications

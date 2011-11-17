@@ -1,5 +1,11 @@
 Revision history for Dancer-Plugin-Database
 
+1.51    2011-11-17
+        [ BUGFIXES ]
+        - Handle "is" operator properly (particularly if negated) - Issue 15.
+        - Add =encoding utf8 to POD so contributor names render correctly on
+          search.cpan.org / metacpan.org
+
 1.50    2011-10-18
         All new features kindly contributed by Mark Allen (@mrallen1) - thanks!
         - Much more flexible WHERE clauses - e.g.  { foo => { like => 'bar'} }

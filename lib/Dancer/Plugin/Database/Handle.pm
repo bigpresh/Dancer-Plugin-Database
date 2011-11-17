@@ -202,11 +202,11 @@ sub _quick_query {
                 my $v = $where->{$k};
                 if ( ref $v eq 'HASH' ) {
                     my $not = delete $v->{'not'};
-                    foreach my $op ( keys %$v ) {
-                        push @stmts, $self->quote_identifier($k) . 
-                            $self->_get_where_sql($op, $not);
-                        push @bind_params, 
-                            defined $v->{$op} ? $v->{$op} : 'NULL';
+                    while (my($op,$value) = each %$v ) {
+                        my ($cond, $add_bind_param) 
+                            = $self->_get_where_sql($op, $not, $value);
+                        push @stmts, $self->quote_identifier($k) . $cond; 
+                        push @bind_params, $v->{$op} if $add_bind_param;
                     }
                 }
                 else {
@@ -273,11 +273,21 @@ sub _quick_query {
 }
 
 sub _get_where_sql {
-    my ($self, $op, $not) = @_;
+    my ($self, $op, $not, $value) = @_;
 
     $op = lc $op;
 
-    return ' IS NOT ?' if ( $op eq 'is' && $not );
+    # "IS" needs special-casing, as it will be either "IS NULL" or "IS NOT NULL"
+    # - there's no need to return a bind param for that.
+    if ($op eq 'is') {
+        if (defined $value) {
+            Dancer::Logger::warning(
+                "Using the 'IS' operator only makes sense to test for nullness,"
+                ." but a non-undef value was passed.  Did you mean eq/ne?"
+            );
+        }
+        return $not ? 'IS NOT NULL' : 'IS NULL';
+    }
 
     my %st = (
         'like' => ' LIKE ?',
@@ -290,7 +300,9 @@ sub _get_where_sql {
         'ne' => ' != ?',
     );
 
-    return $not ? ' NOT' . $st{$op} : $st{$op};
+    # Return the appropriate SQL, and indicate that the value should be added to
+    # the bind params
+    return (($not ? ' NOT' . $st{$op} : $st{$op}), 1);
 }
 
 =back

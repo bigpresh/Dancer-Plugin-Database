@@ -370,13 +370,13 @@ Currently recognized operators are:
 
 ... same as C<WHERE foo LIKE '%bar%'>
 
-=item 'ge' / 'gt'
+=item 'gt' / 'ge'
  
  'greater than' or 'greater or equal to'
   
  { foo => { 'ge' => '42' } } 
 
-... same as C<WHERE foo >= '42'>
+... same as C<WHERE foo E<gt>= '42'>
 
 =item 'lt' / 'le'
 

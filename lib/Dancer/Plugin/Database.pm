@@ -18,7 +18,7 @@ our $VERSION = '1.51';
 
 my $settings = undef;
 
-sub _load_db_settings { $settings = plugin_setting; }
+sub _load_db_settings { $settings = plugin_setting(); }
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that

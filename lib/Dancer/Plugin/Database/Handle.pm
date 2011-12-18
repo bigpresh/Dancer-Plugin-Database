@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use DBI;
 use base qw(DBI::db);
-
+use Dancer::Plugin;
 our $VERSION = '0.07';
 
 =head1 NAME

@@ -11,7 +11,6 @@ get '/prepare_db' => sub {
         q/insert into users values (2, 'bigpresh', 'admin')/,
         q/insert into users values (3, 'badger', 'animal')/,
     );
-
     database->do($_) for @sql;
     'ok';
 };

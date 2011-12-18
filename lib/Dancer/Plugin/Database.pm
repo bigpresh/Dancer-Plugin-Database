@@ -2,7 +2,6 @@ package Dancer::Plugin::Database;
 
 use strict;
 use Dancer::Plugin;
-use Dancer::Config;
 use DBI;
 use Dancer::Plugin::Database::Handle;
 
@@ -97,7 +96,6 @@ register database => sub {
     }
 };
 
-register_plugin;
 
 # Given the settings to use, try to get a database connection
 sub _get_connection {
@@ -557,5 +555,5 @@ L<DBI>
 L<Dancer::Plugin::SimpleCRUD>
 
 =cut
-
+register_plugin;
 1; # End of Dancer::Plugin::Database

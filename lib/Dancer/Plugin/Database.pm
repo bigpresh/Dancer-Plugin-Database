@@ -104,8 +104,8 @@ sub _get_connection {
     my $settings = shift;
 
     # Assemble the DSN:
-    my $dsn;
-    my $driver;
+    my $dsn = '';
+    my $driver = '';
     if ($settings->{dsn}) {
         $dsn = $settings->{dsn};
         ($driver) = $dsn =~ m{dbi:([^:]+)};

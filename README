@@ -65,6 +65,7 @@ CONFIGURATION
                 driver: 'mysql'
                 database: 'test'
                 host: 'localhost'
+                port: 3306
                 username: 'myusername'
                 password: 'mypassword'
                 connection_check_threshold: 10
@@ -82,7 +83,7 @@ CONFIGURATION
     been used for a while and the underlying connection has gone away.
 
     The `dbi_params' setting is also optional, and if specified, should be
-    settings which can be passed to `DBI->connect' as its third argument;
+    settings which can be passed to `DBI->connect' as its fourth argument;
     see the DBI documentation for these.
 
     The optional `on_connect_do' setting is an array of queries which should
@@ -185,6 +186,26 @@ CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
       # Fetch all rows from a table (since version 1.30):
       database->quick_select($table_name, {});
 
+HOOKS
+    This plugin uses Dancer's hooks support to allow you to register code
+    that should execute at given times - for example:
+
+        hook 'database_connected' => sub {
+            my $dbh = shift;
+            # do something with the new DB handle here
+        };
+
+    Currrently defined hook positions are:
+
+    `database_connected'
+        Called when a new database connection has been established, after
+        performing any `on_connect_do' statements, but before the handle is
+        returned. Receives the new database handle as a parameter, so that
+        you can do what you need with it.
+
+    If you need other hook positions which would be useful to you, please
+    feel free to suggest them!
+
 AUTHOR
     David Precious, `<davidp@preshweb.co.uk>'
 
@@ -193,7 +214,8 @@ CONTRIBUTING
 
     http://github.com/bigpresh/Dancer-Plugin-Database
 
-    Feel free to fork the repo and submit pull requests!
+    Feel free to fork the repo and submit pull requests! Also, it makes
+    sense to watch the repo on GitHub for updates.
 
     Feedback and bug reports are always appreciated. Even a quick mail to
     let me know the module is useful to you would be very nice - it's nice
@@ -218,7 +240,17 @@ ACKNOWLEDGEMENTS
 
     Matthew Vickers
 
+    Christian Walde
+
     Alberto Simões
+
+    James Aitken (LoonyPandora)
+
+    Mark Allen (mrallen1)
+
+    Sergiy Borodych (bor)
+
+    Mario Domgoergen (mdom)
 
 BUGS
     Please report any bugs or feature requests to
@@ -265,3 +297,4 @@ SEE ALSO
     DBI
 
     Dancer::Plugin::SimpleCRUD
+

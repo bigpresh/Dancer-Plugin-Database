@@ -1,5 +1,12 @@
 Revision history for Dancer-Plugin-Database
 
+1.60    2011-12-29
+        [ ENHANCEMENTS ]
+        - Hook support, requested by mdom.  Currently supports a
+          database_connected hook position; others may be added in future.
+
+        Happy New Year!
+
 1.51    2011-11-17
         [ BUGFIXES ]
         - Handle "is" operator properly (particularly if negated) - Issue 15.

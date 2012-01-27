@@ -370,13 +370,13 @@ Currently recognized operators are:
 
 ... same as C<WHERE foo LIKE '%bar%'>
 
-=item 'ge' / 'gt'
+=item 'gt' / 'ge'
  
  'greater than' or 'greater or equal to'
   
  { foo => { 'ge' => '42' } } 
 
-... same as C<WHERE foo >= '42'>
+... same as C<WHERE foo E<gt>= '42'>
 
 =item 'lt' / 'le'
 
@@ -409,6 +409,7 @@ replaced with 'NULL' in the query.
 If that's not flexible enough, you can pass in your own scalar WHERE clause 
 string B<BUT> there's no automatic sanitation on that - if you suffer 
 from a SQL injection attack - don't blame me!
+Don't forget to use C<quote()>/C<quote_identifier()> on it then.
 
 =head1 AUTHOR
 

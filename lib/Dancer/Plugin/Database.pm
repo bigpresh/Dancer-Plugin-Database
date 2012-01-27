@@ -452,6 +452,9 @@ Examples:
   # Fetch all rows from a table (since version 1.30):
   database->quick_select($table_name, {});
 
+There's more extensive documentation on these features in
+L<Dancer::Plugin::Database::Handle>, including using the C<order_by>, C<limit>,
+C<columns> options to sort / limit results and include only specific columns.
 
 =head1 HOOKS
 

@@ -240,7 +240,7 @@ sub _get_settings {
         }
     }
 
-    # We should have soemthing to return now; make sure we have a
+    # We should have something to return now; make sure we have a
     # connection_check_threshold, then return what we found.  In previous
     # versions the documentation contained a typo mentioning
     # connectivity-check-threshold, so support that as an alias.

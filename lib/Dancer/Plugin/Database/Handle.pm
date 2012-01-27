@@ -289,6 +289,11 @@ sub _quick_query {
         }
     }
 
+    # Add an ORDER BY clause, if we want to:
+    if (exists $opts->{order_by}) {
+        $sql .= $self->_build_order_by_clause($opts->{order_by});
+    }
+
 
     # Add a LIMIT clause if we want to:
     if (exists $opts->{limit}) {
@@ -369,6 +374,43 @@ sub _get_where_sql {
     # the bind params
     return (($not ? ' NOT' . $st{$op} : $st{$op}), 1);
 }
+
+# Given either a column name, or a hashref of e.g. { asc => 'colname' },
+# or an arrayref of either, construct an ORDER BY clause (quoting col names)
+# e.g.:
+# 'foo'              => ORDER BY foo
+# { asc => 'foo' }   => ORDER BY foo ASC
+# ['foo', 'bar']     => ORDER BY foo, bar
+# [ { asc => 'foo' }, { desc => 'bar' } ]
+#      => 'ORDER BY foo ASC, bar DESC
+sub _build_order_by_clause {
+    my ($self, $in) = @_;
+
+    # Input could be a straight scalar, or a hashref, or an arrayref of either
+    # straight scalars or hashrefs.  Turn a straight scalar into an arrayref to
+    # avoid repeating ourselves.
+    $in = [ $in ] unless ref $in eq 'ARRAY';
+
+    # Now, for each of the fields given, add them to the clause
+    my @sort_fields;
+    for my $field (@$in) {
+        if (!ref $field) {
+            push @sort_fields, $self->quote_identifier($field);
+        } elsif (ref $field eq 'HASH') {
+            my ($order, $name) = %$field;
+            $order = uc $order;
+            if ($order ne 'ASC' && $order ne 'DESC') {
+                die "Invalid sort order $order used in order_by option!";
+            }
+            # $order has been checked to be 'ASC' or 'DESC' above, so safe to
+            # interpolate
+            push @sort_fields, $self->quote_identifier($name) . " $order";
+        }
+    }
+
+    return "ORDER BY " . join ', ', @sort_fields;
+}
+
 
 =back
 

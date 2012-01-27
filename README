@@ -186,6 +186,11 @@ CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
       # Fetch all rows from a table (since version 1.30):
       database->quick_select($table_name, {});
 
+    There's more extensive documentation on these features in
+    Dancer::Plugin::Database::Handle, including using the `order_by',
+    `limit', `columns' options to sort / limit results and include only
+    specific columns.
+
 HOOKS
     This plugin uses Dancer's hooks support to allow you to register code
     that should execute at given times - for example:
@@ -252,6 +257,8 @@ ACKNOWLEDGEMENTS
 
     Mario Domgoergen (mdom)
 
+    Andrey Inishev (inish777)
+
 BUGS
     Please report any bugs or feature requests to
     `bug-dancer-plugin-database at rt.cpan.org', or through the web
@@ -283,7 +290,7 @@ SUPPORT
     <irc.perl.org>.
 
 LICENSE AND COPYRIGHT
-    Copyright 2010-11 David Precious.
+    Copyright 2010-12 David Precious.
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of either: the GNU General Public License as published

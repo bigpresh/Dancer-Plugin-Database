@@ -101,6 +101,18 @@ get '/quick_select_many' => sub {
         return join ',', sort map { $_->{name} } @users;
 };
 
+# e.g. /quick_select_specific_cols/foo should return col 'foo'
+#  or  /quick_select_specific_cols/foo/bar returns foo:bar
+get '/quick_select_specific_cols/**' => sub {
+    my $out;
+    my $cols = (splat)[0];
+    my @users = database->quick_select('users', {}, { columns => $cols });
+    for my $user (@users) {
+        $out .= join(':', @$user{@$cols}) . "\n"; 
+    }
+    return $out;
+};
+
 # Check we can get a handle by passing a hashref of settings, too:
 get '/runtime_config' => sub {
     my $dbh = database({ driver => 'SQLite', database => ':memory:'});

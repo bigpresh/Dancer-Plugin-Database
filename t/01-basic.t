@@ -6,13 +6,15 @@ use Test::More import => ['!pass'];
 use t::lib::TestApp;
 use Dancer ':syntax';
 use Dancer::Test;
+set logger => 'console';
+set log => 'debug';
 
 eval { require DBD::SQLite };
 if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 26;
+plan tests => 28;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -76,6 +78,16 @@ response_status_is    [ GET => '/quick_delete/42' ], 200,
     "quick_delete returned OK status";
 response_content_like [ GET => '/user/42' ], qr/No such user/,
     "quick_delete deleted a record successfully";
+
+
+# Test that we can fetch only the columns we want
+response_content_like [ GET => '/quick_select_specific_cols/name' ],
+    qr/^bigpresh$/m,
+    'Fetched a single specified column OK';
+
+response_content_like [ GET => '/quick_select_specific_cols/name/category' ],
+    qr/^bigpresh:admin$/m,
+    'Fetched multiple specified columns OK';
 
 # Test that runtime configuration gives us a handle, too:
 response_status_is    [ GET => '/runtime_config' ], 200,

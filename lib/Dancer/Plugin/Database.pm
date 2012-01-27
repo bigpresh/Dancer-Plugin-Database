@@ -120,8 +120,10 @@ sub _get_connection {
         # (DBI's documentation recommends that DBD::* modules should understand
         # 'database', but older versions of DBD::SQLite didn't; let's make 
         # things easier for our users by handling this for them):
-        # (DBD::SQLite will support 'database', too, as of 1.32 when it's
-        # released)
+        # (I asked in RT #61117 for DBD::SQLite to support 'database', too; this
+        # was included in DBD::SQLite 1.33, released Mon 20 May 2011.
+        # Special-casing may as well stay, rather than forcing dependency on
+        # DBD::SQLite 1.33.
         if ($driver eq 'SQLite' 
             && $settings->{database} && !$settings->{dbname}) {
             $settings->{dbname} = delete $settings->{database};
@@ -240,7 +242,7 @@ sub _get_settings {
         }
     }
 
-    # We should have soemthing to return now; make sure we have a
+    # We should have something to return now; make sure we have a
     # connection_check_threshold, then return what we found.  In previous
     # versions the documentation contained a typo mentioning
     # connectivity-check-threshold, so support that as an alias.
@@ -450,6 +452,9 @@ Examples:
   # Fetch all rows from a table (since version 1.30):
   database->quick_select($table_name, {});
 
+There's more extensive documentation on these features in
+L<Dancer::Plugin::Database::Handle>, including using the C<order_by>, C<limit>,
+C<columns> options to sort / limit results and include only specific columns.
 
 =head1 HOOKS
 
@@ -529,6 +534,8 @@ Sergiy Borodych (bor)
 
 Mario Domgoergen (mdom)
 
+Andrey Inishev (inish777)
+
 
 =head1 BUGS
 
@@ -573,7 +580,7 @@ You can find the author on IRC in the channel C<#dancer> on <irc.perl.org>.
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-11 David Precious.
+Copyright 2010-12 David Precious.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

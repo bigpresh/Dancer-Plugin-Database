@@ -5,7 +5,7 @@ use Carp;
 use DBI;
 use base qw(DBI::db);
 
-our $VERSION = '0.07';
+our $VERSION = '0.10';
 
 =head1 NAME
 
@@ -94,20 +94,73 @@ sub quick_delete {
   my @row  = database->quick_select($table, { id => 42 }, [ 'foo', 'bar' ]);
 
 Given a table name and a hashref of where clauses (see below for explanation),
-and an optional list of columns to return, returns either the first matching 
+and an optional hashref of options, returns either the first matching 
 row as a hashref if called in scalar context, or a list of matching rows 
-as hashrefs if called in list context.
+as hashrefs if called in list context.  The third argument is a hashref of
+options to allow additional control, as documented below.  For backwards
+compatibility, it can also be an arrayref of column names, which acts in the
+same way as the C<columns> option.
+
+The options you can provide are:
+
+=over 4
+
+=item C<columns>
+
+An arrayref of column names to return, if you only want certain columns returned
+
+=item C<order_by>
+
+Specify how the results should be ordered.  This option can take various values:
+
+=over 4
+
+=item * a straight scalar or arrayref sorts by the given column(s):
+
+    { order_by => 'foo' }         # equivalent to "ORDER BY foo"
+    { order_by => [ qw(foo bar) } # equiv to "ORDER BY foo,bar"
+
+=item * a hashref of C<order => column name>, e.g.:
+
+    { order_by => { desc => 'foo' } } # equiv to ORDER BY foo DESC
+    { order_by => [ { desc => 'foo' }, { asc => 'bar' }
+       # above is equiv to ORDER BY foo ASC, bar DESC
+
+=back
+
+=item C<limit>
+
+Limit how many records will be returned; equivalent to e.g. C<LIMIT 1> in an SQL
+query.  Example:
+
+=back
+
+An example of using options to control the results you get back:
+
+    # Get the name & phone number of the 10 highest-paid men:
+    database->query(
+        'employees', 
+        { gender => 'male' },
+        { order_by => 'salary', limit => 10, columns => [qw(name phone)] }
+    );
 
 =cut
 
 sub quick_select {
-    my ($self, $table_name, $where, $data) = @_;
+    my ($self, $table_name, $where, $opts) = @_;
+
+    # For backwards compatibility, accept an arrayref of column names as the 3rd
+    # arg, instead of an arrayref of options:
+    if ($opts && ref $opts eq 'ARRAY') {
+        $opts = { columns => $opts };
+    }
+
     # Make sure to call _quick_query in the same context we were called.
     # This is a little ugly, rewrite this perhaps.
     if (wantarray) {
-        return ($self->_quick_query('SELECT', $table_name, $data, $where));
+        return ($self->_quick_query('SELECT', $table_name, $opts, $where));
     } else {
-        return $self->_quick_query('SELECT', $table_name, $data, $where);
+        return $self->_quick_query('SELECT', $table_name, $opts, $where);
     }
 }
 
@@ -129,12 +182,17 @@ the results.
 
 sub quick_lookup {
     my ($self, $table_name, $where, $data) = @_;
-
-    my $row = $self->_quick_query('SELECT', $table_name, [$data], $where);
+    my $opts = { columns => [$data] };
+    my $row = $self->_quick_query('SELECT', $table_name, $opts, $where);
 
     return ( $row && exists $row->{$data} ) ? $row->{$data} : undef;
 }
 
+# The 3rd arg, $data, has a different meaning depending on the type of query
+# (no, I don't like that much; I may refactor this soon to use named params).
+# For INSERT/UPDATE queries, it'll be a hashref of field => value.
+# For SELECT queries, it'll be a hashref of additional options.
+# For DELETE queries, it's unused.
 sub _quick_query {
     my ($self, $type, $table_name, $data, $where) = @_;
     
@@ -158,22 +216,20 @@ sub _quick_query {
         return;
     }
 
-    my $select_params = '*';
-    if ($type eq 'SELECT' && $data) {
-        if (ref $data ne 'ARRAY') {
-            carp 'Expected arrayref of data';
-            return;
-        }
-        else {
-            $select_params = join(',', map { $self->quote_identifier($_) } @$data);
-        }
+    my $which_cols = '*';
+    my $opts = $type eq 'SELECT' && $data ? $data : {};
+    if ($opts->{columns}) {
+        my @cols = (ref $opts->{columns}) 
+            ? @{ $opts->{columns} }
+            :    $opts->{columns} ;
+        $which_cols = join(',', map { $self->quote_identifier($_) } @cols);
     }
 
     $table_name = $self->quote_identifier($table_name);
     my @bind_params;
 
     my $sql = {
-        SELECT => "SELECT $select_params FROM $table_name ",
+        SELECT => "SELECT $which_cols FROM $table_name ",
         INSERT => "INSERT INTO $table_name ",
         UPDATE => "UPDATE $table_name SET ",
         DELETE => "DELETE FROM $table_name ",
@@ -233,10 +289,24 @@ sub _quick_query {
         }
     }
 
-    # If it's a select query and we're called in scalar context, we'll only
-    # return one row, so add a LIMIT 1
-    if ($type eq 'SELECT' && !wantarray) {
-        $sql .= ' LIMIT 1';
+    # Add an ORDER BY clause, if we want to:
+    if (exists $opts->{order_by}) {
+        $sql .= $self->_build_order_by_clause($opts->{order_by});
+    }
+
+
+    # Add a LIMIT clause if we want to:
+    if (exists $opts->{limit}) {
+        if ($opts->{limit} =~ /^\d+$/) {
+            # Checked for sanity above so safe to interpolate
+            $sql .= " LIMIT $opts->{limit}";
+        } else {
+            die "Invalid LIMIT param $opts->{limit} !";
+        }
+    } elsif ($type eq 'SELECT' && !wantarray) {
+        # We're only returning one row in scalar context, so don't ask for any
+        # more than that
+        $sql .= " LIMIT 1";
     }
 
     # Dancer::Plugin::Database will have looked at the log_queries setting and
@@ -304,6 +374,43 @@ sub _get_where_sql {
     # the bind params
     return (($not ? ' NOT' . $st{$op} : $st{$op}), 1);
 }
+
+# Given either a column name, or a hashref of e.g. { asc => 'colname' },
+# or an arrayref of either, construct an ORDER BY clause (quoting col names)
+# e.g.:
+# 'foo'              => ORDER BY foo
+# { asc => 'foo' }   => ORDER BY foo ASC
+# ['foo', 'bar']     => ORDER BY foo, bar
+# [ { asc => 'foo' }, { desc => 'bar' } ]
+#      => 'ORDER BY foo ASC, bar DESC
+sub _build_order_by_clause {
+    my ($self, $in) = @_;
+
+    # Input could be a straight scalar, or a hashref, or an arrayref of either
+    # straight scalars or hashrefs.  Turn a straight scalar into an arrayref to
+    # avoid repeating ourselves.
+    $in = [ $in ] unless ref $in eq 'ARRAY';
+
+    # Now, for each of the fields given, add them to the clause
+    my @sort_fields;
+    for my $field (@$in) {
+        if (!ref $field) {
+            push @sort_fields, $self->quote_identifier($field);
+        } elsif (ref $field eq 'HASH') {
+            my ($order, $name) = %$field;
+            $order = uc $order;
+            if ($order ne 'ASC' && $order ne 'DESC') {
+                die "Invalid sort order $order used in order_by option!";
+            }
+            # $order has been checked to be 'ASC' or 'DESC' above, so safe to
+            # interpolate
+            push @sort_fields, $self->quote_identifier($name) . " $order";
+        }
+    }
+
+    return "ORDER BY " . join ', ', @sort_fields;
+}
+
 
 =back
 

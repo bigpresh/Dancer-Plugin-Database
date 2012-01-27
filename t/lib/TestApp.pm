@@ -123,6 +123,19 @@ get '/quick_select_with_limit/:limit' => sub {
     return scalar @users;
 };
 
+get '/quick_select_sorted' => sub {
+    my @users = database->quick_select('users', {}, { order_by => 'name' });
+    return join ':', map { $_->{name} } @users;
+};
+get '/quick_select_sorted_rev' => sub {
+    my @users = database->quick_select(
+        'users', {}, { order_by => { desc => 'name' } }
+    );
+    return join ':', map { $_->{name} } @users;
+};
+
+
+
 # Check we can get a handle by passing a hashref of settings, too:
 get '/runtime_config' => sub {
     my $dbh = database({ driver => 'SQLite', database => ':memory:'});

@@ -14,7 +14,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 30;
+plan tests => 32;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -97,7 +97,13 @@ response_content_is [ GET => '/quick_select_with_limit/2'],
     "2",
     "User-specified LIMIT works (2 row)";
 
-
+# Test that order_by gives us rows in desired order
+response_content_is [ GET => '/quick_select_sorted' ],
+    "bigpresh:bodger:mousey:sukria",
+    "Records sorted properly";
+response_content_is [ GET => '/quick_select_sorted_rev' ],
+    "sukria:mousey:bodger:bigpresh",
+    "Records sorted properly in descending order";
 
 # Test that runtime configuration gives us a handle, too:
 response_status_is    [ GET => '/runtime_config' ], 200,

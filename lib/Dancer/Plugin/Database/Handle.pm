@@ -219,7 +219,7 @@ sub _quick_query {
     my $which_cols = '*';
     my $opts = $type eq 'SELECT' && $data ? $data : {};
     if ($opts->{columns}) {
-        my @cols = ref $opts->{columns} 
+        my @cols = (ref $opts->{columns}) 
             ? @{ $opts->{columns} }
             :    $opts->{columns} ;
         $which_cols = join(',', map { $self->quote_identifier($_) } @cols);
@@ -293,6 +293,20 @@ sub _quick_query {
     # return one row, so add a LIMIT 1
     if ($type eq 'SELECT' && !wantarray) {
         $sql .= ' LIMIT 1';
+    }
+
+    # Add a LIMIT clause if we want to:
+    if (exists $opts->{limit}) {
+        if ($opts->{limit} =~ /^\d+$/) {
+            # Checked for sanity above so safe to interpolate
+            $sql .= " LIMIT $opts->{limit}";
+        } else {
+            die "Invalid LIMIT param $opts->{limit} !";
+        }
+    } elsif ($type eq 'SELECT' && !wantarray) {
+        # We're only returning one row in scalar context, so don't ask for any
+        # more than that
+        $sql .= " LIMIT 1";
     }
 
     # Dancer::Plugin::Database will have looked at the log_queries setting and

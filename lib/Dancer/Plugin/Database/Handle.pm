@@ -289,11 +289,6 @@ sub _quick_query {
         }
     }
 
-    # If it's a select query and we're called in scalar context, we'll only
-    # return one row, so add a LIMIT 1
-    if ($type eq 'SELECT' && !wantarray) {
-        $sql .= ' LIMIT 1';
-    }
 
     # Add a LIMIT clause if we want to:
     if (exists $opts->{limit}) {

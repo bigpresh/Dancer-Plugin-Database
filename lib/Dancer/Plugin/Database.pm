@@ -120,8 +120,10 @@ sub _get_connection {
         # (DBI's documentation recommends that DBD::* modules should understand
         # 'database', but older versions of DBD::SQLite didn't; let's make 
         # things easier for our users by handling this for them):
-        # (DBD::SQLite will support 'database', too, as of 1.32 when it's
-        # released)
+        # (I asked in RT #61117 for DBD::SQLite to support 'database', too; this
+        # was included in DBD::SQLite 1.33, released Mon 20 May 2011.
+        # Special-casing may as well stay, rather than forcing dependency on
+        # DBD::SQLite 1.33.
         if ($driver eq 'SQLite' 
             && $settings->{database} && !$settings->{dbname}) {
             $settings->{dbname} = delete $settings->{database};

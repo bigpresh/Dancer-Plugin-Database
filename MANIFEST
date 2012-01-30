@@ -1,5 +1,6 @@
 Changes
 MANIFEST
+MANIFEST.SKIP
 Makefile.PL
 README
 lib/Dancer/Plugin/Database.pm

@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-Database
 
+1.70    2012-01-31
+        [ ENHANCEMENTS ]
+        - New `order_by`, `limit` and `columns` options for quick_select()
+          (Requested by bor in GH-20)
+
 1.60    2011-12-29
         [ ENHANCEMENTS ]
         - Hook support, requested by mdom.  Currently supports a

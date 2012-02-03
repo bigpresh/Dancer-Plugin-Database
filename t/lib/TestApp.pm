@@ -4,11 +4,22 @@ use Dancer;
 use Dancer::Plugin::Database;
 
 
-hook database_connected => sub { vars->{connecthookfired} = 1; };
+hook database_connected => sub {
+    my $dbh = shift;
+    vars->{connecthookfired} = $dbh; 
+
+};
 
 get '/connecthookfired' => sub { 
     my $database = database();
-    return vars->{connecthookfired};
+    # If the hook fired, it'll have squirreled away a reference to the DB handle
+    # for us to look for.
+    my $h = vars->{connecthookfired};
+    if (ref $h && $h->isa('DBI::db')) {
+        return 1;
+    } else {
+        return 0;
+    }
 };
 
 get '/prepare_db' => sub {

@@ -21,7 +21,7 @@ my $dsn = "dbi:SQLite:dbname=:memory:";
 setting plugins => { Database => { dsn => $dsn, } };
 
 response_content_is   [ GET => '/connecthookfired' ], 1,
-    'database_connect hook fires';
+    'database_connected hook fires';
 
 response_status_is    [ GET => '/prepare_db' ], 200, 'db is created';
 

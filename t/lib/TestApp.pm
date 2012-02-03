@@ -177,4 +177,20 @@ get '/handles_cached' => sub {
     database() eq database() and return "Same handle returned";
 };
 
+
+# Check that the database_lost_connection hook fires when we force a db handle
+# to go away:
+hook database_lost_connection => sub { vars->{lost_connection} = 1; };
+get '/database_lost_connection_fires' => sub {
+    vars->{lost_connection} = 0;
+    database()->disconnect;
+    # We set connection_check_threshold to 0.1 at the start, so wait a second
+    # then check that the code detects the handle is no longer connected and
+    # triggers the hook
+    sleep 1;
+    my $handle = database();
+    return vars->{lost_connection};
+};
+
+
 1;

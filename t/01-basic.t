@@ -14,11 +14,16 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 34;
+plan tests => 35;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
-setting plugins => { Database => { dsn => $dsn, } };
+setting plugins => { 
+    Database => { 
+        dsn => $dsn, 
+        connection_check_threshold => 0.1,
+    } 
+};
 
 response_content_is   [ GET => '/connecthookfired' ], 1,
     'database_connected hook fires';
@@ -120,3 +125,9 @@ response_content_like [ GET => '/runtime_config' ], qr/ok/,
 # Test that we get the same handle each time we call the database() keyword
 # (i.e., that handles are cached appropriately)
 response_content_like [ GET => '/handles_cached' ], qr/Same handle returned/;
+
+# Test that the database_lost_connection hook fires when the connection goes
+# away
+response_content_is [ GET => '/database_lost_connection_fires' ], 1,
+    'database_lost_connection hook fires';
+

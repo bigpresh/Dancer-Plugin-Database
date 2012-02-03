@@ -575,6 +575,8 @@ Mario Domgoergen (mdom)
 
 Andrey Inishev (inish777)
 
+Nick S. Knutov (knutov)
+
 
 =head1 BUGS
 

@@ -192,5 +192,18 @@ get '/database_connection_lost_fires' => sub {
     return vars->{lost_connection};
 };
 
+# Check that database_connection_failed hook fires if we can't connect - pass
+# bogus connection details to make that happen
+hook database_connection_failed => sub {
+    vars->{connection_failed} = 1;
+};
+get '/database_connection_failed_fires' => sub {
+    # Give a ridiculous database filename which should never exist in order to
+    # force a connection failure
+    my $handle = database({ 
+        dsn => "dbi:SQLite:/Please/Tell/Me/This/File/Does/Not/Exist!",
+    });
+    return vars->{connection_failed};
+};
 
 1;

@@ -6,15 +6,13 @@ use Test::More import => ['!pass'];
 use t::lib::TestApp;
 use Dancer ':syntax';
 use Dancer::Test;
-set logger => 'console';
-set log => 'debug';
 
 eval { require DBD::SQLite };
 if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 35;
+plan tests => 36;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -22,6 +20,9 @@ setting plugins => {
     Database => { 
         dsn => $dsn, 
         connection_check_threshold => 0.1,
+        dbi_params => {
+            RaiseError => 0,
+        },
     } 
 };
 
@@ -130,4 +131,8 @@ response_content_like [ GET => '/handles_cached' ], qr/Same handle returned/;
 # away
 response_content_is [ GET => '/database_connection_lost_fires' ], 1,
     'database_connection_lost hook fires';
+
+# Test that the database_connection_failed hook fires when we can't connect
+response_content_is [ GET => '/database_connection_failed_fires' ], 1,
+    'database_connection_failed hook fires';
 

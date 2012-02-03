@@ -80,6 +80,10 @@ register database => sub {
                 Dancer::Logger::debug(
                     "Database connection went away, reconnecting"
                 );
+
+                Dancer::Factory::Hook->instance->execute_hooks(
+                    'database_lost_connection', $handle->{dbh}
+                );
                 if ($handle->{dbh}) { eval { $handle->{dbh}->disconnect } }
                 return $handle->{dbh}= _get_connection($conn_details);
 
@@ -97,7 +101,14 @@ register database => sub {
     }
 };
 
-Dancer::Factory::Hook->instance->install_hooks(qw(database_connected));
+Dancer::Factory::Hook->instance->install_hooks(
+    qw(
+        database_connected 
+        database_lost_connection
+        database_connection_failed
+        database_error
+    )
+);
 
 register_plugin;
 
@@ -169,6 +180,9 @@ sub _get_connection {
     if (!$dbh) {
         Dancer::Logger::error(
             "Database connection failed - " . $DBI::errstr
+        );
+        Dancer::Factory::Hook->instance->execute_hooks(
+            'database_connection_failed', $settings
         );
         return;
     } elsif (exists $settings->{on_connect_do}) {
@@ -475,6 +489,23 @@ Currrently defined hook positions are:
 Called when a new database connection has been established, after performing any
 C<on_connect_do> statements, but before the handle is returned.  Receives the
 new database handle as a parameter, so that you can do what you need with it.
+
+=item C<database_lost_connection>
+
+Called when the plugin detects that the database connection has gone away.
+Receives the no-longer usable handle as a paramter, in case you need to extract
+some information from it (such as which server it was connected to).
+
+=item C<database_connection_failed>
+
+Called when an attempt to connect to the database fails.  Receives a hashref of
+connection settings as a parameter, containing the settings the plugin was using
+to connect (as obtained from the config file).
+
+=item C<database_error>
+
+Called when a database error is raised by C<DBI>.  Receives two parameters: the
+error message being returned by DBI, and the database handle in question.
 
 =back
 

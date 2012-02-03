@@ -126,8 +126,8 @@ response_content_like [ GET => '/runtime_config' ], qr/ok/,
 # (i.e., that handles are cached appropriately)
 response_content_like [ GET => '/handles_cached' ], qr/Same handle returned/;
 
-# Test that the database_lost_connection hook fires when the connection goes
+# Test that the database_connection_lost hook fires when the connection goes
 # away
-response_content_is [ GET => '/database_lost_connection_fires' ], 1,
-    'database_lost_connection hook fires';
+response_content_is [ GET => '/database_connection_lost_fires' ], 1,
+    'database_connection_lost hook fires';
 

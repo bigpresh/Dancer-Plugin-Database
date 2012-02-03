@@ -178,10 +178,10 @@ get '/handles_cached' => sub {
 };
 
 
-# Check that the database_lost_connection hook fires when we force a db handle
+# Check that the database_connection_lost hook fires when we force a db handle
 # to go away:
-hook database_lost_connection => sub { vars->{lost_connection} = 1; };
-get '/database_lost_connection_fires' => sub {
+hook database_connection_lost => sub { vars->{lost_connection} = 1; };
+get '/database_connection_lost_fires' => sub {
     vars->{lost_connection} = 0;
     database()->disconnect;
     # We set connection_check_threshold to 0.1 at the start, so wait a second

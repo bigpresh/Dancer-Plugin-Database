@@ -82,7 +82,7 @@ register database => sub {
                 );
 
                 Dancer::Factory::Hook->instance->execute_hooks(
-                    'database_lost_connection', $handle->{dbh}
+                    'database_connection_lost', $handle->{dbh}
                 );
                 if ($handle->{dbh}) { eval { $handle->{dbh}->disconnect } }
                 return $handle->{dbh}= _get_connection($conn_details);
@@ -104,7 +104,7 @@ register database => sub {
 Dancer::Factory::Hook->instance->install_hooks(
     qw(
         database_connected 
-        database_lost_connection
+        database_connection_lost
         database_connection_failed
         database_error
     )
@@ -171,6 +171,14 @@ sub _get_connection {
             $settings->{dbi_params}{$param} = 1;
         }
     }
+
+    # To support the database_error hook, use DBI's HandleError option
+    $settings->{dbi_params}{HandleError} = sub {
+        my ($error, $handle) = @_;
+        Dancer::Factory::Hook->instance->execute_hooks(
+            'database_error', $error, $handle
+        );
+    };
 
 
     my $dbh = DBI->connect($dsn, 
@@ -490,7 +498,7 @@ Called when a new database connection has been established, after performing any
 C<on_connect_do> statements, but before the handle is returned.  Receives the
 new database handle as a parameter, so that you can do what you need with it.
 
-=item C<database_lost_connection>
+=item C<database_connection_lost>
 
 Called when the plugin detects that the database connection has gone away.
 Receives the no-longer usable handle as a paramter, in case you need to extract

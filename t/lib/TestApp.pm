@@ -22,6 +22,17 @@ get '/connecthookfired' => sub {
     }
 };
 
+my $last_db_error;
+hook 'database_error' => sub {
+    $last_db_error = $_[0];
+};
+
+get '/errorhookfired' => sub {
+    database->do('something silly');
+    return $last_db_error ? 1 : 0;
+};
+
+
 get '/prepare_db' => sub {
 
     my @sql = (

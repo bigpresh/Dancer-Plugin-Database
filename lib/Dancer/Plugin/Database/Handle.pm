@@ -88,11 +88,6 @@ sub quick_delete {
   my $row  = database->quick_select($table, { id => 42 });
   my @rows = database->quick_select($table, { id => 42 });
 
-  -or-
-
-  my $row  = database->quick_select($table, { id => 42 }, [ 'foo', 'bar' ]);
-  my @row  = database->quick_select($table, { id => 42 }, [ 'foo', 'bar' ]);
-
 Given a table name and a hashref of where clauses (see below for explanation),
 and an optional hashref of options, returns either the first matching 
 row as a hashref if called in scalar context, or a list of matching rows 
@@ -131,7 +126,8 @@ Specify how the results should be ordered.  This option can take various values:
 =item C<limit>
 
 Limit how many records will be returned; equivalent to e.g. C<LIMIT 1> in an SQL
-query.  Example:
+query.  If called in scalar context, an implicit LIMIT 1 will be added to the
+query anyway, so you needn't add it yourself.
 
 =back
 

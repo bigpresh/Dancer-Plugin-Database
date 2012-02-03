@@ -14,13 +14,16 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 32;
+plan tests => 33;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
 setting plugins => { Database => { dsn => $dsn, } };
 
-response_status_is [ GET => '/prepare_db' ], 200, 'db is created';
+response_content_is   [ GET => '/connecthookfired' ], 1,
+    'database_connect hook fires';
+
+response_status_is    [ GET => '/prepare_db' ], 200, 'db is created';
 
 response_status_is    [ GET => '/' ], 200,   "GET / is found";
 response_content_like [ GET => '/' ], qr/5/, 

@@ -3,6 +3,14 @@ package t::lib::TestApp;
 use Dancer;
 use Dancer::Plugin::Database;
 
+
+hook database_connected => sub { vars->{connecthookfired} = 1; };
+
+get '/connecthookfired' => sub { 
+    my $database = database();
+    return vars->{connecthookfired};
+};
+
 get '/prepare_db' => sub {
 
     my @sql = (

@@ -212,8 +212,12 @@ sub _get_connection {
     };
 
     # Re-bless it as a Dancer::Plugin::Database::Handle object, to provide nice
-    # extra features:
-    return bless $dbh, 'Dancer::Plugin::Database::Handle';
+    # extra features (unless the config specifies a different class; if it does,
+    # this should be a subclass of Dancer::Plugin::Database::Handle in order to
+    # extend the features provided by it, or a direct subclass of DBI::db (or
+    # even DBI::db itself) to bypass the features provided by D::P::D::Handle)
+    return bless $dbh, 
+        $settings->{handle_class} || 'Dancer::Plugin::Database::Handle';
 }
 
 

@@ -202,8 +202,16 @@ get '/database_connection_failed_fires' => sub {
     # force a connection failure
     my $handle = database({ 
         dsn => "dbi:SQLite:/Please/Tell/Me/This/File/Does/Not/Exist!",
+        dbi_params => {
+            HandleError => sub { return 1 }, # gobble connect failed message
+        },
     });
     return vars->{connection_failed};
+};
+
+# Check that the handle isa() subclass of the named class
+get '/isa/:class' => sub {
+    return database->isa(params->{class}) ? 1 : 0;
 };
 
 1;

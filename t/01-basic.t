@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More import => ['!pass'];
-
+use t::lib::TestHandleClass;
 use t::lib::TestApp;
 use Dancer ':syntax';
 use Dancer::Test;
@@ -12,25 +12,38 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 36;
+plan tests => 40;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
-setting plugins => { 
+set plugins => { 
     Database => { 
         dsn => $dsn, 
         connection_check_threshold => 0.1,
         dbi_params => {
             RaiseError => 0,
+            PrintError => 0,
+            PrintWarn  => 0,
         },
+        handle_class => 't::lib::TestHandleClass',
     } 
 };
+
 
 response_content_is   [ GET => '/connecthookfired' ], 1,
     'database_connected hook fires';
 
 response_content_is   [ GET => '/errorhookfired' ], 1,
     'database_error hook fires';
+
+response_content_is   [ GET => '/isa/DBI::db' ], 1,
+    "handle isa('DBI::db')";
+response_content_is   [ GET => '/isa/Dancer::Plugin::Database::Handle' ], 1,
+    "handle isa('Dancer::Plugin::Database::Handle')";
+response_content_is   [ GET => '/isa/t::lib::TestHandleClass' ], 1,
+    "handle isa('t::lib::TestHandleClass')";
+response_content_is   [ GET => '/isa/duck' ], 0, # reverse duck-typing ;)
+    "handle is not a duck";
 
 response_status_is    [ GET => '/prepare_db' ], 200, 'db is created';
 

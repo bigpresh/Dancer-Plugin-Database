@@ -216,8 +216,13 @@ sub _get_connection {
     # this should be a subclass of Dancer::Plugin::Database::Handle in order to
     # extend the features provided by it, or a direct subclass of DBI::db (or
     # even DBI::db itself) to bypass the features provided by D::P::D::Handle)
-    return bless $dbh, 
+    my $handle_class = 
         $settings->{handle_class} || 'Dancer::Plugin::Database::Handle';
+    my $package = $handle_class;
+    $package =~ s{::}{/}g;
+    $package .= '.pm';
+    require $package;
+    return bless $dbh => $handle_class;
 }
 
 

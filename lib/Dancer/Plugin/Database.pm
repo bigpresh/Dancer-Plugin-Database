@@ -359,6 +359,7 @@ should be specified as, for example:
                 AutoCommit: 1
             on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
             log_queries: 1
+            handle_class: 'My::Super::Sexy::Database::Handle'
 
 The C<connection_check_threshold> setting is optional, if not provided, it
 will default to 30 seconds.  If the database keyword was last called more than
@@ -386,6 +387,11 @@ If you prefer, you can also supply a pre-crafted DSN using the C<dsn> setting;
 in that case, it will be used as-is, and the driver/database/host settings will 
 be ignored.  This may be useful if you're using some DBI driver which requires 
 a peculiar DSN.
+
+The optional C<handle_class> defines your own class into which database handles
+should be blessed.  This should be a subclass of
+L<Dancer::Plugin::Database::Handle> (or L<DBI::db> directly, if you just want to
+skip the extra features).
 
 
 =head2 DEFINING MULTIPLE CONNECTIONS

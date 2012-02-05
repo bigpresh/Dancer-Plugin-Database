@@ -18,4 +18,11 @@ WriteMakefile(
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Dancer-Plugin-Database-*' },
+    META_MERGE => {
+        resources => {
+            repository => 'https://github.com/bigpresh/Dancer-Plugin-Database',
+            bugtracker => 'https://github.com/bigpresh/Dancer-Plugin-Database/issues',
+            homepage   => 'https://github.com/bigpresh/Dancer-Plugin-Database/',
+        },
+    },
 );

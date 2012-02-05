@@ -12,6 +12,7 @@ t/manifest.t
 t/pod-coverage.t
 t/pod.t
 t/lib/TestApp.pm
+t/lib/lib/TestHandleClass.pm
 t/lib/public/.placeholder
 t/lib/views/.placeholder
 t/lib/lib/.placeholder

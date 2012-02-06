@@ -1,5 +1,14 @@
 Revision history for Dancer-Plugin-Database
 
+1.80    2012-02-06
+        [ ENHANCEMENTS]
+        - New hooks 'database_error', 'database_connect_failed',
+          'database_connection_lost'
+        - New option 'handle_class' to allow the database handles to be
+          reblessed into an alternative class, allowing you to subclass
+          D::P::D::Handle if you want to extend it
+        All requested by Nick S. Knutov - thanks Nick1
+
 1.70    2012-01-31
         [ ENHANCEMENTS ]
         - New `order_by`, `limit` and `columns` options for quick_select()

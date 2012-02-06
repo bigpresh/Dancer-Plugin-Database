@@ -74,6 +74,7 @@ CONFIGURATION
                     AutoCommit: 1
                 on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
                 log_queries: 1
+                handle_class: 'My::Super::Sexy::Database::Handle'
 
     The `connection_check_threshold' setting is optional, if not provided,
     it will default to 30 seconds. If the database keyword was last called
@@ -102,6 +103,11 @@ CONFIGURATION
     setting; in that case, it will be used as-is, and the
     driver/database/host settings will be ignored. This may be useful if
     you're using some DBI driver which requires a peculiar DSN.
+
+    The optional `handle_class' defines your own class into which database
+    handles should be blessed. This should be a subclass of
+    Dancer::Plugin::Database::Handle (or DBI::db directly, if you just want
+    to skip the extra features).
 
   DEFINING MULTIPLE CONNECTIONS
     If you need to connect to multiple databases, this is easy - just list
@@ -208,6 +214,23 @@ HOOKS
         returned. Receives the new database handle as a parameter, so that
         you can do what you need with it.
 
+    `database_connection_lost'
+        Called when the plugin detects that the database connection has gone
+        away. Receives the no-longer usable handle as a paramter, in case
+        you need to extract some information from it (such as which server
+        it was connected to).
+
+    `database_connection_failed'
+        Called when an attempt to connect to the database fails. Receives a
+        hashref of connection settings as a parameter, containing the
+        settings the plugin was using to connect (as obtained from the
+        config file).
+
+    `database_error'
+        Called when a database error is raised by `DBI'. Receives two
+        parameters: the error message being returned by DBI, and the
+        database handle in question.
+
     If you need other hook positions which would be useful to you, please
     feel free to suggest them!
 
@@ -258,6 +281,8 @@ ACKNOWLEDGEMENTS
     Mario Domgoergen (mdom)
 
     Andrey Inishev (inish777)
+
+    Nick S. Knutov (knutov)
 
 BUGS
     Please report any bugs or feature requests to

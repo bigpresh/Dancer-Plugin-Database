@@ -516,7 +516,7 @@ new database handle as a parameter, so that you can do what you need with it.
 =item C<database_connection_lost>
 
 Called when the plugin detects that the database connection has gone away.
-Receives the no-longer usable handle as a paramter, in case you need to extract
+Receives the no-longer usable handle as a parameter, in case you need to extract
 some information from it (such as which server it was connected to).
 
 =item C<database_connection_failed>

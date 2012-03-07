@@ -48,8 +48,8 @@ response_content_is   [ GET => '/isa/duck' ], 0, # reverse duck-typing ;)
 response_status_is    [ GET => '/prepare_db' ], 200, 'db is created';
 
 response_status_is    [ GET => '/' ], 200,   "GET / is found";
-response_content_like [ GET => '/' ], qr/5/, 
-    "content looks good for / (5 users afiter DB initialisation)";
+response_content_like [ GET => '/' ], qr/7/, 
+    "content looks good for / (7 users afiter DB initialisation)";
 
 response_status_is [ GET => '/user/1' ], 200, 'GET /user/1 is found';
 
@@ -59,8 +59,8 @@ response_content_like [ GET => '/user/2' ], qr/bigpresh/,
   "content looks good for /user/2";
 
 response_status_is [ DELETE => '/user/3' ], 200, 'DELETE /user/3 is ok';
-response_content_like [ GET => '/' ], qr/4/, 
-    'content looks good for / (4 users after deleting one)';
+response_content_like [ GET => '/' ], qr/6/, 
+    'content looks good for / (6 users after deleting one)';
 
 # Exercise the extended features (quick_update et al)
 response_status_is    [ GET => '/quick_insert/42/Bob' ], 200, 
@@ -124,10 +124,10 @@ response_content_is [ GET => '/quick_select_with_limit/2'],
 
 # Test that order_by gives us rows in desired order
 response_content_is [ GET => '/quick_select_sorted' ],
-    "bigpresh:bodger:mousey:sukria",
+    "bigpresh:bodger:mousey:mystery1:mystery2:sukria",
     "Records sorted properly";
 response_content_is [ GET => '/quick_select_sorted_rev' ],
-    "sukria:mousey:bodger:bigpresh",
+    "sukria:mystery2:mystery1:mousey:bodger:bigpresh",
     "Records sorted properly in descending order";
 
 # Use where and order_by together

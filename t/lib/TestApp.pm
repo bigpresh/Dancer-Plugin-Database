@@ -2,6 +2,7 @@ package t::lib::TestApp;
 
 use Dancer;
 use Dancer::Plugin::Database;
+no warnings 'uninitialized';
 
 
 hook database_connected => sub {
@@ -42,8 +43,8 @@ get '/prepare_db' => sub {
         q/insert into users values (3, 'badger', 'animal')/,
         q/insert into users values (4, 'bodger', 'man')/,
         q/insert into users values (5, 'mousey', 'animal')/,
-        q/insert into users values (6, 'mystery2')/,
-        q/insert into users values (7, 'mystery1')/,
+        q/insert into users values (6, 'mystery2', null)/,
+        q/insert into users values (7, 'mystery1', null)/,
     );
 
     database->do($_) for @sql;
@@ -208,12 +209,17 @@ hook database_connection_failed => sub {
 get '/database_connection_failed_fires' => sub {
     # Give a ridiculous database filename which should never exist in order to
     # force a connection failure
+    {
+        local $SIG{__WARN__} = undef;
     my $handle = database({ 
         dsn => "dbi:SQLite:/Please/Tell/Me/This/File/Does/Not/Exist!",
         dbi_params => {
-            HandleError => sub { return 1 }, # gobble connect failed message
+            HandleError => sub { return 0 }, # gobble connect failed message
+            RaiseError => 0,
+            PrintError => 0,
         },
     });
+    }
     return vars->{connection_failed};
 };
 

@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-Database
 
+1.81    2012-03-07
+        [ BUGFIXES ]
+        - Don't generate invalid SQL with certain uses of where and order_by
+          clauses together (PR-27, thanks to Michael Stapelberg (mstap))
+
 1.80    2012-02-06
         [ ENHANCEMENTS]
         - New hooks 'database_error', 'database_connect_failed',

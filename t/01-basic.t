@@ -27,7 +27,7 @@ set plugins => {
         handle_class => 'TestHandleClass',
     } 
 };
-set logger => 'console'; set log => 'debug';
+set logger => 'capture'; set log => 'debug';
 
 
 response_content_is   [ GET => '/connecthookfired' ], 1,

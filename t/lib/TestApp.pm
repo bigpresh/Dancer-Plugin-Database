@@ -210,15 +210,14 @@ get '/database_connection_failed_fires' => sub {
     # Give a ridiculous database filename which should never exist in order to
     # force a connection failure
     {
-        local $SIG{__WARN__} = undef;
-    my $handle = database({ 
-        dsn => "dbi:SQLite:/Please/Tell/Me/This/File/Does/Not/Exist!",
-        dbi_params => {
-            HandleError => sub { return 0 }, # gobble connect failed message
-            RaiseError => 0,
-            PrintError => 0,
-        },
-    });
+        my $handle = database({ 
+            dsn => "dbi:SQLite:/Please/Tell/Me/This/File/Does/Not/Exist!",
+            dbi_params => {
+                HandleError => sub { return 0 }, # gobble connect failed message
+                RaiseError => 0,
+                PrintError => 0,
+            },
+        });
     }
     return vars->{connection_failed};
 };

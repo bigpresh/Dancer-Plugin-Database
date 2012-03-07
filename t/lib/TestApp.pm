@@ -42,6 +42,8 @@ get '/prepare_db' => sub {
         q/insert into users values (3, 'badger', 'animal')/,
         q/insert into users values (4, 'bodger', 'man')/,
         q/insert into users values (5, 'mousey', 'animal')/,
+        q/insert into users values (6, 'mystery2')/,
+        q/insert into users values (7, 'mystery1')/,
     );
 
     database->do($_) for @sql;
@@ -160,6 +162,12 @@ get '/quick_select_sorted' => sub {
 get '/quick_select_sorted_rev' => sub {
     my @users = database->quick_select(
         'users', {}, { order_by => { desc => 'name' } }
+    );
+    return join ':', map { $_->{name} } @users;
+};
+get '/quick_select_sorted_where' => sub {
+    my @users = database->quick_select(
+        'users', { category => undef }, { order_by => 'name' }
     );
     return join ':', map { $_->{name} } @users;
 };

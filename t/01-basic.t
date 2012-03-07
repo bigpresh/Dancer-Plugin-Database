@@ -11,7 +11,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 40;
+plan tests => 41;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -129,6 +129,12 @@ response_content_is [ GET => '/quick_select_sorted' ],
 response_content_is [ GET => '/quick_select_sorted_rev' ],
     "sukria:mousey:bodger:bigpresh",
     "Records sorted properly in descending order";
+
+# Use where and order_by together
+# This didn't work as the WHERE and ORDER BY clauses were concatenated without
+# a space, as per https://github.com/bigpresh/Dancer-Plugin-Database/pull/27
+response_content_is [ GET => '/quick_select_sorted_where' ],
+    "mystery1:mystery2";
 
 # Test that runtime configuration gives us a handle, too:
 response_status_is    [ GET => '/runtime_config' ], 200,

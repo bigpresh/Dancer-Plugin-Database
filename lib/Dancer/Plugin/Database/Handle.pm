@@ -287,7 +287,7 @@ sub _quick_query {
 
     # Add an ORDER BY clause, if we want to:
     if (exists $opts->{order_by}) {
-        $sql .= $self->_build_order_by_clause($opts->{order_by});
+        $sql .= ' ' . $self->_build_order_by_clause($opts->{order_by});
     }
 
 

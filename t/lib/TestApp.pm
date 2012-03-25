@@ -4,6 +4,21 @@ use Dancer;
 use Dancer::Plugin::Database;
 no warnings 'uninitialized';
 
+my $dsn = "dbi:SQLite:dbname=:memory:";
+set plugins => { 
+    Database => { 
+        dsn => $dsn, 
+        connection_check_threshold => 0.1,
+        dbi_params => {
+            RaiseError => 0,
+            PrintError => 0,
+            PrintWarn  => 0,
+        },
+        handle_class => 'TestHandleClass',
+    } 
+};
+set logger => 'capture'; set log => 'debug';
+
 
 hook database_connected => sub {
     my $dbh = shift;

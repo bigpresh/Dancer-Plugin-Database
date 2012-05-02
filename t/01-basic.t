@@ -4,7 +4,7 @@ use warnings;
 use Test::More import => ['!pass'];
 use t::lib::TestApp;
 use Dancer ':syntax';
-use Dancer::Test;
+use Dancer::Test 't::lib::TestApp';
 
 eval { require DBD::SQLite };
 if ($@) {
@@ -12,23 +12,6 @@ if ($@) {
 }
 
 plan tests => 41;
-
-my $dsn = "dbi:SQLite:dbname=:memory:";
-
-set plugins => { 
-    Database => { 
-        dsn => $dsn, 
-        connection_check_threshold => 0.1,
-        dbi_params => {
-            RaiseError => 0,
-            PrintError => 0,
-            PrintWarn  => 0,
-        },
-        handle_class => 'TestHandleClass',
-    } 
-};
-set logger => 'capture'; set log => 'debug';
-
 
 response_content_is   [ GET => '/connecthookfired' ], 1,
     'database_connected hook fires';

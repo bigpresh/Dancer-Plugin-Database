@@ -194,7 +194,10 @@ sub _get_connection {
         );
         return;
     } elsif (exists $settings->{on_connect_do}) {
-        for (@{ $settings->{on_connect_do} }) {
+        my $to_do = ref $settings->{on_connect_do} eq 'ARRAY'
+            ?   $settings->{on_connect_do}
+            : [ $settings->{on_connect_do} ];
+        for (@$to_do) {
             $dbh->do($_) or Dancer::Logger::error(
                 "Failed to perform on-connect command $_"
             );

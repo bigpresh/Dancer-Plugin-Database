@@ -94,6 +94,18 @@ register database => sub {
         if ($handle->{dbh} = _get_connection($conn_details)) {
             $handle->{last_connection_check} = time;
             $handles{$pid_tid}{$handle_key} = $handle;
+
+            if (ref $handle_key && ref $handle_key ne ref $def_handle) {
+                # We were given a hashref of connection settings.  Shove a
+                # reference to that hashref into the handle, so that the hashref
+                # doesn't go out of scope for the life of the handle.
+                # Otherwise, that area of memory could be re-used, and, given
+                # different DB settings in a hashref that just happens to have
+                # the same address, we'll happily hand back the original handle.
+                # See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=665221
+                # Thanks to Sam Kington for suggesting this fix :)
+                $handle->{_orig_settings_hashref} = $handle_key;
+            }
             return $handle->{dbh};
         } else {
             return;

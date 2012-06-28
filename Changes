@@ -1,5 +1,13 @@
 Revision history for Dancer-Plugin-Database
 
+1.82    2012-06-28
+        [ BUGFIXES ]
+        - Fix for Debian RT #665221 :
+        http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=665221 - avoid issues
+        if we get a hashref of settings occupying the same region of memory as a
+        previous hashref of settings which since went out of scope but which we
+        still have a handle laying around for.
+
 1.81    2012-03-07
         [ BUGFIXES ]
         - Don't generate invalid SQL with certain uses of where and order_by

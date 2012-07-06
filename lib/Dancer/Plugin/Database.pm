@@ -2,7 +2,7 @@ package Dancer::Plugin::Database;
 
 use strict;
 use Dancer::Plugin;
-use Dancer::Config;
+#use Dancer::Config;
 use DBI;
 use Dancer::Plugin::Database::Handle;
 
@@ -27,6 +27,7 @@ my %handles;
 my $def_handle = {};
 
 register database => sub {
+    my $dsl = shift if dancer_version() >= 2;
     my $arg = shift;
 
     _load_db_settings() if (!$settings);
@@ -113,16 +114,27 @@ register database => sub {
     }
 };
 
-Dancer::Factory::Hook->instance->install_hooks(
-    qw(
-        database_connected 
-        database_connection_lost
-        database_connection_failed
-        database_error
-    )
-);
 
-register_plugin;
+
+register_plugin for_versions => [ 1, 2 ];;
+
+_register_hooks( qw(
+    database_connected 
+    database_connection_lost
+    database_connection_failed
+    database_error
+) );
+
+sub _register_hooks {
+    use Data::Dump;
+    warn Data::Dump::dump(\%INC);
+    if (dancer_version() < 2) {
+        Dancer::Factory::Hook->instance->install_hooks(@_);
+    } else {
+        require Dancer::Hook;
+        Dancer::Hook->register_hooks_name(@_);
+    }
+}
 
 # Given the settings to use, try to get a database connection
 sub _get_connection {

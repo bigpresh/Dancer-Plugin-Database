@@ -112,13 +112,13 @@ Specify how the results should be ordered.  This option can take various values:
 
 =item * a straight scalar or arrayref sorts by the given column(s):
 
-    { order_by => 'foo' }         # equivalent to "ORDER BY foo"
-    { order_by => [ qw(foo bar) } # equiv to "ORDER BY foo,bar"
+    { order_by => 'foo' }           # equivalent to "ORDER BY foo"
+    { order_by => [ qw(foo bar) ] } # equiv to "ORDER BY foo,bar"
 
 =item * a hashref of C<order => column name>, e.g.:
 
     { order_by => { desc => 'foo' } } # equiv to ORDER BY foo DESC
-    { order_by => [ { desc => 'foo' }, { asc => 'bar' }
+    { order_by => [ { desc => 'foo' }, { asc => 'bar' } ] }
        # above is equiv to ORDER BY foo ASC, bar DESC
 
 =back
@@ -134,7 +134,7 @@ query anyway, so you needn't add it yourself.
 An example of using options to control the results you get back:
 
     # Get the name & phone number of the 10 highest-paid men:
-    database->query(
+    database->quick_select(
         'employees', 
         { gender => 'male' },
         { order_by => 'salary', limit => 10, columns => [qw(name phone)] }

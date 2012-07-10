@@ -116,7 +116,7 @@ register database => sub {
 
 register_plugin for_versions => [ 1, 2 ];;
 
-register_hooks(qw(
+register_hook(qw(
     database_connected 
     database_connection_lost
     database_connection_failed

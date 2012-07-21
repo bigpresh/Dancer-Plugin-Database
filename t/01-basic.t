@@ -2,8 +2,8 @@ use strict;
 use warnings;
 
 use Test::More import => ['!pass'];
-use Dancer ':syntax';
 use t::lib::TestApp;
+use Dancer ':syntax';
 use Dancer::Test;
 
 eval { require DBD::SQLite };
@@ -15,9 +15,9 @@ plan tests => 41;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
-set plugins => { 
-    Database => { 
-        dsn => $dsn, 
+set plugins => {
+    Database => {
+        dsn => $dsn,
         connection_check_threshold => 0.1,
         dbi_params => {
             RaiseError => 0,
@@ -25,7 +25,7 @@ set plugins => {
             PrintWarn  => 0,
         },
         handle_class => 'TestHandleClass',
-    } 
+    }
 };
 set logger => 'capture'; set log => 'debug';
 

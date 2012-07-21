@@ -1,16 +1,15 @@
 package t::lib::TestApp;
 
-use Dancer;
+use Dancer ':syntax';
 use Dancer::Plugin::Database;
 no warnings 'uninitialized';
-
 
 hook database_connected => sub {
     my $dbh = shift;
     vars->{connecthookfired} = $dbh;
 };
 
-get '/connecthookfired' => sub { 
+get '/connecthookfired' => sub {
     my $database = database();
     # If the hook fired, it'll have squirreled away a reference to the DB handle
     # for us to look for.

@@ -1,10 +1,17 @@
 package Dancer::Plugin::Database;
 
 use strict;
+use Dancer ':syntax';
 use Dancer::Plugin;
-use Dancer::Config;
 use DBI;
 use Dancer::Plugin::Database::Handle;
+
+my $dancer_version = (exists &dancer_version) ? int(dancer_version()) : 1;
+if ($dancer_version == 1) {
+    require Dancer::Config;
+    Dancer::Config->import();
+}
+
 
 =encoding utf8
 
@@ -50,9 +57,7 @@ register database => sub {
         $handle_key = defined $arg ? $arg : $def_handle;
         $conn_details = _get_settings($arg);
         if (!$conn_details) {
-            Dancer::Logger::error(
-                "No DB settings for " . ($arg || "default connection")
-            );
+            _log(error => "No DB settings for " . ($arg || "default connection"));
             return;
         }
     }
@@ -77,13 +82,15 @@ register database => sub {
                 $handle->{last_connection_check} = time;
                 return $handle->{dbh};
             } else {
-                Dancer::Logger::debug(
-                    "Database connection went away, reconnecting"
-                );
 
-                Dancer::Factory::Hook->instance->execute_hooks(
-                    'database_connection_lost', $handle->{dbh}
-                );
+                _log(debug => "Database connection went away, reconnecting");
+                if ($dancer_version == 1) {
+                    Dancer::Factory::Hook->instance->execute_hooks(
+                      'database_connection_lost', $handle->{dbh}
+                    );
+                } else {
+                    execute_hooks database_connection_lost => $handle->{dbh};
+                }
                 if ($handle->{dbh}) { eval { $handle->{dbh}->disconnect } }
                 return $handle->{dbh}= _get_connection($conn_details);
 
@@ -113,16 +120,19 @@ register database => sub {
     }
 };
 
-Dancer::Factory::Hook->instance->install_hooks(
-    qw(
-        database_connected 
-        database_connection_lost
-        database_connection_failed
-        database_error
-    )
-);
+my @dpd_hooks = qw(
+                      database_connected 
+                      database_connection_lost
+                      database_connection_failed
+                      database_error
+                 );
+if ($dancer_version == 1) {
+    Dancer::Factory::Hook->instance->install_hooks(@dpd_hooks);
+} else {
+    register_hook(@dpd_hooks);
+}
 
-register_plugin;
+register_plugin(for_versions => ['1', '2']);
 
 # Given the settings to use, try to get a database connection
 sub _get_connection {
@@ -177,46 +187,58 @@ sub _get_connection {
         my $param = $param_for_driver{$driver};
 
         if ($param && !$settings->{dbi_params}{$param}) {
-            Dancer::Logger::debug(
-                "Adding $param to DBI connection params to enable UTF-8 support"
-            );
+            _log(debug,
+                 "Adding $param to DBI connection params to enable UTF-8 support");
             $settings->{dbi_params}{$param} = 1;
         }
     }
 
     # To support the database_error hook, use DBI's HandleError option
-    $settings->{dbi_params}{HandleError} = sub {
-        my ($error, $handle) = @_;
-        Dancer::Factory::Hook->instance->execute_hooks(
-            'database_error', $error, $handle
-        );
-    };
+    if ($dancer_version == 1) {
+        $settings->{dbi_params}{HandleError} = sub {
+            my ($error, $handle) = @_;
+            Dancer::Factory::Hook->instance->execute_hooks(
+                'database_error', $error, $handle
+            );
+        };
+    } else {
+        $settings->{dbi_params}{HandleError} = sub {
+            my ($error, $handle) = @_;
+            execute_hooks database_error => $error, $handle
+        };
+    }
 
-
-    my $dbh = DBI->connect($dsn, 
+    my $dbh = DBI->connect($dsn,
         $settings->{username}, $settings->{password}, $settings->{dbi_params}
     );
 
     if (!$dbh) {
-        Dancer::Logger::error(
-            "Database connection failed - " . $DBI::errstr
-        );
-        Dancer::Factory::Hook->instance->execute_hooks(
-            'database_connection_failed', $settings
-        );
+        _log(error => "Database connection failed - " . $DBI::errstr);
+        if ($dancer_version == 1) {
+            Dancer::Factory::Hook->instance->execute_hooks(
+                'database_connection_failed', $settings
+            );
+        } else {
+            Dancer::Factory::Hook->instance->execute_hooks(
+                'database_connection_failed', $settings
+            );
+        }
         return;
     } elsif (exists $settings->{on_connect_do}) {
         my $to_do = ref $settings->{on_connect_do} eq 'ARRAY'
             ?   $settings->{on_connect_do}
             : [ $settings->{on_connect_do} ];
         for (@$to_do) {
-            $dbh->do($_) or Dancer::Logger::error(
-                "Failed to perform on-connect command $_"
-            );
+            $dbh->do($_) or
+              _log(error => "Failed to perform on-connect command $_");
         }
     }
 
-    Dancer::Factory::Hook->instance->execute_hooks('database_connected', $dbh);
+    if ($dancer_version == 1) {
+        Dancer::Factory::Hook->instance->execute_hooks('database_connected', $dbh);
+    } else {
+        execute_hooks database_connected => $dbh;
+    }
 
     # Indicate whether queries generated by quick_query() etc in
     # Dancer::Plugin::Database::Handle should be logged or not; this seemed a
@@ -281,9 +303,9 @@ sub _get_settings {
             $return_settings = { %$settings };
         } else {
             # OK, didn't match anything
-            Dancer::Logger::error(
-                "Asked for a database handle named '$name' but no matching  "
-               ."connection details found in config"
+            _log('error',
+                 "Asked for a database handle named '$name' but no matching  "
+                 ."connection details found in config"
             );
         }
     }
@@ -302,6 +324,15 @@ sub _get_settings {
     $return_settings->{connection_check_threshold} ||= 30;
     return $return_settings;
 
+}
+
+sub _log {
+    my ($type, $message) = @_;
+    if ($dancer_version == 1) {
+        Dancer::Logger->can($type)->($message);
+    } else {
+        log $type => $message;
+    }
 }
 
 

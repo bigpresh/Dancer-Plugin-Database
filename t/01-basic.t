@@ -2,8 +2,8 @@ use strict;
 use warnings;
 
 use Test::More import => ['!pass'];
-use t::lib::TestApp;
 use Dancer ':syntax';
+use t::lib::TestApp;
 use Dancer::Test;
 
 eval { require DBD::SQLite };

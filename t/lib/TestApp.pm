@@ -7,8 +7,7 @@ no warnings 'uninitialized';
 
 hook database_connected => sub {
     my $dbh = shift;
-    vars->{connecthookfired} = $dbh; 
-
+    vars->{connecthookfired} = $dbh;
 };
 
 get '/connecthookfired' => sub { 

@@ -38,7 +38,6 @@ set plugins => {
 };
 set logger => 'capture'; set log => 'debug';
 
-
 response_content_is   [ GET => '/connecthookfired' ], 1,
     'database_connected hook fires';
 

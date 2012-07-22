@@ -27,9 +27,6 @@ my $settings = undef;
 
 sub _load_db_settings {
     $settings = plugin_setting();
-    use Data::Dumper;
-    warn Dumper($settings);
-
 }
 
 my %handles;

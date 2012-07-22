@@ -25,7 +25,12 @@ our $VERSION = '1.82';
 
 my $settings = undef;
 
-sub _load_db_settings { $settings = plugin_setting(); }
+sub _load_db_settings {
+    $settings = plugin_setting();
+    use Data::Dumper;
+    warn Dumper($settings);
+
+}
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that

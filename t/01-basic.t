@@ -4,7 +4,16 @@ use warnings;
 use Test::More import => ['!pass'];
 use t::lib::TestApp;
 use Dancer ':syntax';
-use Dancer::Test;
+
+BEGIN {
+    my $dancer_version = (exists &dancer_version) ? int(dancer_version()) : 1;
+    require Dancer::Test;
+    if ($dancer_version == 1) {
+        Dancer::Test->import();
+    } else {
+        Dancer::Test->import('t::lib::TestApp');
+    }
+}
 
 eval { require DBD::SQLite };
 if ($@) {

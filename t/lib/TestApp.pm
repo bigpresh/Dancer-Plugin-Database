@@ -1,6 +1,6 @@
 package t::lib::TestApp;
 
-use Dancer ':syntax';
+use Dancer;
 use Dancer::Plugin::Database;
 no warnings 'uninitialized';
 

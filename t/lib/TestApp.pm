@@ -187,22 +187,22 @@ get '/handles_cached' => sub {
 
 # Check that the database_connection_lost hook fires when we force a db handle
 # to go away:
-hook database_connection_lost => sub { vars->{lost_connection} = 1; };
+hook database_connection_lost => sub { var(lost_connection => 1); };
 get '/database_connection_lost_fires' => sub {
-    vars->{lost_connection} = 0;
+    var(lost_connection => 0);
     database()->disconnect;
     # We set connection_check_threshold to 0.1 at the start, so wait a second
     # then check that the code detects the handle is no longer connected and
     # triggers the hook
     sleep 1;
     my $handle = database();
-    return vars->{lost_connection};
+    return var('lost_connection');
 };
 
 # Check that database_connection_failed hook fires if we can't connect - pass
 # bogus connection details to make that happen
 hook database_connection_failed => sub {
-    vars->{connection_failed} = 1;
+    var connection_failed => 1;
 };
 get '/database_connection_failed_fires' => sub {
     # Give a ridiculous database filename which should never exist in order to
@@ -215,7 +215,7 @@ get '/database_connection_failed_fires' => sub {
             PrintError => 0,
         },
     });
-    return vars->{connection_failed};
+    return var 'connection_failed';
 };
 
 # Check that the handle isa() subclass of the named class

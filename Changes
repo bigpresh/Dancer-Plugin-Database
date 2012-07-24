@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database
 
+2.00    ...
+        [ ENHANCEMENTS ]
+        - Support for Dancer 2
+
 1.82    2012-06-28
         [ BUGFIXES ]
         - Fix for Debian RT #665221 :

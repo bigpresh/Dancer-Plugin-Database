@@ -81,7 +81,7 @@ register database => sub {
 
     # OK, see if we have a matching handle
     $handle = $handles{$pid_tid}{$handle_key} || {};
-    
+
     if ($handle->{dbh}) {
         if ($handle->{dbh}{Active} && $conn_details->{connection_check_threshold} &&
             time - $handle->{last_connection_check}
@@ -182,7 +182,7 @@ sub _get_connection {
     my $app_charset = setting('charset');
     my $auto_utf8 = exists $settings->{auto_utf8} ?  $settings->{auto_utf8} : 1;
     if (lc $app_charset eq 'utf-8' && $auto_utf8) {
-        
+
         # The option to pass to the DBI->connect call depends on the driver:
         my %param_for_driver = (
             SQLite => 'sqlite_unicode',

@@ -6,14 +6,14 @@ no warnings 'uninitialized';
 
 hook database_connected => sub {
     my $dbh = shift;
-    vars->{connecthookfired} = $dbh;
+    var(connecthookfired => $dbh);
 };
 
 get '/connecthookfired' => sub {
     my $database = database();
     # If the hook fired, it'll have squirreled away a reference to the DB handle
     # for us to look for.
-    my $h = vars->{connecthookfired};
+    my $h = var('connecthookfired');
     if (ref $h && $h->isa('DBI::db')) {
         return 1;
     } else {

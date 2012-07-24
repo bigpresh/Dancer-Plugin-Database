@@ -5,8 +5,9 @@ use Test::More import => ['!pass'];
 use t::lib::TestApp;
 use Dancer ':syntax';
 
+my $dancer_version;
 BEGIN {
-    my $dancer_version = (exists &dancer_version) ? int(dancer_version()) : 1;
+    $dancer_version = (exists &dancer_version) ? int(dancer_version()) : 1;
     require Dancer::Test;
     if ($dancer_version == 1) {
         Dancer::Test->import();
@@ -24,19 +25,27 @@ plan tests => 41;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
-set plugins => {
-    Database => {
-        dsn => $dsn,
-        connection_check_threshold => 0.1,
-        dbi_params => {
-            RaiseError => 0,
-            PrintError => 0,
-            PrintWarn  => 0,
-        },
-        handle_class => 'TestHandleClass',
-    }
-};
-set logger => 'capture'; set log => 'debug';
+my $conf = {
+            Database => {
+                         dsn => $dsn,
+                         connection_check_threshold => 0.1,
+                         dbi_params => {
+                                        RaiseError => 0,
+                                        PrintError => 0,
+                                        PrintWarn  => 0,
+                                       },
+                         handle_class => 'TestHandleClass',
+                        }
+           };
+
+set logger => 'capture';
+set log => 'debug';
+
+if ($dancer_version == 1) {
+    set plugins => $conf;
+} else {
+    t::lib::TestApp->dancer_app->setting( plugins => $conf );
+}
 
 response_content_is   [ GET => '/connecthookfired' ], 1,
     'database_connected hook fires';

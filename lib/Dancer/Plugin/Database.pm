@@ -18,7 +18,7 @@ if ($dancer_version == 1) {
     $register_hooks = sub { Dancer::Factory::Hook->instance->install_hooks(@_) };
 } else {
     $logger = sub { log @_ };
-    $execute_hook   = sub { execute_hooks(@_) };
+    $execute_hook   = sub { execute_hook(@_) };
     $register_hooks = sub { register_hook(@_) };
 }
 
@@ -46,7 +46,7 @@ my %handles;
 my $def_handle = {};
 
 register database => sub {
-    my $arg = shift;
+    my ($self, $arg) = plugin_args(@_);
     $arg = shift if blessed($arg) and $arg->isa('Dancer::Core::DSL');
 
     _load_db_settings() if (!$settings);

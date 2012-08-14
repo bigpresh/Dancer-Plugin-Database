@@ -1,10 +1,23 @@
 package Dancer::Plugin::Database;
 
 use strict;
+use Dancer ':syntax';
 use Dancer::Plugin;
-use Dancer::Config;
 use DBI;
 use Dancer::Plugin::Database::Handle;
+use Scalar::Util 'blessed';
+
+my $dancer_version = (exists &dancer_version) ? int(dancer_version()) : 1;
+my ($logger);
+if ($dancer_version == 1) {
+    require Dancer::Config;
+    Dancer::Config->import();
+
+    $logger = sub { Dancer::Logger->can($_[0])->($_[1]) };
+} else {
+    $logger = sub { log @_ };
+}
+
 
 =encoding utf8
 
@@ -14,11 +27,13 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '1.82';
+our $VERSION = '2.00';
 
 my $settings = undef;
 
-sub _load_db_settings { $settings = plugin_setting(); }
+sub _load_db_settings {
+    $settings = plugin_setting();
+}
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that
@@ -27,7 +42,8 @@ my %handles;
 my $def_handle = {};
 
 register database => sub {
-    my $arg = shift;
+    my ($self, $arg) = plugin_args(@_);
+    $arg = shift if blessed($arg) and $arg->isa('Dancer::Core::DSL');
 
     _load_db_settings() if (!$settings);
 
@@ -50,9 +66,7 @@ register database => sub {
         $handle_key = defined $arg ? $arg : $def_handle;
         $conn_details = _get_settings($arg);
         if (!$conn_details) {
-            Dancer::Logger::error(
-                "No DB settings for " . ($arg || "default connection")
-            );
+            $logger->(error => "No DB settings for " . ($arg || "default connection"));
             return;
         }
     }
@@ -65,7 +79,7 @@ register database => sub {
 
     # OK, see if we have a matching handle
     $handle = $handles{$pid_tid}{$handle_key} || {};
-    
+
     if ($handle->{dbh}) {
         if ($handle->{dbh}{Active} && $conn_details->{connection_check_threshold} &&
             time - $handle->{last_connection_check}
@@ -77,13 +91,10 @@ register database => sub {
                 $handle->{last_connection_check} = time;
                 return $handle->{dbh};
             } else {
-                Dancer::Logger::debug(
-                    "Database connection went away, reconnecting"
-                );
 
-                Dancer::Factory::Hook->instance->execute_hooks(
-                    'database_connection_lost', $handle->{dbh}
-                );
+                $logger->(debug => "Database connection went away, reconnecting");
+                execute_hook('database_connection_lost', $handle->{dbh});
+
                 if ($handle->{dbh}) { eval { $handle->{dbh}->disconnect } }
                 return $handle->{dbh}= _get_connection($conn_details);
 
@@ -113,16 +124,11 @@ register database => sub {
     }
 };
 
-Dancer::Factory::Hook->instance->install_hooks(
-    qw(
-        database_connected 
-        database_connection_lost
-        database_connection_failed
-        database_error
-    )
-);
-
-register_plugin;
+register_hook(qw(database_connected
+                 database_connection_lost
+                 database_connection_failed
+                 database_error));
+register_plugin(for_versions => ['1', '2']);
 
 # Given the settings to use, try to get a database connection
 sub _get_connection {
@@ -163,10 +169,10 @@ sub _get_connection {
     # If the app is configured to use UTF-8, the user will want text from the
     # database in UTF-8 to Just Work, so if we know how to make that happen, do
     # so, unless they've set the auto_utf8 plugin setting to a false value.
-    my $app_charset = Dancer::Config::setting('charset');
+    my $app_charset = setting('charset');
     my $auto_utf8 = exists $settings->{auto_utf8} ?  $settings->{auto_utf8} : 1;
     if (lc $app_charset eq 'utf-8' && $auto_utf8) {
-        
+
         # The option to pass to the DBI->connect call depends on the driver:
         my %param_for_driver = (
             SQLite => 'sqlite_unicode',
@@ -177,9 +183,8 @@ sub _get_connection {
         my $param = $param_for_driver{$driver};
 
         if ($param && !$settings->{dbi_params}{$param}) {
-            Dancer::Logger::debug(
-                "Adding $param to DBI connection params to enable UTF-8 support"
-            );
+            $logger->(debug,
+                      "Adding $param to DBI connection params to enable UTF-8 support");
             $settings->{dbi_params}{$param} = 1;
         }
     }
@@ -187,36 +192,28 @@ sub _get_connection {
     # To support the database_error hook, use DBI's HandleError option
     $settings->{dbi_params}{HandleError} = sub {
         my ($error, $handle) = @_;
-        Dancer::Factory::Hook->instance->execute_hooks(
-            'database_error', $error, $handle
-        );
+        execute_hook('database_error', $error, $handle);
     };
 
-
-    my $dbh = DBI->connect($dsn, 
+    my $dbh = DBI->connect($dsn,
         $settings->{username}, $settings->{password}, $settings->{dbi_params}
     );
 
     if (!$dbh) {
-        Dancer::Logger::error(
-            "Database connection failed - " . $DBI::errstr
-        );
-        Dancer::Factory::Hook->instance->execute_hooks(
-            'database_connection_failed', $settings
-        );
+        $logger->(error => "Database connection failed - " . $DBI::errstr);
+        execute_hook('database_connection_failed', $settings);
         return;
     } elsif (exists $settings->{on_connect_do}) {
         my $to_do = ref $settings->{on_connect_do} eq 'ARRAY'
             ?   $settings->{on_connect_do}
             : [ $settings->{on_connect_do} ];
         for (@$to_do) {
-            $dbh->do($_) or Dancer::Logger::error(
-                "Failed to perform on-connect command $_"
-            );
+            $dbh->do($_) or
+              $logger->(error => "Failed to perform on-connect command $_");
         }
     }
 
-    Dancer::Factory::Hook->instance->execute_hooks('database_connected', $dbh);
+    execute_hook('database_connected', $dbh);
 
     # Indicate whether queries generated by quick_query() etc in
     # Dancer::Plugin::Database::Handle should be logged or not; this seemed a
@@ -281,9 +278,9 @@ sub _get_settings {
             $return_settings = { %$settings };
         } else {
             # OK, didn't match anything
-            Dancer::Logger::error(
-                "Asked for a database handle named '$name' but no matching  "
-               ."connection details found in config"
+            $logger->('error',
+                      "Asked for a database handle named '$name' but no matching  "
+                      ."connection details found in config"
             );
         }
     }

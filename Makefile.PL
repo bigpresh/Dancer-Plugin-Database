@@ -13,9 +13,8 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'Test::More' => 0,
-        # We need support for "var("foo" => "bar")".
-        # Not sure if this is the correct version
-        'Dancer'     => 1.3059,
+        # Need support for Dancer2-compatible stuff
+        'Dancer'     => 1.3099,
         'DBI'        => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

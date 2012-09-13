@@ -218,10 +218,10 @@ sub _quick_query {
         my @cols = (ref $opts->{columns}) 
             ? @{ $opts->{columns} }
             :    $opts->{columns} ;
-        $which_cols = join(',', map { $self->quote_identifier($_) } @cols);
+        $which_cols = join(',', map { $self->_quote_identifier($_) } @cols);
     }
 
-    $table_name = $self->quote_identifier($table_name);
+    $table_name = $self->_quote_identifier($table_name);
     my @bind_params;
 
     my $sql = {
@@ -232,14 +232,14 @@ sub _quick_query {
     }->{$type};
     if ($type eq 'INSERT') {
         $sql .= "("
-            . join(',', map { $self->quote_identifier($_) } keys %$data)
+            . join(',', map { $self->_quote_identifier($_) } keys %$data)
             . ") VALUES ("
             . join(',', map { "?" } values %$data)
             . ")";
         push @bind_params, values %$data;
     }
     if ($type eq 'UPDATE') {
-        $sql .= join ',', map { $self->quote_identifier($_) .'=?' } keys %$data;
+        $sql .= join ',', map { $self->_quote_identifier($_) .'=?' } keys %$data;
         push @bind_params, values %$data;
     }
 
@@ -257,12 +257,12 @@ sub _quick_query {
                     while (my($op,$value) = each %$v ) {
                         my ($cond, $add_bind_param) 
                             = $self->_get_where_sql($op, $not, $value);
-                        push @stmts, $self->quote_identifier($k) . $cond; 
+                        push @stmts, $self->_quote_identifier($k) . $cond; 
                         push @bind_params, $v->{$op} if $add_bind_param;
                     }
                 }
                 else {
-                    my $clause .= $self->quote_identifier($k);
+                    my $clause .= $self->_quote_identifier($k);
                     if ( ! defined $v ) {
                         $clause .= ' IS NULL';
                     }
@@ -391,7 +391,7 @@ sub _build_order_by_clause {
     my @sort_fields;
     for my $field (@$in) {
         if (!ref $field) {
-            push @sort_fields, $self->quote_identifier($field);
+            push @sort_fields, $self->_quote_identifier($field);
         } elsif (ref $field eq 'HASH') {
             my ($order, $name) = %$field;
             $order = uc $order;
@@ -400,13 +400,22 @@ sub _build_order_by_clause {
             }
             # $order has been checked to be 'ASC' or 'DESC' above, so safe to
             # interpolate
-            push @sort_fields, $self->quote_identifier($name) . " $order";
+            push @sort_fields, $self->_quote_identifier($name) . " $order";
         }
     }
 
     return "ORDER BY " . join ', ', @sort_fields;
 }
 
+# A wrapper around DBI's quote_identifier which first splits on ".", so that
+# e.g. database.table gets quoted as `database`.`table`, not `database.table`
+sub _quote_identifier {
+    my ($self, $identifier) = @_;
+
+    return join '.', map { 
+        $self->quote_identifier($_) 
+    } split /\./, $identifier;
+}
 
 =back
 

@@ -25,7 +25,13 @@ my @order_by_tests = (
     [ [ { asc => 'foo' }, { desc => 'bar' } ] 
         => 'ORDER BY "foo" ASC, "bar" DESC'                ],
 );
-plan tests => scalar @order_by_tests;
+my %quoting_tests = (
+    'foo' => '"foo"',
+    'foo.bar' => '"foo"."bar"',
+);
+
+plan tests => scalar @order_by_tests + scalar keys %quoting_tests;
+
 my $i;
 for my $test (@order_by_tests) {
     $i++;
@@ -35,4 +41,13 @@ for my $test (@order_by_tests) {
             $i, scalar @order_by_tests, $res
     );
 }
+
+for my $identifier (keys %quoting_tests) {
+    is(
+        $handle->_quote_identifier($identifier),
+        $quoting_tests{$identifier},
+        "Quoted '$identifier' as '$quoting_tests{$identifier}'"
+    );
+}
+
 

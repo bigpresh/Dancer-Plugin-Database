@@ -3,6 +3,8 @@ Revision history for Dancer-Plugin-Database
 2.00    ...
         [ ENHANCEMENTS ]
         - Support for Dancer 2
+        - Automatic quoting handles e.g. schema.table properly - Issue 33,
+          thanks to mscolly for reporting
 
 1.82    2012-06-28
         [ BUGFIXES ]

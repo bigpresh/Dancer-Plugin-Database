@@ -89,7 +89,20 @@ CONFIGURATION
 
     The optional `on_connect_do' setting is an array of queries which should
     be performed when a connection is established; if given, each query will
-    be performed using `$dbh->do'.
+    be performed using `$dbh->do'. (If using MySQL, you might want to use
+    this to set `SQL_MODE' to a suitable value to disable MySQL's built-in
+    free data loss 'features', for example:
+
+      on_connect_do: "SET SQL_MODE='TRADITIONAL'"
+
+    (If you're not familiar with what I mean, I'm talking about the insane
+    default behaviour of "hmm, this bit of data won't fit the column you're
+    trying to put it in.. hmm, I know, I'll just munge it to fit, and throw
+    a warning afterwards - it's not like you're relying on me to, y'know,
+    store what you ask me to store". See
+    http://effectivemysql.com/presentation/mysql-idiosyncrasies-that-bite/
+    for just one illustration. In hindsight, I wish I'd made a sensible
+    `sql_mode' a default setting, but I don't want to change that now.)
 
     The optional `log_queries' setting enables logging of queries generated
     by the helper functions `quick_insert' et al in
@@ -216,7 +229,7 @@ HOOKS
 
     `database_connection_lost'
         Called when the plugin detects that the database connection has gone
-        away. Receives the no-longer usable handle as a paramter, in case
+        away. Receives the no-longer usable handle as a parameter, in case
         you need to extract some information from it (such as which server
         it was connected to).
 
@@ -283,6 +296,10 @@ ACKNOWLEDGEMENTS
     Andrey Inishev (inish777)
 
     Nick S. Knutov (knutov)
+
+    Nicolas Franck (nicolasfranck)
+
+    mscolly
 
 BUGS
     Please report any bugs or feature requests to

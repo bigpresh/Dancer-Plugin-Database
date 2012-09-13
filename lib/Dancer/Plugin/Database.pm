@@ -628,6 +628,9 @@ Andrey Inishev (inish777)
 
 Nick S. Knutov (knutov)
 
+Nicolas Franck (nicolasfranck)
+
+mscolly
 
 =head1 BUGS
 

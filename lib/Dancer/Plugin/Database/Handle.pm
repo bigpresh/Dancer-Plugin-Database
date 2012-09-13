@@ -293,9 +293,13 @@ sub _quick_query {
 
     # Add a LIMIT clause if we want to:
     if (exists $opts->{limit}) {
-        if ($opts->{limit} =~ /^\d+$/) {
+        my $limit = $opts->{limit};
+        $limit =~ s/\s+//g;
+        # Check the limit clause is sane - just a number, or two numbers with a
+        # comma between (if using offset,limit )
+        if ($limit =~ m{ ^ \d+ (?: , \d+)? $ }x) {
             # Checked for sanity above so safe to interpolate
-            $sql .= " LIMIT $opts->{limit}";
+            $sql .= " LIMIT $limit";
         } else {
             die "Invalid LIMIT param $opts->{limit} !";
         }

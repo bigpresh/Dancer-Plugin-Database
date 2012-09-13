@@ -81,6 +81,11 @@ register database => sub {
     $handle = $handles{$pid_tid}{$handle_key} || {};
 
     if ($handle->{dbh}) {
+        # If we should never check, go no further:
+        if (!$conn_details->{connection_check_threshold}) {
+            return $handle->{dbh};
+        }
+
         if ($handle->{dbh}{Active} && $conn_details->{connection_check_threshold} &&
             time - $handle->{last_connection_check}
             < $conn_details->{connection_check_threshold}) 
@@ -296,7 +301,14 @@ sub _get_settings {
             = delete $return_settings->{'connectivity-check-threshold'};
     }
 
-    $return_settings->{connection_check_threshold} ||= 30;
+    # If the setting wasn't provided, default to 30 seconds; if a false value is
+    # provided, though, leave it alone.  (Older versions just checked for
+    # truthiness, so a value of zero would still default to 30 seconds, which
+    # isn't ideal.)
+    if (!exists $return_settings->{connection_check_threshold}) {
+        $return_settings->{connection_check_threshold} = 30;
+    }
+
     return $return_settings;
 
 }

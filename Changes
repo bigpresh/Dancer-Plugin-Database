@@ -1,12 +1,14 @@
 Revision history for Dancer-Plugin-Database
 
-2.00    ...
+2.00    2012-09-17
         [ ENHANCEMENTS ]
         - Support for Dancer 2
         - Automatic quoting handles e.g. schema.table properly - GH #33,
           thanks to mscolly for reporting
         - Accept limit offset,count syntax too - GH #31, thanks to nicolasfranck
           for reporting
+        - a value of 0 for connectivity_check_threshold now disables checking
+          entirely - thanks to knutov in GH #22
 
 1.82    2012-06-28
         [ BUGFIXES ]

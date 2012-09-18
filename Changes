@@ -1,5 +1,12 @@
 Revision history for Dancer-Plugin-Database
 
+2.01    2012-09-18
+        [ BUGFIX ]
+        - Fix crashing bug when charset: UTF-8 is present - thanks to Hugh
+          Gallagher for reporting & providing fix in RT #79719.
+          Presumably the test suite doesn't set UTF-8, so this failure never
+          showed up in testing :(
+
 2.00    2012-09-17
         [ ENHANCEMENTS ]
         - Support for Dancer 2

@@ -281,8 +281,10 @@ sub _get_settings {
 
 
         # OK, find a matching config for this name:
-        if (my $settings = $settings->{connections}{$name}) {
-            $return_settings = { %$settings };
+        if (my $named_settings = $settings->{connections}{$name}) {
+            # Take a (shallow) copy of the settings, so we don't change them
+            warn "Found settings for $name, I'll return those";
+            $return_settings = { %$named_settings };
         } else {
             # OK, didn't match anything
             $logger->('error',

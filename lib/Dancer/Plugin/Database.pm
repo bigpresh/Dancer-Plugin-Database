@@ -275,6 +275,12 @@ sub _get_settings {
     # If no name given, just return the default settings
     if (!defined $name) {
         $return_settings = { %$settings };
+        if (!$return_settings->{driver} && !$return_settings->{dsn}) {
+            $logger->('error',
+                "Asked for default connection (no name given)"
+                ." but no default connection details found in config"
+            );
+        }
     } else {
         # If there are no named connections in the config, bail now:
         return unless exists $settings->{connections};

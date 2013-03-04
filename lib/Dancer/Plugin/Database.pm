@@ -163,7 +163,7 @@ sub _get_connection {
             $settings->{dbname} = delete $settings->{database};
         }
 
-        for (qw(database dbname host port)) {
+        for (qw(database dbname host port sid)) {
             if (exists $settings->{$_}) {
                 push @extra_args, $_ . "=" . $settings->{$_};
             }

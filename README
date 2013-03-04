@@ -122,6 +122,25 @@ CONFIGURATION
     Dancer::Plugin::Database::Handle (or DBI::db directly, if you just want
     to skip the extra features).
 
+    You will require slightly different options depending on the database
+    engine you're talking to. For instance, for SQLite, you won't need to
+    supply `hostname', `port' etc, but will need to supply `database' as the
+    name of the SQLite database file:
+
+        plugins:
+            Database:
+                driver: SQLite
+                database: 'foo.sqlite'
+
+    For Oracle, you may want to pass `sid' (system ID) to identify a
+    particular database, e.g.:
+
+        plugins:
+            Database:
+                driver: Oracle
+                host: localhost
+                sid: ABC12
+
   DEFINING MULTIPLE CONNECTIONS
     If you need to connect to multiple databases, this is easy - just list
     them in your config under `connections' as shown below:

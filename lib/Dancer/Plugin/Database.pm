@@ -168,6 +168,11 @@ sub _get_connection {
                 push @extra_args, $_ . "=" . $settings->{$_};
             }
         }
+        if (my $even_more_dsn_args = $settings->{dsn_extra}) {
+            foreach my $arg ( keys %$even_more_dsn_args ) {
+                push @extra_args, $arg . '=' . $even_more_dsn_args->{$arg};
+            }
+        }
         $dsn .= ':' . join(';', @extra_args) if @extra_args;
     }
 
@@ -462,6 +467,15 @@ database, e.g.:
             host: localhost
             sid: ABC12
 
+If you have any further connection parameters that need to be appended to the
+dsn, you can put them in as a hash called dsn_extra.  For example, if you're running 
+mysql on a non-standard socket, you could have
+    plugins:
+        Database:
+            driver: mysql
+            host: localhost
+            dsn_extra: 
+                mysql_socket: /tmp/mysql_staging.sock
 
 =head2 DEFINING MULTIPLE CONNECTIONS
 

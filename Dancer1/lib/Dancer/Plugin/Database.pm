@@ -1,11 +1,13 @@
 package Dancer::Plugin::Database;
 
 use strict;
+
+use Dancer::Plugin::Database::Core;
+use Dancer::Plugin::Database::Core::Handle;
+
 use Dancer ':syntax';
 use Dancer::Plugin;
 use DBI;
-use Dancer::Plugin::Database::Core;
-use Dancer::Plugin::Database::Core::Handle;
 use Scalar::Util 'blessed';
 
 # my $dancer_version = (exists &dancer_version) ? int(dancer_version()) : 1;
@@ -35,10 +37,7 @@ sub _load_db_settings {
     $settings = plugin_setting();
 }
 
-sub _logger {
-    my ($type, $message) = @_;
-    Dancer::Logger->can($type)->($message);
-}
+sub _logger { Dancer::Logger->can( $_[0] )->( $_[1] ) }
 
 sub _execute_hook { execute_hook(@_) }
 

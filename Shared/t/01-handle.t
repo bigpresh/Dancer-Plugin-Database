@@ -2,18 +2,18 @@
 
 use Test::More;
 use DBI;
-use Dancer::Plugin::Database::Handle;
+use Dancer::Plugin::Database::Core::Handle;
 
-diag( "Testing Dancer::Plugin::Database::Handle "
-    . "$Dancer::Plugin::Database::Handle::VERSION, Perl $], $^X"
+diag( "Testing Dancer::Plugin::Database::Core::Handle "
+    . "$Dancer::Plugin::Database::Core::Handle::VERSION, Perl $], $^X"
 );
 
 
-# A few tests that poke directly at the internals of D::P::D::Handle.
+# A few tests that poke directly at the internals of D::P::D::C::Handle.
 # For this to work, we'll need a dummy DBI handle to rebless.
 # DBD::Sponge ships with DBI, and should be sufficient for our needs.
 my $handle = DBI->connect("dbi:Sponge:","","",{ RaiseError => 1 });
-bless $handle => 'Dancer::Plugin::Database::Handle';
+bless $handle => 'Dancer::Plugin::Database::Core::Handle';
 
 
 

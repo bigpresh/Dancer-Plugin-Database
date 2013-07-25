@@ -5,7 +5,7 @@ use Carp;
 use DBI;
 use base qw(DBI::db);
 
-our $VERSION = '0.12';
+our $VERSION = '0.01';
 
 =head1 NAME
 

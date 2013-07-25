@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 
 =head1 NAME
 
-Dancer::Plugin::Database::Core - The great new Dancer::Plugin::Database::Core!
+Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
 
 =head1 VERSION
 
@@ -24,23 +24,14 @@ my $def_handle = {};
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+This module should not be used directly. It is a shared library for
+L<Dancer::Plugin::Database> and L<Dancer2::Plugin::Database> modules.
 
-Perhaps a little code snippet.
-
-    use Dancer::Plugin::Database::Core;
-
-    my $foo = Dancer::Plugin::Database::Core->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
+=head1 METHODS
 
 =head2 database
+
+Implements the C<database> keyword.
 
 =cut
 
@@ -128,6 +119,7 @@ sub database {
                 # Thanks to Sam Kington for suggesting this fix :)
                 $handle->{_orig_settings_hashref} = $handle_key;
             }
+
             return ($handle->{dbh}, $settings);
         } else {
             return (undef, $settings);
@@ -233,10 +225,10 @@ sub _get_connection {
     # If the app is configured to use UTF-8, the user will want text from the
     # database in UTF-8 to Just Work, so if we know how to make that happen, do
     # so, unless they've set the auto_utf8 plugin setting to a false value.
-    my $app_charset = $settings->{charset};
+    my $app_charset = $settings->{charset} || "";
     my $auto_utf8 = exists $settings->{auto_utf8} ?  $settings->{auto_utf8} : 1;
-    if (lc $app_charset eq 'utf-8' && $auto_utf8) {
 
+    if (lc $app_charset eq 'utf-8' && $auto_utf8) {
         # The option to pass to the DBI->connect call depends on the driver:
         my %param_for_driver = (
             SQLite => 'sqlite_unicode',
@@ -338,9 +330,6 @@ David Precious, C<< <davidp at preshweb.co.uk> >>
 Please report any bugs or feature requests to C<bug-dancer-plugin-database-core at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer-Plugin-Database-Core>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 

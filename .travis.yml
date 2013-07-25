@@ -12,3 +12,5 @@ install:
 script:
     - cd Shared; perl Makefile.PL
     - cd Shared; make test
+	- cd Dancer1; perl Makefile.PL
+	- cd Dancer1; make test

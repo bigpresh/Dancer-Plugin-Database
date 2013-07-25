@@ -10,9 +10,13 @@ install:
     - cpanm Dancer Dancer2 DBI --quiet --notest
 
 script:
-    - cd Shared; perl Makefile.PL
-    - cd Shared; make test
-    - cd Dancer1; perl Makefile.PL
-    - cd Dancer1; make test
-    - cd Dancer2; perl Makefile.PL
-    - cd Dancer2; make test
+    - cd Shared;
+    - perl Makefile.PL
+    - make test
+    - make install
+    - cd ../Dancer1;
+    - perl Makefile.PL
+    - make test
+    - cd ../Dancer2;
+    - perl Makefile.PL
+    - make test

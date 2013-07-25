@@ -70,7 +70,7 @@ sub database {
         $conn_details = _get_settings($arg, $settings, $logger);
         if (!$conn_details) {
             $logger->(error => "No DB settings for " . ($arg || "default connection"));
-            return;
+            return (undef, $settings);
         }
     }
 
@@ -86,31 +86,34 @@ sub database {
     if ($handle->{dbh}) {
         # If we should never check, go no further:
         if (!$conn_details->{connection_check_threshold}) {
-            return $handle->{dbh};
+            return ($handle->{dbh}, $settings);
         }
 
         if ($handle->{dbh}{Active} && $conn_details->{connection_check_threshold} &&
             time - $handle->{last_connection_check}
             < $conn_details->{connection_check_threshold}) 
         {
-            return $handle->{dbh};
+            return ($handle->{dbh}, $settings);
         } else {
             if (_check_connection($handle->{dbh})) {
                 $handle->{last_connection_check} = time;
-                return $handle->{dbh};
+                return ($handle->{dbh}, $settings);
             } else {
 
                 $logger->(debug => "Database connection went away, reconnecting");
                 $hook_exec->('database_connection_lost', $handle->{dbh});
 
                 if ($handle->{dbh}) { eval { $handle->{dbh}->disconnect } }
-                return $handle->{dbh}= _get_connection($conn_details, $logger, $hook_exec);
-
+                return _get_connection($conn_details, $logger, $hook_exec);
             }
         }
     } else {
+
         # Get a new connection
-        if ($handle->{dbh} = _get_connection($conn_details, $logger, $hook_exec)) {
+        ($handle->{dbh}, $settings) = _get_connection($conn_details, $logger, $hook_exec);
+
+        if ($handle->{dbh}) {
+
             $handle->{last_connection_check} = time;
             $handles{$pid_tid}{$handle_key} = $handle;
 
@@ -125,9 +128,9 @@ sub database {
                 # Thanks to Sam Kington for suggesting this fix :)
                 $handle->{_orig_settings_hashref} = $handle_key;
             }
-            return $handle->{dbh};
+            return ($handle->{dbh}, $settings);
         } else {
-            return;
+            return (undef, $settings);
         }
     }
 
@@ -230,7 +233,7 @@ sub _get_connection {
     # If the app is configured to use UTF-8, the user will want text from the
     # database in UTF-8 to Just Work, so if we know how to make that happen, do
     # so, unless they've set the auto_utf8 plugin setting to a false value.
-    my $app_charset = setting('charset');
+    my $app_charset = $settings->{charset};
     my $auto_utf8 = exists $settings->{auto_utf8} ?  $settings->{auto_utf8} : 1;
     if (lc $app_charset eq 'utf-8' && $auto_utf8) {
 
@@ -265,7 +268,7 @@ sub _get_connection {
     if (!$dbh) {
         $logger->(error => "Database connection failed - " . $DBI::errstr);
         $hook_exec->('database_connection_failed', $settings);
-        return;
+        return (undef, $settings);
     } elsif (exists $settings->{on_connect_do}) {
         my $to_do = ref $settings->{on_connect_do} eq 'ARRAY'
             ?   $settings->{on_connect_do}
@@ -297,7 +300,8 @@ sub _get_connection {
     $package =~ s{::}{/}g;
     $package .= '.pm';
     require $package;
-    return bless $dbh => $handle_class;
+
+    return (bless($dbh => $handle_class), $settings);
 }
 
 

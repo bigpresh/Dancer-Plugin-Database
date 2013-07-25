@@ -35,6 +35,7 @@ my $settings = undef;
 
 sub _load_db_settings {
     $settings = plugin_setting();
+    $settings->{charset} ||= setting('charset');
 }
 
 sub _logger { Dancer::Logger->can( $_[0] )->( $_[1] ) }
@@ -43,10 +44,12 @@ sub _execute_hook { execute_hook(@_) }
 
 register database => sub {
     _load_db_settings() unless $settings;
-    Dancer::Plugin::Database::Core::database( arg => $_[0],
-                                              logger => \&_logger,
-                                              hook_exec => \&_execute_hook,
-                                              settings => $settings );
+    my ($dbh, $cfg) = Dancer::Plugin::Database::Core::database( arg => $_[0],
+                                                                logger => \&_logger,
+                                                                hook_exec => \&_execute_hook,
+                                                                settings => $settings );
+    $settings = $cfg;
+    return $dbh;
 };
 
 register_hook(qw(database_connected

@@ -22,7 +22,7 @@ my @order_by_tests = (
     [ 'foo'                   =>  'ORDER BY "foo"'         ],
     [ ['foo','bar']           =>  'ORDER BY "foo", "bar"'  ],
     [ { asc => 'foo' }        =>  'ORDER BY "foo" ASC'     ],
-    [ [ { asc => 'foo' }, { desc => 'bar' } ] 
+    [ [ { asc => 'foo' }, { desc => 'bar' } ]
         => 'ORDER BY "foo" ASC, "bar" DESC'                ],
 );
 my %quoting_tests = (

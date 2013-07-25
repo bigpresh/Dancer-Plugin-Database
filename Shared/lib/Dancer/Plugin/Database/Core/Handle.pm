@@ -1,4 +1,4 @@
-package Dancer::Plugin::Database::Handle;
+package Dancer::Plugin::Database::Core::Handle;
 
 use strict;
 use Carp;
@@ -9,7 +9,7 @@ our $VERSION = '0.12';
 
 =head1 NAME
 
-Dancer::Plugin::Database::Handle - subclassed DBI connection handle
+Dancer::Plugin::Database::Core::Handle - subclassed DBI connection handle
 
 =head1 DESCRIPTION
 
@@ -537,9 +537,9 @@ See L<Dancer::Plugin::Database/ACKNOWLEDGEMENTS>
 
 =head1 SEE ALSO
 
-L<Dancer::Plugin::Database>
+L<Dancer::Plugin::Database> and L<Dancer2::Plugin::Database>
 
-L<Dancer>
+L<Dancer> and L<Dancer2>
 
 L<DBI>
 

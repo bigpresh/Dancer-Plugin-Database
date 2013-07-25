@@ -2,10 +2,9 @@ use strict;
 use warnings;
 
 use Test::More import => ['!pass'];
-use t::lib::TestApp;
-use Dancer ':syntax';
 
-use Dancer::Test apps => ['t::lib::TestApp'];
+use t::lib::TestApp;
+use Dancer2::Test apps => ['t::lib::TestApp'];
 
 eval { require DBD::SQLite };
 if ($@) {

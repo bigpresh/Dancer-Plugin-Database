@@ -5,7 +5,6 @@ use strict;
 use Dancer::Plugin::Database::Core;
 use Dancer::Plugin::Database::Core::Handle;
 
-use Dancer2 ':syntax';
 use Dancer2::Plugin;
 
 =encoding utf8
@@ -452,4 +451,4 @@ L<Dancer::Plugin::SimpleCRUD>
 
 =cut
 
-1; # End of Dancer::Plugin::Database
+1; # End of Dancer2::Plugin::Database

@@ -1,38 +1,44 @@
-package Dancer::Plugin::Database;
+package Dancer2::Plugin::Database;
 
 use strict;
 
 use Dancer::Plugin::Database::Core;
 use Dancer::Plugin::Database::Core::Handle;
 
-use Dancer ':syntax';
-use Dancer::Plugin;
+use Dancer2 ':syntax';
+use Dancer2::Plugin;
 
 =encoding utf8
 
 =head1 NAME
 
-Dancer::Plugin::Database - easy database connections for Dancer applications
+Dancer2::Plugin::Database - easy database connections for Dancer2 applications
 
 =cut
 
-our $VERSION = '2.50'; # Try to keep up with Dancer2
+our $VERSION = '2.50'; # Try to keep up with Dancer1
 
 my $settings = undef;
 
-sub _load_db_settings {
-    $settings = plugin_setting();
-    $settings->{charset} ||= setting('charset');
-}
-
-sub _logger { Dancer::Logger->can( $_[0] )->( $_[1] ) }
 
 sub _execute_hook { execute_hook(@_) }
 
+sub _load_db_settings {
+    my $self = shift;
+    $settings = plugin_setting();
+    $settings->{charset} ||= $self->setting('charset');
+}
+
 register database => sub {
-    _load_db_settings() unless $settings;
+    my $dsl = shift;
+
+    my $logger = sub {
+        $dsl->log(@_);
+    };
+
+    _load_db_settings($dsl) unless $settings;
     my ($dbh, $cfg) = Dancer::Plugin::Database::Core::database( arg => $_[0],
-                                                                logger => \&_logger,
+                                                                logger => $logger,
                                                                 hook_exec => \&_execute_hook,
                                                                 settings => $settings );
     $settings = $cfg;
@@ -48,8 +54,8 @@ register_plugin;
 
 =head1 SYNOPSIS
 
-    use Dancer;
-    use Dancer::Plugin::Database;
+    use Dancer2;
+    use Dancer2::Plugin::Database;
 
     # Calling the database keyword will get you a connected database handle:
     get '/widget/view/:id' => sub {
@@ -74,14 +80,14 @@ register_plugin;
 
     dance;
 
-Database connection details are read from your Dancer application config - see
+Database connection details are read from your Dancer2 application config - see
 below.
 
 
 =head1 DESCRIPTION
 
 Provides an easy way to obtain a connected DBI database handle by simply calling
-the database keyword within your L<Dancer> application
+the database keyword within your L<Dancer2> application
 
 Returns a L<Dancer::Plugin::Database::Core::Handle> object, which is a subclass of
 L<DBI>'s C<DBI::db> connection handle object, so it does everything you'd expect
@@ -103,7 +109,7 @@ drawn from DBIx::Connector.)
 
 =head1 CONFIGURATION
 
-Connection details will be taken from your Dancer application config file, and
+Connection details will be taken from your Dancer2 application config file, and
 should be specified as, for example: 
 
     plugins:
@@ -282,7 +288,7 @@ C<columns> options to sort / limit results and include only specific columns.
 
 =head1 HOOKS
 
-This plugin uses Dancer's hooks support to allow you to register code that
+This plugin uses Dancer2's hooks support to allow you to register code that
 should execute at given times - for example:
 
     hook 'database_connected' => sub {
@@ -386,7 +392,7 @@ mscolly
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-dancer-plugin-database at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer-Plugin-Database>.  I will be notified, and then you'll
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer2-Plugin-Database>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
 
@@ -396,8 +402,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Dancer::Plugin::Database
-
+    perldoc Dancer2::Plugin::Database
 
 You can also look for information at:
 
@@ -405,19 +410,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dancer-Plugin-Database>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dancer2-Plugin-Database>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Dancer-Plugin-Database>
+L<http://annocpan.org/dist/Dancer2-Plugin-Database>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Dancer-Plugin-Database>
+L<http://cpanratings.perl.org/d/Dancer2-Plugin-Database>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Dancer-Plugin-Database/>
+L<http://search.cpan.org/dist/Dancer2-Plugin-Database/>
 
 =back
 
@@ -426,7 +431,7 @@ You can find the author on IRC in the channel C<#dancer> on <irc.perl.org>.
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-12 David Precious.
+Copyright 2010-13 David Precious.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
@@ -437,7 +442,9 @@ See http://dev.perl.org/licenses/ for more information.
 
 =head1 SEE ALSO
 
-L<Dancer>
+L<Dancer::Plugin::Database::Core> and L<Dancer::Plugin::Database::Core::Handle>
+
+L<Dancer>, L<Dancer2>
 
 L<DBI>
 

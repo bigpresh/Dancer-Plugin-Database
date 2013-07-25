@@ -1,10 +1,10 @@
 NAME
-    Dancer::Plugin::Database - easy database connections for Dancer
+    Dancer2::Plugin::Database - easy database connections for Dancer
     applications
 
 SYNOPSIS
-        use Dancer;
-        use Dancer::Plugin::Database;
+        use Dancer2;
+        use Dancer2::Plugin::Database;
 
         # Calling the database keyword will get you a connected database handle:
         get '/widget/view/:id' => sub {
@@ -29,12 +29,12 @@ SYNOPSIS
 
         dance;
 
-    Database connection details are read from your Dancer application config
+    Database connection details are read from your Dancer2 application config
     - see below.
 
 DESCRIPTION
     Provides an easy way to obtain a connected DBI database handle by simply
-    calling the database keyword within your Dancer application
+    calling the database keyword within your Dancer2 application
 
     Returns a Dancer::Plugin::Database::Core::Handle object, which is a subclass
     of DBI's `DBI::db' connection handle object, so it does everything you'd
@@ -57,7 +57,7 @@ DESCRIPTION
     Inspiration was drawn from DBIx::Connector.)
 
 CONFIGURATION
-    Connection details will be taken from your Dancer application config
+    Connection details will be taken from your Dancer2 application config
     file, and should be specified as, for example:
 
         plugins:
@@ -230,7 +230,7 @@ CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
     specific columns.
 
 HOOKS
-    This plugin uses Dancer's hooks support to allow you to register code
+    This plugin uses Dancer2's hooks support to allow you to register code
     that should execute at given times - for example:
 
         hook 'database_connected' => sub {
@@ -324,28 +324,28 @@ BUGS
     Please report any bugs or feature requests to
     `bug-dancer-plugin-database at rt.cpan.org', or through the web
     interface at
-    http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer-Plugin-Database. I
+    http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer2-Plugin-Database. I
     will be notified, and then you'll automatically be notified of progress
     on your bug as I make changes.
 
 SUPPORT
     You can find documentation for this module with the perldoc command.
 
-        perldoc Dancer::Plugin::Database
+        perldoc Dancer2::Plugin::Database
 
     You can also look for information at:
 
     * RT: CPAN's request tracker
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dancer-Plugin-Database
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dancer2-Plugin-Database
 
     * AnnoCPAN: Annotated CPAN documentation
-        http://annocpan.org/dist/Dancer-Plugin-Database
+        http://annocpan.org/dist/Dancer2-Plugin-Database
 
     * CPAN Ratings
-        http://cpanratings.perl.org/d/Dancer-Plugin-Database
+        http://cpanratings.perl.org/d/Dancer2-Plugin-Database
 
     * Search CPAN
-        http://search.cpan.org/dist/Dancer-Plugin-Database/
+        http://search.cpan.org/dist/Dancer2-Plugin-Database/
 
     You can find the author on IRC in the channel `#dancer' on
     <irc.perl.org>.
@@ -360,9 +360,8 @@ LICENSE AND COPYRIGHT
     See http://dev.perl.org/licenses/ for more information.
 
 SEE ALSO
-    Dancer
+    Dancer2
 
     DBI
 
-    Dancer::Plugin::SimpleCRUD
 

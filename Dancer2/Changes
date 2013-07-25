@@ -1,0 +1,6 @@
+Revision history for Dancer-Plugin-Database
+
+2.50    XXX
+        - First version, released together with
+          Dancer::Plugin::Database::Core version 0.01 and
+          Dancer::Plugin::Database version 2.50

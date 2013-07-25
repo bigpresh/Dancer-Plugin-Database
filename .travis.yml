@@ -10,5 +10,6 @@ install:
     - cpanm Dancer DBI --quiet --notest
 
 script:
+	- cd Shared
     - perl Makefile.PL
     - make test

@@ -17,10 +17,14 @@ Dancer2::Plugin::Database - easy database connections for Dancer2 applications
 
 our $VERSION = '2.50'; # Try to keep up with Dancer1
 
+register_hook qw(database_connected
+                 database_connection_lost
+                 database_connection_failed
+                 database_error);
+
+
 my $settings = undef;
 
-
-sub _execute_hook { execute_hook(@_) }
 
 sub _load_db_settings {
     my $self = shift;
@@ -35,19 +39,20 @@ register database => sub {
         $dsl->log(@_);
     };
 
+    # wasn't working properly calling the Dancer2::Plugin execute_hook
+    # directly
+    my $hook_exec = sub {
+        $dsl->execute_hook(@_);
+    };
+
     _load_db_settings($dsl) unless $settings;
     my ($dbh, $cfg) = Dancer::Plugin::Database::Core::database( arg => $_[0],
                                                                 logger => $logger,
-                                                                hook_exec => \&_execute_hook,
+                                                                hook_exec => $hook_exec,
                                                                 settings => $settings );
     $settings = $cfg;
     return $dbh;
 };
-
-register_hook(qw(database_connected
-                 database_connection_lost
-                 database_connection_failed
-                 database_error));
 
 register_plugin;
 

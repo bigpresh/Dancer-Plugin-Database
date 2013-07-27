@@ -1,6 +1,6 @@
 Revision history for Dancer-Plugin-Database
 
-2.50    XXX
+2.04    Sat Jul 27 18:21:48 WEST 2013
         - First version, released together with
-          Dancer::Plugin::Database::Core version 0.01 and
-          Dancer::Plugin::Database version 2.50
+          Dancer::Plugin::Database::Core version 0.01 with
+          same features as Dancer::Plugin::Database 2.04.

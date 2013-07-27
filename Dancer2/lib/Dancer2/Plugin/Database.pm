@@ -15,7 +15,7 @@ Dancer2::Plugin::Database - easy database connections for Dancer2 applications
 
 =cut
 
-our $VERSION = '2.50'; # Try to keep up with Dancer1
+our $VERSION = '2.04'; 
 
 register_hook qw(database_connected
                  database_connection_lost

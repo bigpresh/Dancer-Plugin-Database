@@ -1,23 +1,12 @@
 package Dancer::Plugin::Database;
 
 use strict;
+
+use Dancer::Plugin::Database::Core;
+use Dancer::Plugin::Database::Core::Handle;
+
 use Dancer ':syntax';
 use Dancer::Plugin;
-use DBI;
-use Dancer::Plugin::Database::Handle;
-use Scalar::Util 'blessed';
-
-my $dancer_version = (exists &dancer_version) ? int(dancer_version()) : 1;
-my ($logger);
-if ($dancer_version == 1) {
-    require Dancer::Config;
-    Dancer::Config->import();
-
-    $logger = sub { Dancer::Logger->can($_[0])->($_[1]) };
-} else {
-    $logger = sub { log @_ };
-}
-
 
 =encoding utf8
 
@@ -27,301 +16,35 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '2.04';
+our $VERSION = '2.05';
 
 my $settings = undef;
 
 sub _load_db_settings {
     $settings = plugin_setting();
+    $settings->{charset} ||= setting('charset');
 }
 
-my %handles;
-# Hashref used as key for default handle, so we don't have a magic value that
-# the user could use for one of their connection names and cause problems
-# (Kudos to Igor Bujna for the idea)
-my $def_handle = {};
+sub _logger { Dancer::Logger->can( $_[0] )->( $_[1] ) }
+
+sub _execute_hook { execute_hook(@_) }
 
 register database => sub {
-    my ($self, $arg) = plugin_args(@_);
-    $arg = shift if blessed($arg) and $arg->isa('Dancer::Core::DSL');
-
-    _load_db_settings() if (!$settings);
-
-    # The key to use to store this handle in %handles.  This will be either the
-    # name supplied to database(), the hashref supplied to database() (thus, as
-    # long as the same hashref of settings is passed, the same handle will be
-    # reused) or $def_handle if database() is called without args:
-    my $handle_key;
-    my $conn_details; # connection settings to use.
-    my $handle;
-
-
-    # Accept a hashref of settings to use, if desired.  If so, we use this
-    # hashref to look for the handle, too, so as long as the same hashref is
-    # passed to the database() keyword, we'll reuse the same handle:
-    if (ref $arg eq 'HASH') {
-        $handle_key = $arg;
-        $conn_details = $arg;
-    } else {
-        $handle_key = defined $arg ? $arg : $def_handle;
-        $conn_details = _get_settings($arg);
-        if (!$conn_details) {
-            $logger->(error => "No DB settings for " . ($arg || "default connection"));
-            return;
-        }
-    }
-
-    # To be fork safe and thread safe, use a combination of the PID and TID (if
-    # running with use threads) to make sure no two processes/threads share
-    # handles.  Implementation based on DBIx::Connector by David E. Wheeler.
-    my $pid_tid = $$;
-    $pid_tid .= '_' . threads->tid if $INC{'threads.pm'};
-
-    # OK, see if we have a matching handle
-    $handle = $handles{$pid_tid}{$handle_key} || {};
-
-    if ($handle->{dbh}) {
-        # If we should never check, go no further:
-        if (!$conn_details->{connection_check_threshold}) {
-            return $handle->{dbh};
-        }
-
-        if ($handle->{dbh}{Active} && $conn_details->{connection_check_threshold} &&
-            time - $handle->{last_connection_check}
-            < $conn_details->{connection_check_threshold}) 
-        {
-            return $handle->{dbh};
-        } else {
-            if (_check_connection($handle->{dbh})) {
-                $handle->{last_connection_check} = time;
-                return $handle->{dbh};
-            } else {
-
-                $logger->(debug => "Database connection went away, reconnecting");
-                execute_hook('database_connection_lost', $handle->{dbh});
-
-                if ($handle->{dbh}) { eval { $handle->{dbh}->disconnect } }
-                return $handle->{dbh}= _get_connection($conn_details);
-
-            }
-        }
-    } else {
-        # Get a new connection
-        if ($handle->{dbh} = _get_connection($conn_details)) {
-            $handle->{last_connection_check} = time;
-            $handles{$pid_tid}{$handle_key} = $handle;
-
-            if (ref $handle_key && ref $handle_key ne ref $def_handle) {
-                # We were given a hashref of connection settings.  Shove a
-                # reference to that hashref into the handle, so that the hashref
-                # doesn't go out of scope for the life of the handle.
-                # Otherwise, that area of memory could be re-used, and, given
-                # different DB settings in a hashref that just happens to have
-                # the same address, we'll happily hand back the original handle.
-                # See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=665221
-                # Thanks to Sam Kington for suggesting this fix :)
-                $handle->{_orig_settings_hashref} = $handle_key;
-            }
-            return $handle->{dbh};
-        } else {
-            return;
-        }
-    }
+    _load_db_settings() unless $settings;
+    my ($dbh, $cfg) = Dancer::Plugin::Database::Core::database( arg => $_[0],
+                                                                logger => \&_logger,
+                                                                hook_exec => \&_execute_hook,
+                                                                settings => $settings );
+    $settings = $cfg;
+    return $dbh;
 };
 
 register_hook(qw(database_connected
                  database_connection_lost
                  database_connection_failed
                  database_error));
-register_plugin(for_versions => ['1', '2']);
 
-# Given the settings to use, try to get a database connection
-sub _get_connection {
-    my $settings = shift;
-
-    # Assemble the DSN:
-    my $dsn = '';
-    my $driver = '';
-    if ($settings->{dsn}) {
-        $dsn = $settings->{dsn};
-        ($driver) = $dsn =~ m{dbi:([^:]+)};
-    } else {
-        $dsn = "dbi:" . $settings->{driver};
-        $driver = $settings->{driver};
-        my @extra_args;
-
-        # DBD::SQLite wants 'dbname', not 'database', so special-case this
-        # (DBI's documentation recommends that DBD::* modules should understand
-        # 'database', but older versions of DBD::SQLite didn't; let's make 
-        # things easier for our users by handling this for them):
-        # (I asked in RT #61117 for DBD::SQLite to support 'database', too; this
-        # was included in DBD::SQLite 1.33, released Mon 20 May 2011.
-        # Special-casing may as well stay, rather than forcing dependency on
-        # DBD::SQLite 1.33.
-        if ($driver eq 'SQLite' 
-            && $settings->{database} && !$settings->{dbname}) {
-            $settings->{dbname} = delete $settings->{database};
-        }
-
-        for (qw(database dbname host port sid)) {
-            if (exists $settings->{$_}) {
-                push @extra_args, $_ . "=" . $settings->{$_};
-            }
-        }
-        $dsn .= ':' . join(';', @extra_args) if @extra_args;
-    }
-
-    # If the app is configured to use UTF-8, the user will want text from the
-    # database in UTF-8 to Just Work, so if we know how to make that happen, do
-    # so, unless they've set the auto_utf8 plugin setting to a false value.
-    my $app_charset = setting('charset');
-    my $auto_utf8 = exists $settings->{auto_utf8} ?  $settings->{auto_utf8} : 1;
-    if (lc $app_charset eq 'utf-8' && $auto_utf8) {
-
-        # The option to pass to the DBI->connect call depends on the driver:
-        my %param_for_driver = (
-            SQLite => 'sqlite_unicode',
-            mysql  => 'mysql_enable_utf8',
-            Pg     => 'pg_enable_utf8',
-        );
-
-        my $param = $param_for_driver{$driver};
-
-        if ($param && !$settings->{dbi_params}{$param}) {
-            $logger->(
-                debug => "Adding $param to DBI connection params"
-                    . " to enable UTF-8 support"
-            );
-            $settings->{dbi_params}{$param} = 1;
-        }
-    }
-
-    # To support the database_error hook, use DBI's HandleError option
-    $settings->{dbi_params}{HandleError} = sub {
-        my ($error, $handle) = @_;
-        execute_hook('database_error', $error, $handle);
-    };
-
-    my $dbh = DBI->connect($dsn,
-        $settings->{username}, $settings->{password}, $settings->{dbi_params}
-    );
-
-    if (!$dbh) {
-        $logger->(error => "Database connection failed - " . $DBI::errstr);
-        execute_hook('database_connection_failed', $settings);
-        return;
-    } elsif (exists $settings->{on_connect_do}) {
-        my $to_do = ref $settings->{on_connect_do} eq 'ARRAY'
-            ?   $settings->{on_connect_do}
-            : [ $settings->{on_connect_do} ];
-        for (@$to_do) {
-            $dbh->do($_) or
-              $logger->(error => "Failed to perform on-connect command $_");
-        }
-    }
-
-    execute_hook('database_connected', $dbh);
-
-    # Indicate whether queries generated by quick_query() etc in
-    # Dancer::Plugin::Database::Handle should be logged or not; this seemed a
-    # little dirty, but DBI's docs encourage it
-    # ("You can stash private data into DBI handles via $h->{private_..._*}..")
-    $dbh->{private_dancer_plugin_database} = {
-        log_queries => $settings->{log_queries} || 0,
-    };
-
-    # Re-bless it as a Dancer::Plugin::Database::Handle object, to provide nice
-    # extra features (unless the config specifies a different class; if it does,
-    # this should be a subclass of Dancer::Plugin::Database::Handle in order to
-    # extend the features provided by it, or a direct subclass of DBI::db (or
-    # even DBI::db itself) to bypass the features provided by D::P::D::Handle)
-    my $handle_class = 
-        $settings->{handle_class} || 'Dancer::Plugin::Database::Handle';
-    my $package = $handle_class;
-    $package =~ s{::}{/}g;
-    $package .= '.pm';
-    require $package;
-    return bless $dbh => $handle_class;
-}
-
-
-
-# Check the connection is alive
-sub _check_connection {
-    my $dbh = shift;
-    return unless $dbh;
-    if ($dbh->{Active} && (my $result = $dbh->ping)) {
-        if (int($result)) {
-            # DB driver itself claims all is OK, trust it:
-            return 1;
-        } else {
-            # It was "0 but true", meaning the default DBI ping implementation
-            # Implement our own basic check, by performing a real simple query.
-            my $ok;
-            eval {
-                $ok = $dbh->do('select 1');
-            };
-            return $ok;
-        }
-    } else {
-        return;
-    }
-}
-
-sub _get_settings {
-    my $name = shift;
-    my $return_settings;
-
-    # If no name given, just return the default settings
-    if (!defined $name) {
-        $return_settings = { %$settings };
-        if (!$return_settings->{driver} && !$return_settings->{dsn}) {
-            $logger->('error',
-                "Asked for default connection (no name given)"
-                ." but no default connection details found in config"
-            );
-        }
-    } else {
-        # If there are no named connections in the config, bail now:
-        return unless exists $settings->{connections};
-
-
-        # OK, find a matching config for this name:
-        if (my $named_settings = $settings->{connections}{$name}) {
-            # Take a (shallow) copy of the settings, so we don't change them
-            $return_settings = { %$named_settings };
-        } else {
-            # OK, didn't match anything
-            $logger->('error',
-                      "Asked for a database handle named '$name' but no matching  "
-                      ."connection details found in config"
-            );
-        }
-    }
-
-    # We should have something to return now; make sure we have a
-    # connection_check_threshold, then return what we found.  In previous
-    # versions the documentation contained a typo mentioning
-    # connectivity-check-threshold, so support that as an alias.
-    if (exists $return_settings->{'connectivity-check-threshold'}
-        && !exists $return_settings->{connection_check_threshold})
-    {
-        $return_settings->{connection_check_threshold}
-            = delete $return_settings->{'connectivity-check-threshold'};
-    }
-
-    # If the setting wasn't provided, default to 30 seconds; if a false value is
-    # provided, though, leave it alone.  (Older versions just checked for
-    # truthiness, so a value of zero would still default to 30 seconds, which
-    # isn't ideal.)
-    if (!exists $return_settings->{connection_check_threshold}) {
-        $return_settings->{connection_check_threshold} = 30;
-    }
-
-    return $return_settings;
-
-}
-
+register_plugin;
 
 =head1 SYNOPSIS
 
@@ -337,7 +60,7 @@ sub _get_settings {
         template 'display_widget', { widget => $sth->fetchrow_hashref };
     };
 
-    # The handle is a Dancer::Plugin::Database::Handle object, which subclasses
+    # The handle is a Dancer::Plugin::Database::Core::Handle object, which subclasses
     # DBI's DBI::db handle and adds a few convenience features, for example:
     get '/insert/:name' => sub {
         database->quick_insert('people', { name => params->{name} });
@@ -360,10 +83,10 @@ below.
 Provides an easy way to obtain a connected DBI database handle by simply calling
 the database keyword within your L<Dancer> application
 
-Returns a L<Dancer::Plugin::Database::Handle> object, which is a subclass of
+Returns a L<Dancer::Plugin::Database::Core::Handle> object, which is a subclass of
 L<DBI>'s C<DBI::db> connection handle object, so it does everything you'd expect
 to do with DBI, but also adds a few convenience methods.  See the documentation
-for L<Dancer::Plugin::Database::Handle> for full details of those.
+for L<Dancer::Plugin::Database::Core::Handle> for full details of those.
 
 Takes care of ensuring that the database handle is still connected and valid.
 If the handle was last asked for more than C<connection_check_threshold> seconds
@@ -427,7 +150,7 @@ just one illustration.  In hindsight, I wish I'd made a sensible C<sql_mode> a
 default setting, but I don't want to change that now.)
 
 The optional C<log_queries> setting enables logging of queries generated by the
-helper functions C<quick_insert> et al in L<Dancer::Plugin::Database::Handle>.
+helper functions C<quick_insert> et al in L<Dancer::Plugin::Database::Core::Handle>.
 If you enable it, generated queries will be logged at 'debug' level.  Be aware
 that they will contain the data you're passing to/from the database, so be
 careful not to enable this option in production, where you could inadvertently
@@ -440,7 +163,7 @@ a peculiar DSN.
 
 The optional C<handle_class> defines your own class into which database handles
 should be blessed.  This should be a subclass of
-L<Dancer::Plugin::Database::Handle> (or L<DBI::db> directly, if you just want to
+L<Dancer::Plugin::Database::Core::Handle> (or L<DBI::db> directly, if you just want to
 skip the extra features).
 
 You will require slightly different options depending on the database engine
@@ -527,10 +250,10 @@ runtime.
 =head1 CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
 
 The handle returned by the C<database> keyword is a
-L<Dancer::Plugin::Database::Handle> object, which subclasses the C<DBI::db> DBI
+L<Dancer::Plugin::Database::Core::Handle> object, which subclasses the C<DBI::db> DBI
 connection handle.  This means you can use it just like you'd normally use a DBI
 handle, but extra convenience methods are provided, as documented in the POD for
-L<Dancer::Plugin::Database::Handle>.
+L<Dancer::Plugin::Database::Core::Handle>.
 
 Examples:
 
@@ -554,7 +277,7 @@ Examples:
   database->quick_select($table_name, {});
 
 There's more extensive documentation on these features in
-L<Dancer::Plugin::Database::Handle>, including using the C<order_by>, C<limit>,
+L<Dancer::Plugin::Database::Core::Handle>, including using the C<order_by>, C<limit>,
 C<columns> options to sort / limit results and include only specific columns.
 
 =head1 HOOKS

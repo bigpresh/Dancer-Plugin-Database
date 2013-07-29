@@ -1,0 +1,11 @@
+Changes
+lib/Dancer/Plugin/Database/Core.pm
+lib/Dancer/Plugin/Database/Core/Handle.pm
+Makefile.PL
+MANIFEST			This list of files
+README
+t/00-load.t
+t/01-handle.t
+t/manifest.t
+t/pod-coverage.t
+t/pod.t

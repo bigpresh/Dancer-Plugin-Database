@@ -1,0 +1,16 @@
+Changes
+MANIFEST
+MANIFEST.SKIP
+Makefile.PL
+README
+lib/Dancer/Plugin/Database.pm
+t/00-load.t
+t/01-basic.t
+t/manifest.t
+t/pod-coverage.t
+t/pod.t
+t/lib/TestApp.pm
+t/lib/lib/TestHandleClass.pm
+t/lib/public/.placeholder
+t/lib/views/.placeholder
+t/lib/lib/.placeholder

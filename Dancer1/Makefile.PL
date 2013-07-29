@@ -16,7 +16,6 @@ WriteMakefile(
         'Dancer::Plugin::Database::Core' => 0,
         # Need support for Dancer2-compatible stuff
         'Dancer'     => 1.3099,
-        'DBI'        => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Dancer-Plugin-Database-*' },

@@ -1,10 +1,10 @@
 NAME
-    Dancer::Plugin::Database - easy database connections for Dancer
+    Dancer2::Plugin::Database - easy database connections for Dancer
     applications
 
 SYNOPSIS
-        use Dancer;
-        use Dancer::Plugin::Database;
+        use Dancer2;
+        use Dancer2::Plugin::Database;
 
         # Calling the database keyword will get you a connected database handle:
         get '/widget/view/:id' => sub {
@@ -15,7 +15,7 @@ SYNOPSIS
             template 'display_widget', { widget => $sth->fetchrow_hashref };
         };
 
-        # The handle is a Dancer::Plugin::Database::Handle object, which subclasses
+        # The handle is a Dancer::Plugin::Database::Core::Handle object, which subclasses
         # DBI's DBI::db handle and adds a few convenience features, for example:
         get '/insert/:name' => sub {
             database->quick_insert('people', { name => params->{name} });
@@ -29,17 +29,17 @@ SYNOPSIS
 
         dance;
 
-    Database connection details are read from your Dancer application config
+    Database connection details are read from your Dancer2 application config
     - see below.
 
 DESCRIPTION
     Provides an easy way to obtain a connected DBI database handle by simply
-    calling the database keyword within your Dancer application
+    calling the database keyword within your Dancer2 application
 
-    Returns a Dancer::Plugin::Database::Handle object, which is a subclass
+    Returns a Dancer::Plugin::Database::Core::Handle object, which is a subclass
     of DBI's `DBI::db' connection handle object, so it does everything you'd
     expect to do with DBI, but also adds a few convenience methods. See the
-    documentation for Dancer::Plugin::Database::Handle for full details of
+    documentation for Dancer::Plugin::Database::Core::Handle for full details of
     those.
 
     Takes care of ensuring that the database handle is still connected and
@@ -57,7 +57,7 @@ DESCRIPTION
     Inspiration was drawn from DBIx::Connector.)
 
 CONFIGURATION
-    Connection details will be taken from your Dancer application config
+    Connection details will be taken from your Dancer2 application config
     file, and should be specified as, for example:
 
         plugins:
@@ -106,7 +106,7 @@ CONFIGURATION
 
     The optional `log_queries' setting enables logging of queries generated
     by the helper functions `quick_insert' et al in
-    Dancer::Plugin::Database::Handle. If you enable it, generated queries
+    Dancer::Plugin::Database::Core::Handle. If you enable it, generated queries
     will be logged at 'debug' level. Be aware that they will contain the
     data you're passing to/from the database, so be careful not to enable
     this option in production, where you could inadvertently log sensitive
@@ -119,7 +119,7 @@ CONFIGURATION
 
     The optional `handle_class' defines your own class into which database
     handles should be blessed. This should be a subclass of
-    Dancer::Plugin::Database::Handle (or DBI::db directly, if you just want
+    Dancer::Plugin::Database::Core::Handle (or DBI::db directly, if you just want
     to skip the extra features).
 
     You will require slightly different options depending on the database
@@ -198,10 +198,10 @@ GETTING A DATABASE HANDLE
 
 CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
     The handle returned by the `database' keyword is a
-    Dancer::Plugin::Database::Handle object, which subclasses the `DBI::db'
+    Dancer::Plugin::Database::Core::Handle object, which subclasses the `DBI::db'
     DBI connection handle. This means you can use it just like you'd
     normally use a DBI handle, but extra convenience methods are provided,
-    as documented in the POD for Dancer::Plugin::Database::Handle.
+    as documented in the POD for Dancer::Plugin::Database::Core::Handle.
 
     Examples:
 
@@ -225,12 +225,12 @@ CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
       database->quick_select($table_name, {});
 
     There's more extensive documentation on these features in
-    Dancer::Plugin::Database::Handle, including using the `order_by',
+    Dancer::Plugin::Database::Core::Handle, including using the `order_by',
     `limit', `columns' options to sort / limit results and include only
     specific columns.
 
 HOOKS
-    This plugin uses Dancer's hooks support to allow you to register code
+    This plugin uses Dancer2's hooks support to allow you to register code
     that should execute at given times - for example:
 
         hook 'database_connected' => sub {
@@ -324,28 +324,28 @@ BUGS
     Please report any bugs or feature requests to
     `bug-dancer-plugin-database at rt.cpan.org', or through the web
     interface at
-    http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer-Plugin-Database. I
+    http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer2-Plugin-Database. I
     will be notified, and then you'll automatically be notified of progress
     on your bug as I make changes.
 
 SUPPORT
     You can find documentation for this module with the perldoc command.
 
-        perldoc Dancer::Plugin::Database
+        perldoc Dancer2::Plugin::Database
 
     You can also look for information at:
 
     * RT: CPAN's request tracker
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dancer-Plugin-Database
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dancer2-Plugin-Database
 
     * AnnoCPAN: Annotated CPAN documentation
-        http://annocpan.org/dist/Dancer-Plugin-Database
+        http://annocpan.org/dist/Dancer2-Plugin-Database
 
     * CPAN Ratings
-        http://cpanratings.perl.org/d/Dancer-Plugin-Database
+        http://cpanratings.perl.org/d/Dancer2-Plugin-Database
 
     * Search CPAN
-        http://search.cpan.org/dist/Dancer-Plugin-Database/
+        http://search.cpan.org/dist/Dancer2-Plugin-Database/
 
     You can find the author on IRC in the channel `#dancer' on
     <irc.perl.org>.
@@ -360,9 +360,8 @@ LICENSE AND COPYRIGHT
     See http://dev.perl.org/licenses/ for more information.
 
 SEE ALSO
-    Dancer
+    Dancer2
 
     DBI
 
-    Dancer::Plugin::SimpleCRUD
 

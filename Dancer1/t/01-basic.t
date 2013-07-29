@@ -5,16 +5,7 @@ use Test::More import => ['!pass'];
 use t::lib::TestApp;
 use Dancer ':syntax';
 
-my $dancer_version;
-BEGIN {
-    $dancer_version = (exists &dancer_version) ? int(dancer_version()) : 1;
-    require Dancer::Test;
-    if ($dancer_version == 1) {
-        Dancer::Test->import();
-    } else {
-        Dancer::Test->import('t::lib::TestApp');
-    }
-}
+use Dancer::Test;
 
 eval { require DBD::SQLite };
 if ($@) {
@@ -39,15 +30,9 @@ my $conf = {
            };
 
 
-if ($dancer_version == 1) {
-    set plugins => $conf;
-    set logger => 'capture';
-    set log => 'debug';
-} else {
-    t::lib::TestApp->dancer_app->setting( plugins => $conf );
-    t::lib::TestApp->dancer_app->setting( logger => 'capture');
-    t::lib::TestApp->dancer_app->setting( log => 'debug');
-}
+set plugins => $conf;
+set logger => 'capture';
+set log => 'debug';
 
 response_content_is   [ GET => '/connecthookfired' ], 1,
     'database_connected hook fires';

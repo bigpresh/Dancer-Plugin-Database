@@ -1,0 +1,9 @@
+Revision history for Dancer-Plugin-Database
+
+2.05    Mon Jul 29 12:08:21 WEST 2013
+        - Fix dependency with Dancer 2.
+
+2.04    Sat Jul 27 18:21:48 WEST 2013
+        - First version, released together with
+          Dancer::Plugin::Database::Core version 0.01 with
+          same features as Dancer::Plugin::Database 2.04.

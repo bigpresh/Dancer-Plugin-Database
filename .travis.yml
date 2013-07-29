@@ -7,8 +7,16 @@ perl:
     - "5.10"
 
 install:
-    - cpanm Dancer DBI --quiet --notest
+    - cpanm Dancer Dancer2 DBI --quiet --notest
 
 script:
+    - cd Shared;
+    - perl Makefile.PL
+    - make test
+    - make install
+    - cd ../Dancer1;
+    - perl Makefile.PL
+    - make test
+    - cd ../Dancer2;
     - perl Makefile.PL
     - make test

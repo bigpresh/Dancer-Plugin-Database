@@ -14,7 +14,7 @@ WriteMakefile(
     PREREQ_PM => {
         'Test::More' => 0,
         'Dancer::Plugin::Database::Core' => 0,
-        'Dancer2'     => '0.05',
+        'Dancer2'     => '0.06',
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Dancer2-Plugin-Database-*' },

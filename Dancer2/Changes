@@ -1,4 +1,7 @@
-Revision history for Dancer-Plugin-Database
+Revision history for Dancer2-Plugin-Database
+
+2.07    Tue Jul 30 18:49:37 WEST 2013
+        - Fix test with wrong base class.
 
 2.06    Tue Jul 30 16:14:28 WEST 2013
         - Require recent Dancer2 0.06 as 0.05 was broken.

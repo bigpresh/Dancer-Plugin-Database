@@ -42,8 +42,8 @@ response_content_is   [ GET => '/errorhookfired' ], 1,
 
 response_content_is   [ GET => '/isa/DBI::db' ], 1,
     "handle isa('DBI::db')";
-response_content_is   [ GET => '/isa/Dancer::Plugin::Database::Handle' ], 1,
-    "handle isa('Dancer::Plugin::Database::Handle')";
+response_content_is   [ GET => '/isa/Dancer::Plugin::Database::Core::Handle' ], 1,
+    "handle isa('Dancer::Plugin::Database::Core::Handle')";
 response_content_is   [ GET => '/isa/TestHandleClass' ], 1,
     "handle isa('TestHandleClass')";
 response_content_is   [ GET => '/isa/duck' ], 0, # reverse duck-typing ;)

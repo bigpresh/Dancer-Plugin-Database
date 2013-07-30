@@ -1,5 +1,7 @@
 Revision history for Dancer-Plugin-Database
 
+2.07    Tue Jul 30 18:59:30 WEST 2013
+        - Fix test with wrong base class (part 2)
 
 2.06    Tue Jul 30 18:49:37 WEST 2013
         - Fix test with wrong base class.

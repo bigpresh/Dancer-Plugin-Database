@@ -1,8 +1,12 @@
 Revision history for Dancer-Plugin-Database
 
+
+2.06    Tue Jul 30 18:49:37 WEST 2013
+        - Fix test with wrong base class.
+
 2.05    2013-07-29
-		- Remove code from module to share with Dancer2 plugin.
-	    - Added dependency on Dancer::Plugin::Database::Core
+	- Remove code from module to share with Dancer2 plugin.
+        - Added dependency on Dancer::Plugin::Database::Core
 
 2.04    2013-03-04
         [ ENHANCEMENTS ]

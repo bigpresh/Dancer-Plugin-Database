@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.03    Mon Aug  5 21:11:23 WEST 2013
+        - Fix issue when using named databases
+        (thanks to Michael J South for reporting it)
+
 0.02    Mon Jul 29 12:05:28 WEST 2013
         - Fix DBI dependency.
 

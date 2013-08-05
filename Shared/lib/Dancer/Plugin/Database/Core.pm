@@ -10,11 +10,11 @@ Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that
@@ -94,14 +94,16 @@ sub database {
                 $logger->(debug => "Database connection went away, reconnecting");
                 $hook_exec->('database_connection_lost', $handle->{dbh});
 
-                if ($handle->{dbh}) { eval { $handle->{dbh}->disconnect } }
-                return _get_connection($conn_details, $logger, $hook_exec);
+                if ($handle->{dbh}) {
+                    eval { $handle->{dbh}->disconnect }
+                }
+                return (_get_connection($conn_details, $logger, $hook_exec), $settings);
             }
         }
     } else {
 
         # Get a new connection
-        ($handle->{dbh}, $settings) = _get_connection($conn_details, $logger, $hook_exec);
+        $handle->{dbh} = _get_connection($conn_details, $logger, $hook_exec);
 
         if ($handle->{dbh}) {
 
@@ -260,7 +262,7 @@ sub _get_connection {
     if (!$dbh) {
         $logger->(error => "Database connection failed - " . $DBI::errstr);
         $hook_exec->('database_connection_failed', $settings);
-        return (undef, $settings);
+        return undef;
     } elsif (exists $settings->{on_connect_do}) {
         my $to_do = ref $settings->{on_connect_do} eq 'ARRAY'
             ?   $settings->{on_connect_do}
@@ -293,7 +295,7 @@ sub _get_connection {
     $package .= '.pm';
     require $package;
 
-    return (bless($dbh => $handle_class), $settings);
+    return bless($dbh => $handle_class);
 }
 
 

@@ -247,7 +247,7 @@ You can also pass a hashref of settings if you wish to provide settings at
 runtime.
 
 
-=head1 CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete)
+=head1 CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete, quick_count)
 
 The handle returned by the C<database> keyword is a
 L<Dancer::Plugin::Database::Core::Handle> object, which subclasses the C<DBI::db> DBI
@@ -275,6 +275,9 @@ Examples:
 
   # Fetch all rows from a table (since version 1.30):
   database->quick_select($table_name, {});
+
+  # Retrieve a count of rows matching the criteria:
+  database->quick_count($table_name, {});
 
 There's more extensive documentation on these features in
 L<Dancer::Plugin::Database::Core::Handle>, including using the C<order_by>, C<limit>,

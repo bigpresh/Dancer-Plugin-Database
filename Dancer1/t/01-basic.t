@@ -12,7 +12,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 41;
+plan tests => 42;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -84,6 +84,10 @@ response_content_like [ GET => '/quick_select/2/name' ], qr/bigpresh/,
 
 response_content_like [ GET => '/quick_lookup/bigpresh' ], qr/2/,
   'content looks good for /quick_lookup/bigpresh';
+
+# Test quick_count functions
+
+response_content_is [ GET => '/quick_count/admin'], 2, 'quick_count shows 2 admins';
 
 response_content_like   [ GET => '/complex_where/4' ], qr/mousey/,
     "Complex where clause succeeded";
@@ -158,4 +162,3 @@ response_content_is [ GET => '/database_connection_lost_fires' ], 1,
 # Test that the database_connection_failed hook fires when we can't connect
 response_content_is [ GET => '/database_connection_failed_fires' ], 1,
     'database_connection_failed hook fires';
-

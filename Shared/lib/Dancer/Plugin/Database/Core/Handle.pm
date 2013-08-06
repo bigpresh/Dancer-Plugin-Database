@@ -200,7 +200,7 @@ sub quick_count {
     my $opts = {}; #Options are irrelevant for a count.
     my $row = $self->_quick_query('COUNT', $table_name, $opts, $where);
 
-    return ( $row && exists $row->{'COUNT(*)'} ) ? $row->{'COUNT(*)'} : 0;
+    return ( $row && exists $row->{'COUNT(*)'} ) ? $row->{'COUNT(*)'} : undef;
 }
 
 # The 3rd arg, $data, has a different meaning depending on the type of query

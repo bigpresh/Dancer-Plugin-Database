@@ -31,6 +31,8 @@ Subclassed DBI connection handle with added convenience features
   # no where clause (i.e. return all rows -  so "select * from $table_name"):
   my @all_employees = database->quick_select('employees', {});
 
+  # count number of male employees
+  my $count = database->quick_count('employees', { gender => 'male' });
 
 =head1 Added features
 
@@ -185,22 +187,25 @@ sub quick_lookup {
 }
 
 =item quick_count
-  my $count = database->quick_count($table, { email => $params->{'email'} });
 
-This is syntactic sugar to return a count of all rows which match your parameters, 
-useful for pagination.
+  my $count = database->quick_count($table,
+                                    { email => $params->{'email'} });
+
+This is syntactic sugar to return a count of all rows which match your
+parameters, useful for pagination.
 
 This call always returns a single scalar value, not a hashref of the
-entire row (or partial row) like most of the other methods in this library. 
+entire row (or partial row) like most of the other methods in this
+library.
 
 =cut
 
 sub quick_count {
     my ($self, $table_name, $where) = @_;
     my $opts = {}; #Options are irrelevant for a count.
-    my $row = $self->_quick_query('COUNT', $table_name, $opts, $where);
+    my @row = $self->_quick_query('COUNT', $table_name, $opts, $where);
 
-    return ( $row && exists $row->{'COUNT(*)'} ) ? $row->{'COUNT(*)'} : undef;
+    return ( @row ) ? $row[0] : undef ;
 }
 
 # The 3rd arg, $data, has a different meaning depending on the type of query
@@ -357,8 +362,7 @@ sub _quick_query {
         }
 
     } elsif ($type eq 'COUNT') {
-        my ($count) = $self->selectrow_array($sql, undef, @bind_params);
-        return $count;
+        return $self->selectrow_array($sql, undef, @bind_params);
     } else {
         # INSERT/UPDATE/DELETE queries just return the result of DBI's do()
         return $self->do($sql, undef, @bind_params);

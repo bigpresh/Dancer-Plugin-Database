@@ -5,7 +5,7 @@ use Carp;
 use DBI;
 use base qw(DBI::db);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
@@ -31,6 +31,8 @@ Subclassed DBI connection handle with added convenience features
   # no where clause (i.e. return all rows -  so "select * from $table_name"):
   my @all_employees = database->quick_select('employees', {});
 
+  # count number of male employees
+  my $count = database->quick_count('employees', { gender => 'male' });
 
 =head1 Added features
 
@@ -184,6 +186,28 @@ sub quick_lookup {
     return ( $row && exists $row->{$data} ) ? $row->{$data} : undef;
 }
 
+=item quick_count
+
+  my $count = database->quick_count($table,
+                                    { email => $params->{'email'} });
+
+This is syntactic sugar to return a count of all rows which match your
+parameters, useful for pagination.
+
+This call always returns a single scalar value, not a hashref of the
+entire row (or partial row) like most of the other methods in this
+library.
+
+=cut
+
+sub quick_count {
+    my ($self, $table_name, $where) = @_;
+    my $opts = {}; #Options are irrelevant for a count.
+    my @row = $self->_quick_query('COUNT', $table_name, $opts, $where);
+
+    return ( @row ) ? $row[0] : undef ;
+}
+
 # The 3rd arg, $data, has a different meaning depending on the type of query
 # (no, I don't like that much; I may refactor this soon to use named params).
 # For INSERT/UPDATE queries, it'll be a hashref of field => value.
@@ -192,7 +216,7 @@ sub quick_lookup {
 sub _quick_query {
     my ($self, $type, $table_name, $data, $where) = @_;
     
-    if ($type !~ m{^ (SELECT|INSERT|UPDATE|DELETE) $}x) {
+    if ($type !~ m{^ (SELECT|INSERT|UPDATE|DELETE|COUNT) $}x) {
         carp "Unrecognised query type $type!";
         return;
     }
@@ -206,7 +230,7 @@ sub _quick_query {
         carp "Expected a hashref of changes";
         return;
     }
-    if (($type =~ m{^ (SELECT|UPDATE|DELETE) $}x)
+    if (($type =~ m{^ (SELECT|UPDATE|DELETE|COUNT) $}x)
         && (!$where)) {
         carp "Expected where conditions";
         return;
@@ -229,6 +253,7 @@ sub _quick_query {
         INSERT => "INSERT INTO $table_name ",
         UPDATE => "UPDATE $table_name SET ",
         DELETE => "DELETE FROM $table_name ",
+        COUNT => "SELECT COUNT(*) FROM $table_name",
     }->{$type};
     if ($type eq 'INSERT') {
         $sql .= "("
@@ -243,7 +268,7 @@ sub _quick_query {
         push @bind_params, values %$data;
     }
 
-    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT') 
+    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT')
     {
         if (!ref $where) {
             $sql .= " WHERE " . $where;
@@ -336,6 +361,8 @@ sub _quick_query {
             return $self->selectrow_hashref($sql, undef, @bind_params);
         }
 
+    } elsif ($type eq 'COUNT') {
+        return $self->selectrow_array($sql, undef, @bind_params);
     } else {
         # INSERT/UPDATE/DELETE queries just return the result of DBI's do()
         return $self->do($sql, undef, @bind_params);

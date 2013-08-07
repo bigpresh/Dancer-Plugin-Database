@@ -111,6 +111,11 @@ get '/quick_lookup/:name' => sub {
     return $id;
 };
 
+get '/quick_count/:category' => sub {
+    my $row = database->quick_count('users', { category => params->{category} });
+    return $row;
+};
+
 get '/complex_where/:id' => sub {
     my $row = database->quick_select(
         'users', { id => { 'gt' => params->{id} } }

@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-Database
 
+        [ ENHANCEMENTS ]
+        - Add quick_count method (Thanks to Colin Ewen)
+
 2.07    Tue Jul 30 18:59:30 WEST 2013
         - Fix test with wrong base class (part 2)
 

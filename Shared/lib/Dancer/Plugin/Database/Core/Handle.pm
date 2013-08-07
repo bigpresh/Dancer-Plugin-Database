@@ -263,7 +263,7 @@ sub _quick_query {
         push @bind_params, values %$data;
     }
 
-    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT') 
+    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT')
     {
         if (!ref $where) {
             $sql .= " WHERE " . $where;
@@ -357,7 +357,8 @@ sub _quick_query {
         }
 
     } elsif ($type eq 'COUNT') {
-        return $self->selectrow_hashref($sql, undef, @bind_params);
+        my ($count) = $self->selectrow_array($sql, undef, @bind_params);
+        return $count;
     } else {
         # INSERT/UPDATE/DELETE queries just return the result of DBI's do()
         return $self->do($sql, undef, @bind_params);

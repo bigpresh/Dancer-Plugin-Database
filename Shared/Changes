@@ -1,5 +1,6 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.04    Sun Sep  1 13:51:26 WEST 2013
         [ ENHANCEMENTS ]
         - Add quick_count method (Thanks to Colin Ewen)
 

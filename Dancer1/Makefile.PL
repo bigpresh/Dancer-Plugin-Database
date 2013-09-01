@@ -13,7 +13,7 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'Test::More' => 0,
-        'Dancer::Plugin::Database::Core' => 0,
+        'Dancer::Plugin::Database::Core' => '0.04',
         # Need support for Dancer2-compatible stuff
         'Dancer'     => 1.3099,
     },

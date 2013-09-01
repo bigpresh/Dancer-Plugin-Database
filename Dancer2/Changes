@@ -1,5 +1,10 @@
 Revision history for Dancer2-Plugin-Database
 
+2.09    Sun Sep  1 13:56:18 WEST 2013
+
+        [ BUG FIXES ]
+        - Remove ':syntax' on test case (Dancer2 0.08)
+
         [ ENHANCEMENTS ]
         - Add quick_count method (Thanks to Colin Ewen)
 

@@ -13,8 +13,8 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'Test::More' => 0,
-        'Dancer::Plugin::Database::Core' => 0,
-        'Dancer2'     => '0.06',
+        'Dancer::Plugin::Database::Core' => '0.04',
+        'Dancer2'     => '0.08',
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Dancer2-Plugin-Database-*' },

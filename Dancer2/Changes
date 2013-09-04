@@ -1,5 +1,10 @@
 Revision history for Dancer2-Plugin-Database
 
+2.10    Wed Sep  4 16:13:14 WEST 2013
+
+        [ BUG FIXES ]
+        - Dancer2 v0.9 no longer includes 'lib' by default;
+
 2.09    Sun Sep  1 13:56:18 WEST 2013
 
         [ BUG FIXES ]

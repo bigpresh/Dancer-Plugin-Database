@@ -69,7 +69,6 @@ del '/user/:id' => sub {
     'ok';
 };
 
-
 # Routes to exercise some of the extended features:
 get '/quick_insert/:id/:name' => sub {
     database->quick_insert('users',

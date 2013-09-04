@@ -24,7 +24,7 @@ my $conf = {
                                         PrintError => 0,
                                         PrintWarn  => 0,
                                        },
-                         handle_class => 'TestHandleClass',
+                         handle_class => 't::lib::TestHandleClass',
                         }
            };
 
@@ -45,8 +45,8 @@ response_content_is   [ GET => '/isa/DBI::db' ], 1,
     "handle isa('DBI::db')";
 response_content_is   [ GET => '/isa/Dancer::Plugin::Database::Core::Handle' ], 1,
     "handle isa('Dancer::Plugin::Database::Core::Handle')";
-response_content_is   [ GET => '/isa/TestHandleClass' ], 1,
-    "handle isa('TestHandleClass')";
+response_content_is   [ GET => '/isa/t::lib::TestHandleClass' ], 1,
+    "handle isa('t::lib::TestHandleClass')";
 response_content_is   [ GET => '/isa/duck' ], 0, # reverse duck-typing ;)
     "handle is not a duck";
 

@@ -97,7 +97,7 @@ sub database {
                 if ($handle->{dbh}) {
                     eval { $handle->{dbh}->disconnect }
                 }
-                return (_get_connection($conn_details, $logger, $hook_exec), $settings);
+                return ($handle->{dbh} = _get_connection($conn_details, $logger, $hook_exec), $settings);
             }
         }
     } else {

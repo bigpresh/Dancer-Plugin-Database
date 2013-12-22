@@ -1,5 +1,13 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.05    2014-12-22
+        [ ENHANCEMENTS ]
+        - New offset param
+
+        [ BUGFIXES]
+        - Cache handle after reconnection (PR-44, @jmazon)
+        - Check for definedness for options (PR-45, e11it)
+
 0.04    Sun Sep  1 13:51:26 WEST 2013
         [ ENHANCEMENTS ]
         - Add quick_count method (Thanks to Colin Ewen)

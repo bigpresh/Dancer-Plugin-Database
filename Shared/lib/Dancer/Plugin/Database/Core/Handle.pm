@@ -311,13 +311,13 @@ sub _quick_query {
     }
 
     # Add an ORDER BY clause, if we want to:
-    if (exists $opts->{order_by}) {
+    if (exists $opts->{order_by} and defined $opts->{order_by}) {
         $sql .= ' ' . $self->_build_order_by_clause($opts->{order_by});
     }
 
 
     # Add a LIMIT clause if we want to:
-    if (exists $opts->{limit}) {
+    if (exists $opts->{limit} and defined $opts->{limit}) {
         my $limit = $opts->{limit};
         $limit =~ s/\s+//g;
         # Check the limit clause is sane - just a number, or two numbers with a
@@ -333,6 +333,16 @@ sub _quick_query {
         # more than that
         $sql .= " LIMIT 1";
     }
+    
+	if (exists $opts->{offset} and defined $opts->{offset}) {
+        my $offset = $opts->{offset};
+        $offset =~ s/\s+//g;
+		if ($offset =~ /^\d+$/) {
+			$sql .= " OFFSET $offset";
+		} else {
+            die "Invalid OFFSET param $opts->{offset} !";
+		}
+	}
 
     # Dancer::Plugin::Database will have looked at the log_queries setting and
     # stashed it away for us to see:

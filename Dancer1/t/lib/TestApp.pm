@@ -189,6 +189,14 @@ get '/handles_cached' => sub {
     database() eq database() and return "Same handle returned";
 };
 
+get '/handles_cached_after_reconnect' => sub {
+    my $old_handle = database();
+    $old_handle->disconnect;
+    my $new_handle = database();
+    if ($old_handle ne $new_handle && $new_handle eq database()) {
+        return "New handle cached after reconnect";
+    }
+};
 
 # Check that the database_connection_lost hook fires when we force a db handle
 # to go away:

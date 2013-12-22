@@ -12,7 +12,7 @@ if ($@) {
     plan skip_all => 'DBD::SQLite required to run these tests';
 }
 
-plan tests => 42;
+plan tests => 43;
 
 my $dsn = "dbi:SQLite:dbname=:memory:";
 
@@ -153,6 +153,12 @@ response_content_like [ GET => '/runtime_config' ], qr/ok/,
 # Test that we get the same handle each time we call the database() keyword
 # (i.e., that handles are cached appropriately)
 response_content_like [ GET => '/handles_cached' ], qr/Same handle returned/;
+
+# ... and that we get the same handle each time we call the database() keyword
+# after a reconnection (see PR-44)
+response_content_like [ GET => '/handles_cached_after_reconnect' ], 
+    qr/New handle cached after reconnect/;
+
 
 # Test that the database_connection_lost hook fires when the connection goes
 # away

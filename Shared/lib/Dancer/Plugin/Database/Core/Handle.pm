@@ -144,6 +144,24 @@ An example of using options to control the results you get back:
 
 =cut
 
+=item C<offset> number
+
+C<Offset> says to skip that many rows before beginning to return rows (postgresql).
+
+=back
+
+Example:
+
+    # Get the name & phone number of the 10 highest-paid men starting from 11th:
+    database->quick_select(
+        'employees', 
+        { gender => 'male' },
+        { order_by => 'salary', offset => 10, limit => 10, columns => [qw(name phone)] }
+    );
+
+
+=cut
+
 sub quick_select {
     my ($self, $table_name, $where, $opts) = @_;
 

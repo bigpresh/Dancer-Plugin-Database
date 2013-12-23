@@ -156,7 +156,7 @@ Example:
     database->quick_select(
         'employees', 
         { gender => 'male' },
-        { order_by => 'salary', offset=>10, limit => 10, columns => [qw(name phone)] }
+        { order_by => 'salary', offset => 10, limit => 10, columns => [qw(name phone)] }
     );
 
 

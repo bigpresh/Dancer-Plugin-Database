@@ -148,7 +148,6 @@ An example of using options to control the results you get back:
 
 C<Offset> says to skip that many rows before beginning to return rows (postgresql).
 
-=back
 
 Example:
 
@@ -542,7 +541,7 @@ Currently recognized operators are:
 ... same as C<WHERE foo LIKE '%bar%'>
 
 =item 'gt' / 'ge'
- 
+
  'greater than' or 'greater or equal to'
   
  { foo => { 'ge' => '42' } } 
@@ -556,7 +555,7 @@ Currently recognized operators are:
  { foo => { 'lt' => '42' } } 
 
 ... same as C<WHERE foo E<lt> '42'>
- 
+
 =item 'eq' / 'ne' / 'is'
 
  'equal' or 'not equal' or 'is'

@@ -10,11 +10,11 @@ Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
 
 =head1 VERSION
 
-Version 0.04
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that
@@ -217,7 +217,7 @@ sub _get_connection {
             $settings->{dbname} = delete $settings->{database};
         }
 
-        for (qw(database dbname host port sid)) {
+        for (qw(database dbname host port sid server)) {
             if (exists $settings->{$_}) {
                 push @extra_args, $_ . "=" . $settings->{$_};
             }
@@ -390,7 +390,7 @@ This license does not grant you the right to use any trademark, service
 mark, tradename, or logo of the Copyright Holder.
 
 This license includes the non-exclusive, worldwide, free-of-charge
-patent license to make, have made, use, offer to sell, sell, import and
+patent license to make, have made, use, er to sell, sell, import and
 otherwise transfer the Package with respect to any patent claims
 licensable by the Copyright Holder that are necessarily infringed by the
 Package. If you institute patent litigation (including a cross-claim or

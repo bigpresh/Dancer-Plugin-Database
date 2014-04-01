@@ -1,6 +1,14 @@
 Revision history for Dancer-Plugin-Database-Core
 
-0.05    2014-12-22
+0.06    2014-04-01
+        [ ENHANCEMENTS ]
+		- New server config option (thanks Collin Seaton)
+
+		[ BUGFIXES ]
+		- Fix date for 0.05 release
+		- Fix version numbers on documentation
+
+0.05    2013-12-22
         [ ENHANCEMENTS ]
         - New offset param
 

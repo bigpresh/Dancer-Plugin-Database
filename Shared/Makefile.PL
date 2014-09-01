@@ -22,4 +22,16 @@ WriteMakefile(
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Dancer-Plugin-Database-Core-*' },
+    META_MERGE =>
+              {
+               "meta-spec" => { version => 2 },
+               resources =>
+               {
+                repository => 
+                {
+                 type => 'git',
+                 web => 'https://github.com/bigpresh/Dancer-Plugin-Database',
+                },
+               },
+              },
 );

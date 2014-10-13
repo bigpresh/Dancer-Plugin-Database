@@ -16,7 +16,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '2.09';
+our $VERSION = '2.10';
 
 my $settings = undef;
 
@@ -184,6 +184,18 @@ database, e.g.:
             driver: Oracle
             host: localhost
             sid: ABC12
+
+If you have any further connection parameters that need to be appended
+to the dsn, you can put them in as a hash called dsn_extra. For
+example, if you're running mysql on a non-standard socket, you could
+have
+
+   plugins:
+       Database:
+           driver: mysql
+           host: localhost
+           dsn_extra:
+               mysql_socket: /tmp/mysql_staging.sock
 
 
 =head2 DEFINING MULTIPLE CONNECTIONS

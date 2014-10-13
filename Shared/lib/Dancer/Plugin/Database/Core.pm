@@ -10,11 +10,11 @@ Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that
@@ -220,6 +220,11 @@ sub _get_connection {
         for (qw(database dbname host port sid server)) {
             if (exists $settings->{$_}) {
                 push @extra_args, $_ . "=" . $settings->{$_};
+            }
+        }
+        if (my $even_more_dsn_args = $settings->{dsn_extra}) {
+            foreach my $arg ( keys %$even_more_dsn_args ) {
+                push @extra_args, $arg . '=' . $even_more_dsn_args->{$arg};
             }
         }
         $dsn .= ':' . join(';', @extra_args) if @extra_args;

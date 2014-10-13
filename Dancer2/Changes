@@ -1,5 +1,9 @@
 Revision history for Dancer2-Plugin-Database
 
+2.11    2014-10-13
+        [ ENHANCEMENTS ]
+        - Support dsn_extra option (Thanks to Michael J South)
+
 2.10    Wed Sep  4 16:13:14 WEST 2013
 
         [ BUG FIXES ]

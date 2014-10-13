@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database
 
+2.10    2014-10-13
+        [ ENHANCEMENTS ]
+        - Support dsn_extra option (Thanks to Michael J South)
+
 2.09    2013-12-22
         [ ENHANCEMENTS ]
         - Tests for cached handle after reconnection

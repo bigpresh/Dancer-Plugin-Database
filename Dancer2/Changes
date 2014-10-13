@@ -1,5 +1,9 @@
 Revision history for Dancer2-Plugin-Database
 
+2.12    2014-10-13
+        [ BUG FIXES ]
+        - Fixed dependency for Plack::Test.
+
 2.11    2014-10-13
         [ BUG FIXES ]
         - Changed test process to Plack::Test.

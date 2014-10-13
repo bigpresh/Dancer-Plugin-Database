@@ -18,7 +18,7 @@ WriteMakefile(
     TEST_REQUIRES => {
         'Test::More'            => 0,
         'HTTP::Request::Common' => 0,
-        'Plack::Test'           => '1.0032',
+        'Plack'                 => '1.0032',
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Dancer2-Plugin-Database-*' },

@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-Database-Core
 
+        [ BUGFIXES ]
+        - fix dsn regexp (thanks to Michael R. Davis)
+
 0.08    2014-10-13
         [ ENHANCEMENTS ]
         - Support dsn_extra option (Thanks to Michael J South)

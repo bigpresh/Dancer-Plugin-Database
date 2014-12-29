@@ -198,7 +198,7 @@ sub _get_connection {
     my $driver = '';
     if ($settings->{dsn}) {
         $dsn = $settings->{dsn};
-        ($driver) = $dsn =~ m{dbi:([^:]+)};
+        ($driver) = $dsn =~ m{^dbi:([^:]+)}i;
     } else {
         $dsn = "dbi:" . $settings->{driver};
         $driver = $settings->{driver};

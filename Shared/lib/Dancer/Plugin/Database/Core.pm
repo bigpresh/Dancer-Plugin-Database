@@ -156,6 +156,9 @@ sub _get_settings {
         if (my $named_settings = $settings->{connections}{$name}) {
             # Take a (shallow) copy of the settings, so we don't change them
             $return_settings = { %$named_settings };
+            # Make sure that the charset for the default connection is inherited by the
+            # named connection(s)(unless it has been set)
+            $return_settings->{charset} ||= $settings->{charset};
         } else {
             # OK, didn't match anything
             $logger->('error',

@@ -323,7 +323,10 @@ sub _generate_sql {
         $sql .= "("
             . join(',', map { $self->_quote_identifier($_) } keys %$data)
             . ") VALUES ("
-            . join(',', map { "?" } values %$data)
+            . join(',', map { 
+                    ref $_ eq 'SCALAR' ? $$_ : "?" 
+                } values %$data
+            )
             . ")";
         push @bind_params, values %$data;
     }

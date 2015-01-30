@@ -351,15 +351,15 @@ sub _quick_query {
         $sql .= " LIMIT 1";
     }
     
-	if (exists $opts->{offset} and defined $opts->{offset}) {
-        my $offset = $opts->{offset};
-        $offset =~ s/\s+//g;
-		if ($offset =~ /^\d+$/) {
-			$sql .= " OFFSET $offset";
-		} else {
-            die "Invalid OFFSET param $opts->{offset} !";
-		}
-	}
+    if (exists $opts->{offset} and defined $opts->{offset}) {
+    my $offset = $opts->{offset};
+    $offset =~ s/\s+//g;
+            if ($offset =~ /^\d+$/) {
+                    $sql .= " OFFSET $offset";
+            } else {
+        die "Invalid OFFSET param $opts->{offset} !";
+            }
+    }
 
     # Dancer::Plugin::Database will have looked at the log_queries setting and
     # stashed it away for us to see:

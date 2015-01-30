@@ -74,7 +74,7 @@ my @sql_tests = (
     {
         name       => "INSERT with scalarrefs untouched",
         params     => ['INSERT', 'tablename', { one => \'NOW()', two => '2' } ],
-        expect_sql => qq{INSERT INTO "tablename" ("one","two") VALUES (NOW(), ?)},
+        expect_sql => qq{INSERT INTO "tablename" ("one","two") VALUES (NOW(),?)},
     },
 );
 

@@ -48,6 +48,13 @@ database handle, with the following added convenience methods:
 Given a table name and a hashref of data (where keys are column names, and the
 values are, well, the values), insert a row in the table.
 
+If you need any of the values to be interpolated straight into the SQL, for
+instance if you need to use a function call like C<NOW()> or similar, then you
+can provide them as a scalarref:
+
+  database->quick_insert('mytable', { foo => 'Bar', timestamp => \'NOW()' });
+
+Of course, if you do that, you must be careful to avoid SQL injection attacks!
 =cut
 
 sub quick_insert {
@@ -61,6 +68,13 @@ sub quick_insert {
 
 Given a table name, a hashref describing a where clause and a hashref of
 changes, update a row.
+
+As per quick_insert, if you need any of the values to be interpolated straight
+in the SQL, for e.g. to use a function call, provide a scalarref:
+
+  database->quick_update('mytable', { id => 42 }, { counter => \'counter + 1' });
+
+Of course, if you do that, you must be careful to avoid SQL injection attacks!
 
 =cut
 

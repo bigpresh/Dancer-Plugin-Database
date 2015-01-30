@@ -41,17 +41,20 @@ my @sql_tests = (
         name       => "Simple SELECT, no WHERE",
         params     => [ 'SELECT', 'tablename', {} ],
         expect_sql => qq{SELECT * FROM "tablename"},
+        expect_bind_params => [],
     },
     {
         name       => "SELECT with named columns, no WHERE",
         params     => ['SELECT', 'tablename', { columns => [qw(one two) ] } ],
         expect_sql => qq{SELECT "one","two" FROM "tablename"},
+        expect_bind_params => [],
     },
 
     {
         name       => "SELECT with literal string WHERE",
         params     => ['SELECT', 'tablename', undef, 'BEER IS GOOD' ],
         expect_sql => qq{SELECT * FROM "tablename" WHERE BEER IS GOOD},
+        expect_bind_params => [],
     },
 
     {

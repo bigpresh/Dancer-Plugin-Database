@@ -30,25 +30,7 @@ my %quoting_tests = (
     'foo.bar' => '"foo"."bar"',
 );
 
-plan tests => scalar @order_by_tests + scalar keys %quoting_tests;
 
-my $i;
-for my $test (@order_by_tests) {
-    $i++;
-    my $res = $handle->_build_order_by_clause($test->[0]);
-    is($res, $test->[1],
-        sprintf "Order by test %d/%d : %s",
-            $i, scalar @order_by_tests, $res
-    );
-}
-
-for my $identifier (keys %quoting_tests) {
-    is(
-        $handle->_quote_identifier($identifier),
-        $quoting_tests{$identifier},
-        "Quoted '$identifier' as '$quoting_tests{$identifier}'"
-    );
-}
 
 # SQL-generation tests.  Each test is an arrayref consisting of an arrayref of
 # params to pass to _generate_sql(), the SQL to expect, and the bind columns to
@@ -78,6 +60,26 @@ my @sql_tests = (
     },
 );
 
+plan tests 
+    => scalar @order_by_tests + scalar keys(%quoting_tests) + scalar @sql_tests;
+
+my $i;
+for my $test (@order_by_tests) {
+    $i++;
+    my $res = $handle->_build_order_by_clause($test->[0]);
+    is($res, $test->[1],
+        sprintf "Order by test %d/%d : %s",
+            $i, scalar @order_by_tests, $res
+    );
+}
+
+for my $identifier (keys %quoting_tests) {
+    is(
+        $handle->_quote_identifier($identifier),
+        $quoting_tests{$identifier},
+        "Quoted '$identifier' as '$quoting_tests{$identifier}'"
+    );
+}
 
 for my $test (@sql_tests) {
     my ($sql, @bind_params) = $handle->_generate_sql(@{ $test->{params} });

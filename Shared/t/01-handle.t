@@ -3,6 +3,7 @@
 use Test::More;
 use DBI;
 use Dancer::Plugin::Database::Core::Handle;
+use List::Util;
 
 diag( "Testing Dancer::Plugin::Database::Core::Handle "
     . "$Dancer::Plugin::Database::Core::Handle::VERSION, Perl $], $^X"
@@ -58,10 +59,24 @@ my @sql_tests = (
         params     => ['INSERT', 'tablename', { one => \'NOW()', two => '2' } ],
         expect_sql => qq{INSERT INTO "tablename" ("one","two") VALUES (NOW(),?)},
     },
+    {
+        name       => "UPDATE with scalarrefs untouched",
+        params     => ['UPDATE', 'tablename', 
+            { foo => 'Foo', counter => \'counter+1' },
+            { id => 42 },
+        ],
+        expect_sql => qq{UPDATE "tablename" SET "counter"=counter+1,"foo"=?}
+            . qq{ WHERE "id"=?},
+        expect_bind_params => ['Foo',42],
+    },
 );
 
-plan tests 
-    => scalar @order_by_tests + scalar keys(%quoting_tests) + scalar @sql_tests;
+my $sqlgen_test_count = List::Util::sum(
+    map { exists $_->{expect_bind_params} ? 2 : 1 } @sql_tests
+);
+
+ plan tests 
+    => scalar @order_by_tests + scalar keys(%quoting_tests) + $sqlgen_test_count;
 
 my $i;
 for my $test (@order_by_tests) {
@@ -84,6 +99,13 @@ for my $identifier (keys %quoting_tests) {
 for my $test (@sql_tests) {
     my ($sql, @bind_params) = $handle->_generate_sql(@{ $test->{params} });
     is($sql, $test->{expect_sql}, "Got expected SQL for $test->{name}");
+    if (exists $test->{expect_bind_params}) {
+        is_deeply(
+            \@bind_params,
+            $test->{expect_bind_params},
+            "Got expected bind params for $test->{name}",
+        );
+    }
 }
 
 

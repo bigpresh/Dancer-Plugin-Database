@@ -328,7 +328,7 @@ sub _generate_sql {
                 } values %$data
             )
             . ")";
-        push @bind_params, values %$data;
+        push @bind_params, grep { ref $_ ne 'SCALAR' } values %$data;
     }
     if ($type eq 'UPDATE') {
         $sql .= join ',', map { $self->_quote_identifier($_) .'=?' } keys %$data;

@@ -233,6 +233,7 @@ sub quick_count {
 sub _quick_query {
     my ($self, $type, $table_name, $data, $where) = @_;
     
+    # Basic sanity checks first...
     if ($type !~ m{^ (SELECT|INSERT|UPDATE|DELETE|COUNT) $}x) {
         carp "Unrecognised query type $type!";
         return;
@@ -252,6 +253,52 @@ sub _quick_query {
         carp "Expected where conditions";
         return;
     }
+
+    # OK, get the SQL we're going to need
+    # TODO: can we replace our own generation with e.g. SQL::Abstract?  How much
+    # backwards-incompatible change would that incur?
+    my ($sql, @bind_params) = $self->_generate_sql(
+        $type, $table_name, $data, $where
+    );
+
+
+    # Dancer::Plugin::Database will have looked at the log_queries setting and
+    # stashed it away for us to see:
+    if ($self->{private_dancer_plugin_database}{log_queries}) {
+        Dancer::Logger::debug(
+            "Executing $type query $sql with params " . join ',', 
+            map {
+                defined $_ ? 
+                $_ =~ /^[[:ascii:]]+$/ ? 
+                    length $_ > 50 ? substr($_, 0, 47) . '...' : $_
+                : "[non-ASCII data not logged]" : 'undef'
+            } @bind_params
+        );
+    }
+
+    # Select queries, in scalar context, return the first matching row; in list
+    # context, they return a list of matching rows.
+    if ($type eq 'SELECT') {
+        if (wantarray) {
+            return @{ 
+                $self->selectall_arrayref(
+                    $sql, { Slice => {} }, @bind_params
+                )
+            };
+        } else {
+            return $self->selectrow_hashref($sql, undef, @bind_params);
+        }
+
+    } elsif ($type eq 'COUNT') {
+        return $self->selectrow_array($sql, undef, @bind_params);
+    } else {
+        # INSERT/UPDATE/DELETE queries just return the result of DBI's do()
+        return $self->do($sql, undef, @bind_params);
+    }
+}
+
+sub _generate_sql {
+    my ($self, $type, $table_name, $data, $where) = @_;
 
     my $which_cols = '*';
     my $opts = $type eq 'SELECT' && $data ? $data : {};
@@ -289,8 +336,7 @@ sub _quick_query {
     {
         if (!ref $where) {
             $sql .= " WHERE " . $where;
-        }
-        elsif ( ref $where eq 'HASH' ) {
+        } elsif ( ref $where eq 'HASH' ) {
             my @stmts;
             foreach my $k ( keys %$where ) {
                 my $v = $where->{$k};
@@ -302,8 +348,7 @@ sub _quick_query {
                         push @stmts, $self->_quote_identifier($k) . $cond; 
                         push @bind_params, $v->{$op} if $add_bind_param;
                     }
-                }
-                else {
+                } else {
                     my $clause .= $self->_quote_identifier($k);
                     if ( ! defined $v ) {
                         $clause .= ' IS NULL';
@@ -320,8 +365,7 @@ sub _quick_query {
                 }
             }
             $sql .= " WHERE " . join " AND ", @stmts if keys %$where;
-        }
-        else {
+        } else {
             carp "Can't handle ref " . ref $where . " for where";
             return;
         }
@@ -352,48 +396,16 @@ sub _quick_query {
     }
     
     if (exists $opts->{offset} and defined $opts->{offset}) {
-    my $offset = $opts->{offset};
-    $offset =~ s/\s+//g;
-            if ($offset =~ /^\d+$/) {
-                    $sql .= " OFFSET $offset";
-            } else {
-        die "Invalid OFFSET param $opts->{offset} !";
-            }
-    }
-
-    # Dancer::Plugin::Database will have looked at the log_queries setting and
-    # stashed it away for us to see:
-    if ($self->{private_dancer_plugin_database}{log_queries}) {
-        Dancer::Logger::debug(
-            "Executing $type query $sql with params " . join ',', 
-            map {
-                defined $_ ? 
-                $_ =~ /^[[:ascii:]]+$/ ? 
-                    length $_ > 50 ? substr($_, 0, 47) . '...' : $_
-                : "[non-ASCII data not logged]" : 'undef'
-            } @bind_params
-        );
-    }
-
-    # Select queries, in scalar context, return the first matching row; in list
-    # context, they return a list of matching rows.
-    if ($type eq 'SELECT') {
-        if (wantarray) {
-            return @{ 
-                $self->selectall_arrayref(
-                    $sql, { Slice => {} }, @bind_params
-                )
-            };
+        my $offset = $opts->{offset};
+        $offset =~ s/\s+//g;
+        if ($offset =~ /^\d+$/) {
+            $sql .= " OFFSET $offset";
         } else {
-            return $self->selectrow_hashref($sql, undef, @bind_params);
+            die "Invalid OFFSET param $opts->{offset} !";
         }
-
-    } elsif ($type eq 'COUNT') {
-        return $self->selectrow_array($sql, undef, @bind_params);
-    } else {
-        # INSERT/UPDATE/DELETE queries just return the result of DBI's do()
-        return $self->do($sql, undef, @bind_params);
     }
+
+    return ($sql, @bind_params);
 }
 
 sub _get_where_sql {

@@ -345,8 +345,11 @@ sub _generate_sql {
         push @bind_params, grep { ref $_ ne 'SCALAR' } values %$data;
     }
     if ($type eq 'UPDATE') {
-        $sql .= join ',', map { $self->_quote_identifier($_) .'=?' } keys %$data;
-        push @bind_params, values %$data;
+        $sql .= join ',', map {
+            $self->_quote_identifier($_) .'=' 
+            . (ref $data->{$_} eq 'SCALAR' ? ${$data->{$_}} : "?")
+        } keys %$data;
+        push @bind_params, grep { ref $_ ne 'SCALAR' } values %$data;
     }
 
     if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT')

@@ -313,7 +313,7 @@ sub _generate_sql {
     my @bind_params;
 
     my $sql = {
-        SELECT => "SELECT $which_cols FROM $table_name ",
+        SELECT => "SELECT $which_cols FROM $table_name",
         INSERT => "INSERT INTO $table_name ",
         UPDATE => "UPDATE $table_name SET ",
         DELETE => "DELETE FROM $table_name ",
@@ -334,7 +334,7 @@ sub _generate_sql {
 
     if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT')
     {
-        if (!ref $where) {
+        if ($where && !ref $where) {
             $sql .= " WHERE " . $where;
         } elsif ( ref $where eq 'HASH' ) {
             my @stmts;
@@ -365,7 +365,7 @@ sub _generate_sql {
                 }
             }
             $sql .= " WHERE " . join " AND ", @stmts if keys %$where;
-        } else {
+        } elsif (ref $where) {
             carp "Can't handle ref " . ref $where . " for where";
             return;
         }
@@ -404,7 +404,6 @@ sub _generate_sql {
             die "Invalid OFFSET param $opts->{offset} !";
         }
     }
-
     return ($sql, @bind_params);
 }
 

@@ -55,9 +55,20 @@ my @sql_tests = (
     },
 
     {
+        name       => "SELECT with simple WHERE values",
+        params     => [
+            'SELECT', 'tablename', undef, { foo => 'One', bar => 'Two' }
+        ],
+        # Expected order differs - columns alphabetical
+        expect_sql => qq{SELECT * FROM "tablename" WHERE "bar"=? AND "foo"=?},
+        expect_bind_params => ['Two','One'],
+    },
+
+    {
         name       => "INSERT with scalarrefs untouched",
         params     => ['INSERT', 'tablename', { one => \'NOW()', two => '2' } ],
         expect_sql => qq{INSERT INTO "tablename" ("one","two") VALUES (NOW(),?)},
+        expect_bind_params => [ 2 ],
     },
     {
         name       => "UPDATE with scalarrefs untouched",

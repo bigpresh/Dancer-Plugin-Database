@@ -48,6 +48,13 @@ database handle, with the following added convenience methods:
 Given a table name and a hashref of data (where keys are column names, and the
 values are, well, the values), insert a row in the table.
 
+If you need any of the values to be interpolated straight into the SQL, for
+instance if you need to use a function call like C<NOW()> or similar, then you
+can provide them as a scalarref:
+
+  database->quick_insert('mytable', { foo => 'Bar', timestamp => \'NOW()' });
+
+Of course, if you do that, you must be careful to avoid SQL injection attacks!
 =cut
 
 sub quick_insert {
@@ -61,6 +68,13 @@ sub quick_insert {
 
 Given a table name, a hashref describing a where clause and a hashref of
 changes, update a row.
+
+As per quick_insert, if you need any of the values to be interpolated straight
+in the SQL, for e.g. to use a function call, provide a scalarref:
+
+  database->quick_update('mytable', { id => 42 }, { counter => \'counter + 1' });
+
+Of course, if you do that, you must be careful to avoid SQL injection attacks!
 
 =cut
 
@@ -233,6 +247,7 @@ sub quick_count {
 sub _quick_query {
     my ($self, $type, $table_name, $data, $where) = @_;
     
+    # Basic sanity checks first...
     if ($type !~ m{^ (SELECT|INSERT|UPDATE|DELETE|COUNT) $}x) {
         carp "Unrecognised query type $type!";
         return;
@@ -253,113 +268,13 @@ sub _quick_query {
         return;
     }
 
-    my $which_cols = '*';
-    my $opts = $type eq 'SELECT' && $data ? $data : {};
-    if ($opts->{columns}) {
-        my @cols = (ref $opts->{columns}) 
-            ? @{ $opts->{columns} }
-            :    $opts->{columns} ;
-        $which_cols = join(',', map { $self->_quote_identifier($_) } @cols);
-    }
+    # OK, get the SQL we're going to need
+    # TODO: can we replace our own generation with e.g. SQL::Abstract?  How much
+    # backwards-incompatible change would that incur?
+    my ($sql, @bind_params) = $self->_generate_sql(
+        $type, $table_name, $data, $where
+    );
 
-    $table_name = $self->_quote_identifier($table_name);
-    my @bind_params;
-
-    my $sql = {
-        SELECT => "SELECT $which_cols FROM $table_name ",
-        INSERT => "INSERT INTO $table_name ",
-        UPDATE => "UPDATE $table_name SET ",
-        DELETE => "DELETE FROM $table_name ",
-        COUNT => "SELECT COUNT(*) FROM $table_name",
-    }->{$type};
-    if ($type eq 'INSERT') {
-        $sql .= "("
-            . join(',', map { $self->_quote_identifier($_) } keys %$data)
-            . ") VALUES ("
-            . join(',', map { "?" } values %$data)
-            . ")";
-        push @bind_params, values %$data;
-    }
-    if ($type eq 'UPDATE') {
-        $sql .= join ',', map { $self->_quote_identifier($_) .'=?' } keys %$data;
-        push @bind_params, values %$data;
-    }
-
-    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT')
-    {
-        if (!ref $where) {
-            $sql .= " WHERE " . $where;
-        }
-        elsif ( ref $where eq 'HASH' ) {
-            my @stmts;
-            foreach my $k ( keys %$where ) {
-                my $v = $where->{$k};
-                if ( ref $v eq 'HASH' ) {
-                    my $not = delete $v->{'not'};
-                    while (my($op,$value) = each %$v ) {
-                        my ($cond, $add_bind_param) 
-                            = $self->_get_where_sql($op, $not, $value);
-                        push @stmts, $self->_quote_identifier($k) . $cond; 
-                        push @bind_params, $v->{$op} if $add_bind_param;
-                    }
-                }
-                else {
-                    my $clause .= $self->_quote_identifier($k);
-                    if ( ! defined $v ) {
-                        $clause .= ' IS NULL';
-                    }
-                    elsif ( ! ref $v ) {
-                        $clause .= '=?';
-                        push @bind_params, $v;
-                    }
-                    elsif ( ref $v eq 'ARRAY' ) {
-                        $clause .= ' IN (' . (join ',', map { '?' } @$v) . ')';
-                        push @bind_params, @$v;
-                    }
-                    push @stmts, $clause;
-                }
-            }
-            $sql .= " WHERE " . join " AND ", @stmts if keys %$where;
-        }
-        else {
-            carp "Can't handle ref " . ref $where . " for where";
-            return;
-        }
-    }
-
-    # Add an ORDER BY clause, if we want to:
-    if (exists $opts->{order_by} and defined $opts->{order_by}) {
-        $sql .= ' ' . $self->_build_order_by_clause($opts->{order_by});
-    }
-
-
-    # Add a LIMIT clause if we want to:
-    if (exists $opts->{limit} and defined $opts->{limit}) {
-        my $limit = $opts->{limit};
-        $limit =~ s/\s+//g;
-        # Check the limit clause is sane - just a number, or two numbers with a
-        # comma between (if using offset,limit )
-        if ($limit =~ m{ ^ \d+ (?: , \d+)? $ }x) {
-            # Checked for sanity above so safe to interpolate
-            $sql .= " LIMIT $limit";
-        } else {
-            die "Invalid LIMIT param $opts->{limit} !";
-        }
-    } elsif ($type eq 'SELECT' && !wantarray) {
-        # We're only returning one row in scalar context, so don't ask for any
-        # more than that
-        $sql .= " LIMIT 1";
-    }
-    
-	if (exists $opts->{offset} and defined $opts->{offset}) {
-        my $offset = $opts->{offset};
-        $offset =~ s/\s+//g;
-		if ($offset =~ /^\d+$/) {
-			$sql .= " OFFSET $offset";
-		} else {
-            die "Invalid OFFSET param $opts->{offset} !";
-		}
-	}
 
     # Dancer::Plugin::Database will have looked at the log_queries setting and
     # stashed it away for us to see:
@@ -394,6 +309,122 @@ sub _quick_query {
         # INSERT/UPDATE/DELETE queries just return the result of DBI's do()
         return $self->do($sql, undef, @bind_params);
     }
+}
+
+sub _generate_sql {
+    my ($self, $type, $table_name, $data, $where) = @_;
+
+    my $which_cols = '*';
+    my $opts = $type eq 'SELECT' && $data ? $data : {};
+    if ($opts->{columns}) {
+        my @cols = (ref $opts->{columns}) 
+            ? @{ $opts->{columns} }
+            :    $opts->{columns} ;
+        $which_cols = join(',', map { $self->_quote_identifier($_) } @cols);
+    }
+
+    $table_name = $self->_quote_identifier($table_name);
+    my @bind_params;
+
+    my $sql = {
+        SELECT => "SELECT $which_cols FROM $table_name",
+        INSERT => "INSERT INTO $table_name ",
+        UPDATE => "UPDATE $table_name SET ",
+        DELETE => "DELETE FROM $table_name ",
+        COUNT => "SELECT COUNT(*) FROM $table_name",
+    }->{$type};
+    if ($type eq 'INSERT') {
+        $sql .= "("
+            . join(',', map { $self->_quote_identifier($_) } keys %$data)
+            . ") VALUES ("
+            . join(',', map { 
+                    ref $_ eq 'SCALAR' ? $$_ : "?" 
+                } values %$data
+            )
+            . ")";
+        push @bind_params, grep { ref $_ ne 'SCALAR' } values %$data;
+    }
+    if ($type eq 'UPDATE') {
+        $sql .= join ',', map {
+            $self->_quote_identifier($_) .'=' 
+            . (ref $data->{$_} eq 'SCALAR' ? ${$data->{$_}} : "?")
+        } keys %$data;
+        push @bind_params, grep { ref $_ ne 'SCALAR' } values %$data;
+    }
+
+    if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT')
+    {
+        if ($where && !ref $where) {
+            $sql .= " WHERE " . $where;
+        } elsif ( ref $where eq 'HASH' ) {
+            my @stmts;
+            foreach my $k ( keys %$where ) {
+                my $v = $where->{$k};
+                if ( ref $v eq 'HASH' ) {
+                    my $not = delete $v->{'not'};
+                    while (my($op,$value) = each %$v ) {
+                        my ($cond, $add_bind_param) 
+                            = $self->_get_where_sql($op, $not, $value);
+                        push @stmts, $self->_quote_identifier($k) . $cond; 
+                        push @bind_params, $v->{$op} if $add_bind_param;
+                    }
+                } else {
+                    my $clause .= $self->_quote_identifier($k);
+                    if ( ! defined $v ) {
+                        $clause .= ' IS NULL';
+                    }
+                    elsif ( ! ref $v ) {
+                        $clause .= '=?';
+                        push @bind_params, $v;
+                    }
+                    elsif ( ref $v eq 'ARRAY' ) {
+                        $clause .= ' IN (' . (join ',', map { '?' } @$v) . ')';
+                        push @bind_params, @$v;
+                    }
+                    push @stmts, $clause;
+                }
+            }
+            $sql .= " WHERE " . join " AND ", @stmts if keys %$where;
+        } elsif (ref $where) {
+            carp "Can't handle ref " . ref $where . " for where";
+            return;
+        }
+    }
+
+    # Add an ORDER BY clause, if we want to:
+    if (exists $opts->{order_by} and defined $opts->{order_by}) {
+        $sql .= ' ' . $self->_build_order_by_clause($opts->{order_by});
+    }
+
+
+    # Add a LIMIT clause if we want to:
+    if (exists $opts->{limit} and defined $opts->{limit}) {
+        my $limit = $opts->{limit};
+        $limit =~ s/\s+//g;
+        # Check the limit clause is sane - just a number, or two numbers with a
+        # comma between (if using offset,limit )
+        if ($limit =~ m{ ^ \d+ (?: , \d+)? $ }x) {
+            # Checked for sanity above so safe to interpolate
+            $sql .= " LIMIT $limit";
+        } else {
+            die "Invalid LIMIT param $opts->{limit} !";
+        }
+    } elsif ($type eq 'SELECT' && !wantarray) {
+        # We're only returning one row in scalar context, so don't ask for any
+        # more than that
+        $sql .= " LIMIT 1";
+    }
+    
+    if (exists $opts->{offset} and defined $opts->{offset}) {
+        my $offset = $opts->{offset};
+        $offset =~ s/\s+//g;
+        if ($offset =~ /^\d+$/) {
+            $sql .= " OFFSET $offset";
+        } else {
+            die "Invalid OFFSET param $opts->{offset} !";
+        }
+    }
+    return ($sql, @bind_params);
 }
 
 sub _get_where_sql {

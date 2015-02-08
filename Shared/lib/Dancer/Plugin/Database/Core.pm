@@ -14,7 +14,7 @@ Version 0.08
 
 =cut
 
-our $VERSION = '0.08_01';
+our $VERSION = '0.08_02';
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that

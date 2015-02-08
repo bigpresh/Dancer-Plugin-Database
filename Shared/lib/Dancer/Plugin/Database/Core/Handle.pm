@@ -334,21 +334,30 @@ sub _generate_sql {
         COUNT => "SELECT COUNT(*) FROM $table_name",
     }->{$type};
     if ($type eq 'INSERT') {
-        $sql .= "("
-            . join(',', map { $self->_quote_identifier($_) } keys %$data)
-            . ") VALUES ("
-            . join(',', map { 
-                    ref $_ eq 'SCALAR' ? $$_ : "?" 
-                } values %$data
-            )
-            . ")";
-        push @bind_params, grep { ref $_ ne 'SCALAR' } values %$data;
+        my (@keys, @values);
+        while (my($key, $value) = each %$data) {
+            push @keys, $self->_quote_identifier($key);
+            if (ref $value eq 'SCALAR') {
+                # If it's a scalarref it goes in the SQL as it is; this is a
+                # potential SQL injection risk, but is documented as such - it
+                # allows the user to include arbitrary SQL, at their own risk.
+                push @values, $$value;
+            } else {
+                push @values, "?";
+                push @bind_params, $value;
+            }
+        }
+
+        $sql .= sprintf "(%s) VALUES (%s)",
+            join(',', @keys), join(',', @values);
     }
+
     if ($type eq 'UPDATE') {
+        my (@keys, @values);
         $sql .= join ',', map {
             $self->_quote_identifier($_) .'=' 
             . (ref $data->{$_} eq 'SCALAR' ? ${$data->{$_}} : "?")
-        } keys %$data;
+        } sort keys %$data;
         push @bind_params, grep { ref $_ ne 'SCALAR' } values %$data;
     }
 
@@ -358,7 +367,7 @@ sub _generate_sql {
             $sql .= " WHERE " . $where;
         } elsif ( ref $where eq 'HASH' ) {
             my @stmts;
-            foreach my $k ( keys %$where ) {
+            foreach my $k ( sort keys %$where ) {
                 my $v = $where->{$k};
                 if ( ref $v eq 'HASH' ) {
                     my $not = delete $v->{'not'};

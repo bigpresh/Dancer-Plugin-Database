@@ -335,7 +335,8 @@ sub _generate_sql {
     }->{$type};
     if ($type eq 'INSERT') {
         my (@keys, @values);
-        while (my($key, $value) = each %$data) {
+        for my $key (sort keys %$data) {
+            my $value = $data->{$key};
             push @keys, $self->_quote_identifier($key);
             if (ref $value eq 'SCALAR') {
                 # If it's a scalarref it goes in the SQL as it is; this is a

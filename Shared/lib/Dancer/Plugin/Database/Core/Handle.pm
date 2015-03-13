@@ -135,7 +135,7 @@ Specify how the results should be ordered.  This option can take various values:
 
     { order_by => { desc => 'foo' } } # equiv to ORDER BY foo DESC
     { order_by => [ { desc => 'foo' }, { asc => 'bar' } ] }
-       # above is equiv to ORDER BY foo ASC, bar DESC
+       # above is equiv to ORDER BY foo DESC, bar ASC
 
 =back
 

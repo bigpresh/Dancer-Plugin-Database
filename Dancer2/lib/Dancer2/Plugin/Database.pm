@@ -23,14 +23,14 @@ register_hook qw(database_connected
                  database_error);
 
 
-my $settings = undef;
+my $settings = {};
 
 
-sub _load_db_settings {
-    my $self = shift;
+on_plugin_import {
+    my $dsl = shift;
     $settings = plugin_setting();
-    $settings->{charset} ||= $self->setting('charset');
-}
+    $settings->{charset} ||= $dsl->setting('charset') || 'utf-8';
+};
 
 register database => sub {
     my $dsl = shift;
@@ -45,7 +45,6 @@ register database => sub {
         $dsl->execute_hook(@_);
     };
 
-    _load_db_settings($dsl) unless $settings;
     my ($dbh, $cfg) = Dancer::Plugin::Database::Core::database( arg => $_[0],
                                                                 logger => $logger,
                                                                 hook_exec => $hook_exec,

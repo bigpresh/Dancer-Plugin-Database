@@ -317,10 +317,9 @@ sub _check_connection {
              $result = $dbh->ping;
         };
 
-	if (!defined($result)) {
-           # if !defined, then it must have thrown exception, so connection no good.
-	   return 0;
-	} elsif (int($result)) {
+        return 0 if $@;
+
+	    if (int($result)) {
             # DB driver itself claims all is OK, trust it:
             return 1;
         } else {

@@ -310,7 +310,13 @@ sub _get_connection {
 sub _check_connection {
     my $dbh = shift;
     return unless $dbh;
-    if ($dbh->{Active} && (my $result = $dbh->ping)) {
+    if ($dbh->{Active}) { 
+        my $result;
+
+        eval { 
+             $result = $dbh->ping;
+        };
+
         if (int($result)) {
             # DB driver itself claims all is OK, trust it:
             return 1;

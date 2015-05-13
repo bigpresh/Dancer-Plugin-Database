@@ -311,13 +311,16 @@ sub _check_connection {
     my $dbh = shift;
     return unless $dbh;
     if ($dbh->{Active}) { 
-        my $result;
+        my $result = undef;
 
         eval { 
              $result = $dbh->ping;
         };
 
-        if (int($result)) {
+	if (!defined($result)) {
+           # if !defined, then it must have thrown exception, so connection no good.
+	   return 0;
+	} elsif (int($result)) {
             # DB driver itself claims all is OK, trust it:
             return 1;
         } else {

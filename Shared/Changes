@@ -2,8 +2,8 @@ Revision history for Dancer-Plugin-Database-Core
 
 0.10    2015-05-14
         [ BUGFIXES ]
-        - Fix SQL generation problems due to hash ordering
           (thanks to Nuno Carvalho (nunorc))
+        - fix bug with hash key randomization (Nuno Carvalho)
 
 0.09    2015-04-30
         [ BUGFIXES ]

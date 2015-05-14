@@ -1,7 +1,10 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.09    2015-05-14
         [ BUGFIXES ]
         - fix dsn regexp (thanks to Michael R. Davis)
+        - fix quick_update problem with sorted keys
+          (thanks to Nuno Carvalho)
 
 0.08    2014-10-13
         [ ENHANCEMENTS ]

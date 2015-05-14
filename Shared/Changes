@@ -1,6 +1,10 @@
 Revision history for Dancer-Plugin-Database-Core
 
-<<<<<<< HEAD
+0.10    2015-05-14
+        [ BUGFIXES ]
+        - Fix SQL generation problems due to hash ordering
+          (thanks to Nuno Carvalho (nunorc))
+
 0.09    2015-04-30
         [ BUGFIXES ]
         - fix dsn regexp (thanks to Michael R. Davis)

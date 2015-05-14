@@ -10,7 +10,7 @@ Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =cut
 

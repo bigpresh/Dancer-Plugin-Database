@@ -1,5 +1,6 @@
 Revision history for Dancer-Plugin-Database-Core
 
+<<<<<<< HEAD
 0.09    2015-04-30
         [ BUGFIXES ]
         - fix dsn regexp (thanks to Michael R. Davis)

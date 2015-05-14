@@ -354,12 +354,13 @@ sub _generate_sql {
     }
 
     if ($type eq 'UPDATE') {
-        my (@keys, @values);
-        $sql .= join ',', map {
-            $self->_quote_identifier($_) .'=' 
-            . (ref $data->{$_} eq 'SCALAR' ? ${$data->{$_}} : "?")
-        } sort keys %$data;
-        push @bind_params, grep { ref $_ ne 'SCALAR' } values %$data;
+        my @sql;
+        for (sort keys %$data) {
+          push @sql, $self->_quote_identifier($_) . '=' .
+            (ref $data->{$_} eq 'SCALAR' ? ${$data->{$_}} : "?");
+          push @bind_params, $data->{$_} if (ref $data->{$_} ne 'SCALAR');
+        }
+        $sql .= join ',', @sql;
     }
 
     if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT')

@@ -24,7 +24,10 @@ WriteMakefile(
     clean => { FILES => 'Dancer-Plugin-Database-Core-*' },
     META_MERGE =>
               {
-               "meta-spec" => { version => 2 },
+              "meta-spec" => { version => 2 },
+              bugtracker  => {
+                web => 'https://github.com/bigpresh/Dancer-Plugin-Database/issues',
+               },
                resources =>
                {
                 repository => 

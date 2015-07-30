@@ -189,6 +189,12 @@ sub _get_settings {
 sub _get_connection {
     my ($settings, $logger, $hook_exec) = @_;
 
+    if (!$settings->{dsn} && !$settings->{driver}) {
+        die "Can't get a database connection without settings supplied!\n"
+            . "Please check you've supplied settings in config as per the "
+            . "Dancer::Plugin::Database documentation";
+    }
+
     # Assemble the DSN:
     my $dsn = '';
     my $driver = '';

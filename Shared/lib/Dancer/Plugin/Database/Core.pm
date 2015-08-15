@@ -289,7 +289,10 @@ sub _get_connection {
     # ("You can stash private data into DBI handles via $h->{private_..._*}..")
     $dbh->{private_dancer_plugin_database} = {
         log_queries => $settings->{log_queries} || 0,
+        logger      => $logger,
     };
+
+
 
     # Re-bless it as a Dancer::Plugin::Database::Core::Handle object, to provide nice
     # extra features (unless the config specifies a different class; if it does,

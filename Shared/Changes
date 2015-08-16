@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.12    2015-08-16
+        [ BUGFIXES ]
+        - use logger correctly for log_queries (thanks aka-raj for bug report)
+
 0.11    2015-06-16
         [ BUGFIXES ]
         - add correct license name (thanks Jens for poking)

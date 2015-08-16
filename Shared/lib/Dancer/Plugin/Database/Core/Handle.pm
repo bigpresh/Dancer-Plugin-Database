@@ -279,7 +279,7 @@ sub _quick_query {
     # Dancer::Plugin::Database will have looked at the log_queries setting and
     # stashed it away for us to see:
     if ($self->{private_dancer_plugin_database}{log_queries}) {
-        Dancer::Logger::debug(
+    	$self->{private_dancer_plugin_database}{logger}->(debug => 
             "Executing $type query $sql with params " . join ',', 
             map {
                 defined $_ ? 
@@ -447,7 +447,7 @@ sub _get_where_sql {
     # - there's no need to return a bind param for that.
     if ($op eq 'is') {
         if (defined $value) {
-            Dancer::Logger::warning(
+        	$self->{private_dancer_plugin_database}{logger}->(warning => 
                 "Using the 'IS' operator only makes sense to test for nullness,"
                 ." but a non-undef value was passed.  Did you mean eq/ne?"
             );

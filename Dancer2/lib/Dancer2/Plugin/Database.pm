@@ -15,7 +15,7 @@ Dancer2::Plugin::Database - easy database connections for Dancer2 applications
 
 =cut
 
-our $VERSION = '2.12';
+our $VERSION = '2.13';
 
 register_hook qw(database_connected
                  database_connection_lost
@@ -25,12 +25,11 @@ register_hook qw(database_connected
 
 my $settings = {};
 
-
-on_plugin_import {
+sub _load_settings {
     my $dsl = shift;
     $settings = plugin_setting();
     $settings->{charset} ||= $dsl->setting('charset') || 'utf-8';
-};
+}
 
 register database => sub {
     my $dsl = shift;
@@ -44,6 +43,10 @@ register database => sub {
     my $hook_exec = sub {
         $dsl->execute_hook(@_);
     };
+
+    ## This is mostly for the case the user uses 'set plugins' and
+    ## changes configuration during runtime. For example in our test suite.
+    _load_settings($dsl);
 
     my ($dbh, $cfg) = Dancer::Plugin::Database::Core::database( arg => $_[0],
                                                                 logger => $logger,

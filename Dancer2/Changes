@@ -1,5 +1,10 @@
 Revision history for Dancer2-Plugin-Database
 
+2.13    2015-10-02
+        [ BUG FIXES ]
+        - Require Dancer::Plugin::Database::Core v0.12, that
+          fixes logging problems        
+
 2.12    2014-10-13
         [ BUG FIXES ]
         - Fixed dependency for Plack::Test.

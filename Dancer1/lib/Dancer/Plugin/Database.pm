@@ -16,7 +16,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '2.10';
+our $VERSION = '2.11';
 
 my $settings = undef;
 
@@ -441,7 +441,7 @@ You can find the author on IRC in the channel C<#dancer> on <irc.perl.org>.
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-12 David Precious.
+Copyright 2010-2015 David Precious.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

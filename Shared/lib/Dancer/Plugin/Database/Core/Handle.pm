@@ -145,8 +145,6 @@ Limit how many records will be returned; equivalent to e.g. C<LIMIT 1> in an SQL
 query.  If called in scalar context, an implicit LIMIT 1 will be added to the
 query anyway, so you needn't add it yourself.
 
-=back
-
 An example of using options to control the results you get back:
 
     # Get the name & phone number of the 10 highest-paid men:
@@ -192,6 +190,8 @@ sub quick_select {
         return $self->_quick_query('SELECT', $table_name, $opts, $where);
     }
 }
+
+=back
 
 =item quick_lookup
 

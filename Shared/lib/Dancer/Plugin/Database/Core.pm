@@ -10,7 +10,7 @@ Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
 
 =cut
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that
@@ -51,7 +51,7 @@ sub database {
     # passed to the database() keyword, we'll reuse the same handle:
     if (ref $arg eq 'HASH') {
         $handle_key = $arg;
-        $conn_details = $arg;
+        $conn_details = _merge_settings($arg, $settings, $logger);
     } else {
         $handle_key = defined $arg ? $arg : $def_handle;
         $conn_details = _get_settings($arg, $settings, $logger);
@@ -128,7 +128,14 @@ sub database {
 }
 
 
+sub _merge_settings {
+    my ($arg, $settings, $logger) = @_;
+    $arg->{charset}  = $settings->{charset};
 
+    $arg = _set_defaults($arg);
+
+    return $arg;
+}
 
 sub _get_settings {
     my ($name, $settings, $logger) = @_;
@@ -161,6 +168,13 @@ sub _get_settings {
         }
     }
 
+    $return_settings = _set_defaults($return_settings);
+
+    return $return_settings;
+}
+
+sub _set_defaults {
+    my $return_settings = shift;
     # We should have something to return now; make sure we have a
     # connection_check_threshold, then return what we found.  In previous
     # versions the documentation contained a typo mentioning
@@ -182,7 +196,6 @@ sub _get_settings {
 
     return $return_settings;
 }
-
 
 
 # Given the settings to use, try to get a database connection

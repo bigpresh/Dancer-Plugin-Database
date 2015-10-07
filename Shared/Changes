@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.13    2015-10-07
+        [ BUGFIXES ]
+        - use consistent version numbering (kwaliteee++)
+
 0.12    2015-08-16
         [ BUGFIXES ]
         - use logger correctly for log_queries (thanks aka-raj for bug report)

@@ -2,6 +2,8 @@ package Dancer2::Plugin::Database;
 
 use strict;
 
+use 5.010;
+
 use Dancer::Plugin::Database::Core;
 use Dancer::Plugin::Database::Core::Handle;
 

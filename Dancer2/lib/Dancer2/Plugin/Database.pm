@@ -41,7 +41,14 @@ register database => sub {
     # wasn't working properly calling the Dancer2::Plugin execute_hook
     # directly
     my $hook_exec = sub {
-        $dsl->execute_hook(@_);
+        if ( $dsl->can('execute_plugin_hook') ) {
+            # Plugin2
+            $dsl->execute_plugin_hook(@_);
+        }
+        else {
+            # old behaviour
+            $dsl->execute_hook(@_);
+        }
     };
 
     ## This is mostly for the case the user uses 'set plugins' and

@@ -1,5 +1,11 @@
 Revision history for Dancer2-Plugin-Database
 
+2.15
+
+        [ ENHANCEMENTS ]
+        - Bump required Dancer2 version to 0.166001 given some
+          bug regressions.
+
 2.14    2016-01-20
 
         [ ENHANCEMENTS ]

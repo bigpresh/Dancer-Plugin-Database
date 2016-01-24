@@ -329,11 +329,7 @@ sub _check_connection {
     my $dbh = shift;
     return unless $dbh;
     if ($dbh->{Active}) { 
-        my $result = undef;
-
-        eval { 
-             $result = $dbh->ping;
-        };
+        my $result = eval { $dbh->ping };
 
         return 0 if $@;
 

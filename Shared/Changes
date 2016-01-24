@@ -1,5 +1,11 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.14    
+
+        [ BUGFIXES ]
+        - wrap the call to DBI ping in eval and handle results.
+        (thanks to James Russo)
+
 0.13    2015-10-07
         [ BUGFIXES ]
         - use consistent version numbering (kwaliteee++)

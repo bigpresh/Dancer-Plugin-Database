@@ -1,5 +1,7 @@
 Revision history for Dancer-Plugin-Database
 
+        - skip author tests (thanks to Stefan Hornburg)
+
 2.11    2015-10-02
         [ BUG FIXES ]
         - Require Dancer::Plugin::Database::Core v0.12, that

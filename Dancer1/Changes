@@ -1,21 +1,28 @@
 Revision history for Dancer-Plugin-Database
 
+2.12    2016-01-24
+
+        [ BUG FIXES ]
         - skip author tests (thanks to Stefan Hornburg)
 
 2.11    2015-10-02
+
         [ BUG FIXES ]
         - Require Dancer::Plugin::Database::Core v0.12, that
           fixes logging problems
 
 2.10    2014-10-13
+
         [ ENHANCEMENTS ]
         - Support dsn_extra option (Thanks to Michael J South)
 
 2.09    2013-12-22
+
         [ ENHANCEMENTS ]
         - Tests for cached handle after reconnection
 
 2.08    Sun Sep  1 13:52:52 WEST 2013
+
         [ ENHANCEMENTS ]
         - Add quick_count method (Thanks to Colin Ewen)
 
@@ -26,41 +33,47 @@ Revision history for Dancer-Plugin-Database
         - Fix test with wrong base class.
 
 2.05    2013-07-29
-	- Remove code from module to share with Dancer2 plugin.
+       	- Remove code from module to share with Dancer2 plugin.
         - Added dependency on Dancer::Plugin::Database::Core
 
 2.04    2013-03-04
+
         [ ENHANCEMENTS ]
         - Allow 'sid' to be passed into DSN, for Oracle support.
 
 2.03    2012-12-14
+
         [ BUGFIX ]
         - Remove left-over debugging warning (thanks to ofosos for reporting)
 
 2.02    2012-12-07
+
         [ ENHANCEMENTS ]
-        - If asked for default connection (no connection name given) but there
-          is no default connection configured, throw a more helpful error
-          message.
+        - If asked for default connection (no connection name given) but
+          there is no default connection configured, throw a more helpful 
+          error message.
 
 2.01    2012-09-18
+
         [ BUGFIX ]
         - Fix crashing bug when charset: UTF-8 is present - thanks to Hugh
           Gallagher for reporting & providing fix in RT #79719.
-          Presumably the test suite doesn't set UTF-8, so this failure never
-          showed up in testing :(
+          Presumably the test suite doesn't set UTF-8, so this failure 
+          never showed up in testing :(
 
 2.00    2012-09-17
+
         [ ENHANCEMENTS ]
         - Support for Dancer 2
         - Automatic quoting handles e.g. schema.table properly - GH #33,
           thanks to mscolly for reporting
-        - Accept limit offset,count syntax too - GH #31, thanks to nicolasfranck
-          for reporting
-        - a value of 0 for connectivity_check_threshold now disables checking
-          entirely - thanks to knutov in GH #22
+        - Accept limit offset,count syntax too - GH #31, thanks to 
+          nicolasfranck for reporting
+        - a value of 0 for connectivity_check_threshold now disables 
+          checking entirely - thanks to knutov in GH #22
 
 1.82    2012-06-28
+
         [ BUGFIXES ]
         - Fix for Debian RT #665221 :
         http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=665221 - avoid issues
@@ -69,9 +82,11 @@ Revision history for Dancer-Plugin-Database
         still have a handle laying around for.
 
 1.81    2012-03-07
+
         [ BUGFIXES ]
-        - Don't generate invalid SQL with certain uses of where and order_by
-          clauses together (PR-27, thanks to Michael Stapelberg (mstap))
+        - Don't generate invalid SQL with certain uses of where and 
+          order_by clauses together (PR-27, thanks to Michael Stapelberg
+          (mstap))
 
 1.80    2012-02-06
         [ ENHANCEMENTS]

@@ -9,3 +9,4 @@ t/01-handle.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
+MANIFEST.SKIP

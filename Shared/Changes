@@ -1,43 +1,52 @@
 Revision history for Dancer-Plugin-Database-Core
 
-0.14    
+0.14    2016-01-24
 
         [ BUGFIXES ]
         - wrap the call to DBI ping in eval and handle results.
         (thanks to James Russo)
+        - skip author tests (thanks to Stefan Hornburg)
 
 0.13    2015-10-07
+
         [ BUGFIXES ]
         - use consistent version numbering (kwaliteee++)
 
 0.12    2015-08-16
+
         [ BUGFIXES ]
         - use logger correctly for log_queries (thanks aka-raj for bug report)
 
 0.11    2015-06-16
+
         [ BUGFIXES ]
         - add correct license name (thanks Jens for poking)
 
 0.10    2015-05-14
+
         [ BUGFIXES ]
-          (thanks to Nuno Carvalho (nunorc))
-        - fix bug with hash key randomization (Nuno Carvalho)
+        - fix bug with hash key randomization
+          (thanks to Nuno Carvalho)
 
 0.09    2015-04-30
+
         [ BUGFIXES ]
         - fix dsn regexp (thanks to Michael R. Davis)
         - Scalarrefs for raw SQL / SQL function calls
         - Refactor SQL generation and add tests for correctness of generated SQL
 
 0.08    2014-10-13
+
         [ ENHANCEMENTS ]
         - Support dsn_extra option (Thanks to Michael J South)
 
 0.07    2014-09-01
+
         [ BUILD SYSTEM ]
         - Added metainformation for metacpan.
 
 0.06    2014-04-01
+
         [ ENHANCEMENTS ]
         - New server config option (thanks Collin Seaton)
 
@@ -46,6 +55,7 @@ Revision history for Dancer-Plugin-Database-Core
         - Fix version numbers on documentation
 
 0.05    2013-12-22
+
         [ ENHANCEMENTS ]
         - New offset param
 
@@ -54,6 +64,7 @@ Revision history for Dancer-Plugin-Database-Core
         - Check for definedness for options (PR-45, e11it)
 
 0.04    Sun Sep  1 13:51:26 WEST 2013
+
         [ ENHANCEMENTS ]
         - Add quick_count method (Thanks to Colin Ewen)
 

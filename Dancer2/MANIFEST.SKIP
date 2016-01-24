@@ -14,3 +14,5 @@ Makefile$
 ^.*\.swp$
 ^ignore.txt
 ^.gitignore
+~$
+\.tar\.gz$

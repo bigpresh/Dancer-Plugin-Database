@@ -396,7 +396,7 @@ L<http://search.cpan.org/dist/Dancer-Plugin-Database-Core/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2013 David Precious.
+Copyright 2016 David Precious.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0). You may obtain a

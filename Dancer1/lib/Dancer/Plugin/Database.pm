@@ -259,39 +259,14 @@ You can also pass a hashref of settings if you wish to provide settings at
 runtime.
 
 
-=head1 CONVENIENCE FEATURES (quick_select, quick_update, quick_insert, quick_delete, quick_count)
+=head1 CONVENIENCE FEATURES
 
 The handle returned by the C<database> keyword is a
 L<Dancer::Plugin::Database::Core::Handle> object, which subclasses the C<DBI::db> DBI
 connection handle.  This means you can use it just like you'd normally use a DBI
-handle, but extra convenience methods are provided, as documented in the POD for
-L<Dancer::Plugin::Database::Core::Handle>.
+handle, but extra convenience methods are provided.
 
-Examples:
-
-  # Quickly fetch the (first) row whose ID is 42 as a hashref:
-  my $row = database->quick_select($table_name, { id => 42 });
-
-  # Fetch all badgers as an array of hashrefs:
-  my @badgers = database->quick_select('animals', { genus => 'Mellivora' });
-
-  # Update the row where the 'id' column is '42', setting the 'foo' column to
-  # 'Bar':
-  database->quick_update($table_name, { id => 42 }, { foo => 'Bar' });
-
-  # Insert a new row, using a named connection (see above)
-  database('connectionname')->quick_insert($table_name, { foo => 'Bar' });
-
-  # Delete the row with id 42:
-  database->quick_delete($table_name, { id => 42 });
-
-  # Fetch all rows from a table (since version 1.30):
-  database->quick_select($table_name, {});
-
-  # Retrieve a count of rows matching the criteria:
-  database->quick_count($table_name, {});
-
-There's more extensive documentation on these features in
+There's extensive documentation on these features in
 L<Dancer::Plugin::Database::Core::Handle>, including using the C<order_by>, C<limit>,
 C<columns> options to sort / limit results and include only specific columns.
 
@@ -441,7 +416,7 @@ You can find the author on IRC in the channel C<#dancer> on <irc.perl.org>.
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-2015 David Precious.
+Copyright 2010-2016 David Precious.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

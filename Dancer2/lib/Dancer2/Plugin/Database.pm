@@ -28,7 +28,7 @@ my $settings = {};
 sub _load_settings {
     my $dsl = shift;
     # ugly plugin1/2 switch - to be removed one day
-    if ( $dsl->can('with_plugin') ) {
+    if ( $dsl->app->can('with_plugin') ) {
         # plugin2
         # We need this for plugins which use this plugins
         $settings = $dsl->config;

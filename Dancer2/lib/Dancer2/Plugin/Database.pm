@@ -27,7 +27,16 @@ my $settings = {};
 
 sub _load_settings {
     my $dsl = shift;
-    $settings = plugin_setting();
+    # ugly plugin1/2 switch - to be removed one day
+    if ( $dsl->app->can('with_plugin') ) {
+        # plugin2
+        # We need this for plugins which use this plugins
+        $settings = $dsl->config;
+    }
+    else {
+        # plugin1
+        $settings = plugin_setting();
+    }
     $settings->{charset} ||= $dsl->setting('charset') || 'utf-8';
 }
 

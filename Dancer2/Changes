@@ -1,5 +1,6 @@
 Revision history for Dancer2-Plugin-Database
 
+2.16    2016-03-30
         - Further fixes for Dancer2 Plugin2 system.
           (Thanks to Peter Mottram)
 

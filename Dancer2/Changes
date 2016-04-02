@@ -1,5 +1,7 @@
 Revision history for Dancer2-Plugin-Database
 
+        - Add the use of warnings. (Thanks to Mohammad S Anwar)
+
 2.16    2016-03-30
         - Further fixes for Dancer2 Plugin2 system.
           (Thanks to Peter Mottram)

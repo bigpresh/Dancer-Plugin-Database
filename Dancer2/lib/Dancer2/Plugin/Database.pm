@@ -1,6 +1,7 @@
 package Dancer2::Plugin::Database;
 
 use strict;
+use warnings;
 
 use Dancer::Plugin::Database::Core;
 use Dancer::Plugin::Database::Core::Handle;

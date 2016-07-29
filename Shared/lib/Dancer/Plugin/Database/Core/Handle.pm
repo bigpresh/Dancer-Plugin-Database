@@ -5,7 +5,7 @@ use Carp;
 use DBI;
 use base qw(DBI::db);
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 =head1 NAME
 
@@ -365,43 +365,13 @@ sub _generate_sql {
 
     if ($type eq 'UPDATE' || $type eq 'DELETE' || $type eq 'SELECT' || $type eq 'COUNT')
     {
-        if ($where && !ref $where) {
-            $sql .= " WHERE " . $where;
-        } elsif ( ref $where eq 'HASH' ) {
-            my @stmts;
-            foreach my $k ( sort keys %$where ) {
-                my $v = $where->{$k};
-                if ( ref $v eq 'HASH' ) {
-                    my $not = delete $v->{'not'};
-                    while (my($op,$value) = each %$v ) {
-                        my ($cond, $add_bind_param) 
-                            = $self->_get_where_sql($op, $not, $value);
-                        push @stmts, $self->_quote_identifier($k) . $cond; 
-                        push @bind_params, $v->{$op} if $add_bind_param;
-                    }
-                } else {
-                    my $clause .= $self->_quote_identifier($k);
-                    if ( ! defined $v ) {
-                        $clause .= ' IS NULL';
-                    }
-                    elsif ( ! ref $v ) {
-                        $clause .= '=?';
-                        push @bind_params, $v;
-                    }
-                    elsif ( ref $v eq 'ARRAY' ) {
-                        $clause .= ' IN (' . (join ',', map { '?' } @$v) . ')';
-                        push @bind_params, @$v;
-                    }
-                    push @stmts, $clause;
-                }
-            }
-            $sql .= " WHERE " . join " AND ", @stmts if keys %$where;
-        } elsif (ref $where) {
-            carp "Can't handle ref " . ref $where . " for where";
-            return;
+        if ($where) {
+            my ($where_sql, @where_binds) = $self->generate_where_clauses( $where );
+            return unless $where_sql;   # there was a problem
+            $sql .= " WHERE $where_sql";
+            push(@bind_params, @where_binds);
         }
     }
-
     # Add an ORDER BY clause, if we want to:
     if (exists $opts->{order_by} and defined $opts->{order_by}) {
         $sql .= ' ' . $self->_build_order_by_clause($opts->{order_by});
@@ -438,7 +408,50 @@ sub _generate_sql {
     return ($sql, @bind_params);
 }
 
-sub _get_where_sql {
+sub generate_where_clauses {
+    my ($self, $where) = @_;
+    my $sql = "";
+    my @bind_params;
+    if ($where && !ref $where) {
+        $sql .= $where;
+    } elsif ( ref $where eq 'HASH' ) {
+        my @stmts;
+        foreach my $k ( sort keys %$where ) {
+            my $v = $where->{$k};
+            if ( ref $v eq 'HASH' ) {
+                my $not = delete $v->{'not'};
+                while (my($op,$value) = each %$v ) {
+                    my ($cond, $add_bind_param) 
+                        = $self->_get_where_sql_clause($op, $not, $value);
+                    push @stmts, $self->_quote_identifier($k) . $cond; 
+                    push @bind_params, $v->{$op} if $add_bind_param;
+                }
+            } else {
+                my $clause .= $self->_quote_identifier($k);
+                if ( ! defined $v ) {
+                    $clause .= ' IS NULL';
+                }
+                elsif ( ! ref $v ) {
+                    $clause .= '=?';
+                    push @bind_params, $v;
+                }
+                elsif ( ref $v eq 'ARRAY' ) {
+                    $clause .= ' IN (' . (join ',', map { '?' } @$v) . ')';
+                    push @bind_params, @$v;
+                }
+                push @stmts, $clause;
+            }
+        }
+        $sql .= join " AND ", @stmts if keys %$where;
+    } elsif (ref $where) {
+        carp "Can't handle ref " . ref $where . " for where";
+        return;
+    }
+    return ($sql, @bind_params);
+}
+
+
+sub _get_where_sql_clause {
     my ($self, $op, $not, $value) = @_;
 
     $op = lc $op;

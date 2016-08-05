@@ -1,9 +1,9 @@
 Revision history for Dancer-Plugin-Database-Core
 
-0.15    2016-07-29
+0.15    2016-08-05
 
         [ ENHANCEMENTS ]
-        - factor code for Dancer::Plugin::SimpleCRUD
+        - factor code for Dancer::Plugin::SimpleCRUD (joshrabinowitz)
 
 0.14    2016-01-24
 

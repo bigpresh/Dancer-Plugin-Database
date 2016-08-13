@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database
 
+2.13    2016-08-13
+        [ BUG FIXES ]
+        - Require 0.16 of core library, as 0.15 had a bug in :(
+
 2.12    2016-01-24
 
         [ BUG FIXES ]

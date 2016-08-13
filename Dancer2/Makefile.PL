@@ -13,7 +13,7 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'Dancer2'                        => '0.166001',
-        'Dancer::Plugin::Database::Core' => '0.12',
+        'Dancer::Plugin::Database::Core' => '0.16',
     },
     TEST_REQUIRES => {
         'Test::More'            => 0,

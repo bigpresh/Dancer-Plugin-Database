@@ -367,9 +367,13 @@ sub _generate_sql {
     {
         if ($where) {
             my ($where_sql, @where_binds) = $self->generate_where_clauses( $where );
-            return unless $where_sql;   # there was a problem
-            $sql .= " WHERE $where_sql";
-            push(@bind_params, @where_binds);
+            # Note: it's reasonable to get back no $where_sql in some cases -
+            # for e.g. if $where was an empty hashref, to denote "no
+            # conditions" - so it's not an error to not get any clauses to add.
+            if ($where_sql) {
+                $sql .= " WHERE $where_sql";
+                push(@bind_params, @where_binds);
+            }
         }
     }
     # Add an ORDER BY clause, if we want to:

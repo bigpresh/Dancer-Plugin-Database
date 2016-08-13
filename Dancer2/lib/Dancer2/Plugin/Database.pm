@@ -244,8 +244,8 @@ your config under C<connections> as shown below:
                     host: "localhost"
                     ....
 
-Then, you can call the C<database> keyword with the name of the database
-connection you want, for example:
+Then, you can -- indeed, I<must> -- call the C<database> keyword with the name
+of the database connection you want, for example:
 
     my $foo_dbh = database('foo');
     my $bar_dbh = database('bar');

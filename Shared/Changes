@@ -1,5 +1,11 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.16    2016-08-13
+
+        [ BUGFIXES ]
+        - Fix bug introduced in 0.15's refactoring which stopped empty where
+          clauses (e.g. $where => {}) working
+
 0.15    2016-08-05
 
         [ ENHANCEMENTS ]

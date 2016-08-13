@@ -1,5 +1,11 @@
 Revision history for Dancer2-Plugin-Database
 
+2.17    2016-08-13
+
+        [ BUG FIXES ]
+        - Require core 0.16, as 0.15 had a bug
+
+        [ ENHANCEMENTS ]
         - Add the use of warnings. (Thanks to Mohammad S Anwar)
 
 2.16    2016-03-30

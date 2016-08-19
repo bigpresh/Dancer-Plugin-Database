@@ -214,11 +214,18 @@ your config under C<connections> as shown below:
                     host: "localhost"
                     ....
 
-Then, you can call the C<database> keyword with the name of the database
-connection you want, for example:
+Note that if you define multiple connections this way, you'll always need to
+specify which connection you mean. Calling C<database()> with no connection
+name will use the default unnamed connection details, whereas
+C<database($connection_name)> will use a connection with the given name.
 
     my $foo_dbh = database('foo');
     my $bar_dbh = database('bar');
+    my $default_dbh = database();
+
+It's perfectly acceptable to mix-and-match, using the default unnamed
+connection most of the time, and a specific named connection from the
+C<connections> section when you need to use an alternative database.
 
 
 =head1 RUNTIME CONFIGURATION

@@ -600,6 +600,10 @@ Currently recognized operators are:
 
 ... same as C<WHERE foo LIKE '%bar%'>
 
+=item 'ilike'
+
+Postgres-specific - same as 'like', but case-insensitive.
+
 =item 'gt' / 'ge'
 
  'greater than' or 'greater or equal to'

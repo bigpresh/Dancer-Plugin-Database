@@ -68,6 +68,26 @@ my @sql_tests = (
     },
 
     {
+        name       => "SELECT with LIKE",
+        params     => [
+            'SELECT', 'tablename', undef, 
+            { foo => 'One', bar => { like => '%baz%' } }
+        ],
+        # Expected order differs - columns alphabetical
+        expect_sql => qq{SELECT * FROM "tablename" WHERE "bar" LIKE ? AND "foo"=?},
+        expect_bind_params => ['%baz%', 'One'],
+    },
+    {
+        name       => "SELECT with ILIKE",
+        params     => [
+            'SELECT', 'tablename', undef, 
+            { foo => 'One', bar => { ilike => '%baz%' } }
+        ],
+        # Expected order differs - columns alphabetical
+        expect_sql => qq{SELECT * FROM "tablename" WHERE "bar" ILIKE ? AND "foo"=?},
+        expect_bind_params => ['%baz%', 'One'],
+    },
+    {
         name       => "INSERT with scalarrefs untouched",
         params     => ['INSERT', 'tablename', { one => \'NOW()', two => '2' } ],
         expect_sql => qq{INSERT INTO "tablename" ("one","two") VALUES (NOW(),?)},

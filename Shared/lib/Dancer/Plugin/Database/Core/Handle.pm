@@ -473,6 +473,7 @@ sub _get_where_sql_clause {
     }
 
     my %st = (
+       'ilike'=> ' ILIKE ?',
         'like' => ' LIKE ?',
         'is' => ' IS ?',
         'ge' => ' >= ?',
@@ -598,6 +599,10 @@ Currently recognized operators are:
  { foo => { 'like' => '%bar%' } } 
 
 ... same as C<WHERE foo LIKE '%bar%'>
+
+=item 'ilike'
+
+Postgres-specific - same as 'like', but case-insensitive.
 
 =item 'gt' / 'ge'
 

@@ -10,7 +10,7 @@ Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
 
 =cut
 
-our $VERSION = '0.16';
+our $VERSION = '0.20';
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that

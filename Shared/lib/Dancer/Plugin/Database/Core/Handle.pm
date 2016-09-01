@@ -473,6 +473,7 @@ sub _get_where_sql_clause {
     }
 
     my %st = (
+       'ilike'=> ' ILIKE ?',
         'like' => ' LIKE ?',
         'is' => ' IS ?',
         'ge' => ' >= ?',

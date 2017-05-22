@@ -4,8 +4,6 @@ use 5.006;
 use strict;
 use warnings FATAL => 'all';
 
-use JSON;
-
 =head1 NAME
 
 Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
@@ -41,10 +39,9 @@ sub database {
     my $hook_exec = $args{hook_exec} || sub {}; ## die?
 
     # The key to use to store this handle in %handles.  This will be either the
-    # name supplied to database(), a serialised representation of the hashref
-    # supplied to database() (thus, as long as the same keys and values are
-    # passed, the same handle will be reused) or $def_handle if database() is 
-    # called without args:
+    # name supplied to database(), the hashref supplied to database() (thus, as
+    # long as the same hashref of settings is passed, the same handle will be
+    # reused) or $def_handle if database() is called without args:
     my $handle_key;
     my $conn_details; # connection settings to use.
     my $handle;
@@ -53,8 +50,7 @@ sub database {
     # hashref to look for the handle, too, so as long as the same hashref is
     # passed to the database() keyword, we'll reuse the same handle:
     if (ref $arg eq 'HASH') {
-        $handle_key = JSON->new->pretty(0)->canonical(1)->encode($arg);
-        warn "Given a hashref of args, handle_key $handle_key";
+        $handle_key = $arg;
         $conn_details = _merge_settings($arg, $settings, $logger);
     } else {
         $handle_key = defined $arg ? $arg : $def_handle;

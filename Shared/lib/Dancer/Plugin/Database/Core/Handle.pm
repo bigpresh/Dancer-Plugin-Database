@@ -252,9 +252,16 @@ sub _quick_query {
         carp "Unrecognised query type $type!";
         return;
     }
-    if (!$table_name || ref $table_name) {
-        carp "Expected table name as a straight scalar";
-        return;
+    if ($type =~ m{^ (SELECT|COUNT) $}x && ref $table_name eq 'HASH') {
+	if (scalar(keys(%$table_name)) != 2) {
+	    carp "join over more than one table";
+	    return;
+	}
+    } else {
+	if (!$table_name || ref $table_name) {
+	    carp "Expected table name as a straight scalar";
+	    return;
+	}
     }
     if (($type eq 'INSERT' || $type eq 'UPDATE')
         && (!$data || ref $data ne 'HASH')) 
@@ -323,16 +330,35 @@ sub _generate_sql {
         $which_cols = join(',', map { $self->_quote_identifier($_) } @cols);
     }
 
-    $table_name = $self->_quote_identifier($table_name);
     my @bind_params;
 
-    my $sql = {
-        SELECT => "SELECT $which_cols FROM $table_name",
-        INSERT => "INSERT INTO $table_name ",
-        UPDATE => "UPDATE $table_name SET ",
-        DELETE => "DELETE FROM $table_name ",
-        COUNT => "SELECT COUNT(*) FROM $table_name",
-    }->{$type};
+    my $sql;
+    if (ref $table_name) {
+	my $payload = ($type eq 'COUNT') ? 'COUNT(*)' : $which_cols;
+	my (@ts,@ks);
+	if ($opts->{'join_type'} && $opts->{'join_type'} =~ m{^ (LEFT|RIGHT) $}xi) {
+	    if (ref $opts->{'join_order'} ne 'ARRAY') {
+		carp('asymmetric joins need explicit join_order');
+		return;
+	    }
+	    @ts = @{$opts->{'join_order'}};
+	} else {
+	    @ts = keys(%$table_name);
+	}
+	@ks = map { $self->_quote_identifier($table_name->{$_}); } @ts;
+	@ts =  map { $self->_quote_identifier($_); } @ts;
+	$sql = "SELECT $payload FROM $ts[0] " . ($opts->{'join_type'} // 'INNER') .
+	    " JOIN $ts[1] ON $ts[0].$ks[0] = $ts[1].$ks[1] ";
+    } else {
+	$table_name = $self->_quote_identifier($table_name);
+	$sql = {
+	    SELECT => "SELECT $which_cols FROM $table_name",
+	    INSERT => "INSERT INTO $table_name ",
+	    UPDATE => "UPDATE $table_name SET ",
+	    DELETE => "DELETE FROM $table_name ",
+	    COUNT => "SELECT COUNT(*) FROM $table_name",
+	}->{$type};
+    }
     if ($type eq 'INSERT') {
         my (@keys, @values);
         for my $key (sort keys %$data) {

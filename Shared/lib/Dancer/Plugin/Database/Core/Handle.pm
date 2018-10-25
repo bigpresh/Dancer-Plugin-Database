@@ -283,8 +283,8 @@ sub _quick_query {
             "Executing $type query $sql with params " . join ',', 
             map {
                 defined $_ ? 
-                $_ =~ /^[[:ascii:]]+$/ ? 
-                    length $_ > 50 ? substr($_, 0, 47) . '...' : $_
+                $_ =~ /^[[:ascii:]]*$/ ?
+                    "'" . (length $_ > 50 ? substr($_, 0, 47) . '...' : $_) . "'"
                 : "[non-ASCII data not logged]" : 'undef'
             } @bind_params
         );

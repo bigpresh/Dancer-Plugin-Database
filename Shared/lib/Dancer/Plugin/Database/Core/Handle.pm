@@ -252,9 +252,16 @@ sub _quick_query {
         carp "Unrecognised query type $type!";
         return;
     }
-    if (!$table_name || ref $table_name) {
-        carp "Expected table name as a straight scalar";
-        return;
+    if ($type =~ m{^ (SELECT|COUNT) $}x && ref $table_name eq 'ARRAY') {
+	if (scalar(@$table_name) != 2) {
+	    carp "join over more than one table";
+	    return;
+	}
+    } else {
+	if (!$table_name || ref $table_name) {
+	    carp "Expected table name as a straight scalar";
+	    return;
+	}
     }
     if (($type eq 'INSERT' || $type eq 'UPDATE')
         && (!$data || ref $data ne 'HASH')) 
@@ -323,16 +330,31 @@ sub _generate_sql {
         $which_cols = join(',', map { $self->_quote_identifier($_) } @cols);
     }
 
-    $table_name = $self->_quote_identifier($table_name);
     my @bind_params;
 
-    my $sql = {
-        SELECT => "SELECT $which_cols FROM $table_name",
-        INSERT => "INSERT INTO $table_name ",
-        UPDATE => "UPDATE $table_name SET ",
-        DELETE => "DELETE FROM $table_name ",
-        COUNT => "SELECT COUNT(*) FROM $table_name",
-    }->{$type};
+    my $sql;
+    if (ref $table_name) {
+	my $payload = ($type eq 'COUNT') ? 'COUNT(*)' : $which_cols;
+	my @ts = map { $self->_quote_identifier($_); } @$table_name;
+	my $join = ($opts->{'join_type'}//'INNER') . " JOIN $ts[1]";
+	if (!ref $opts->{'join_keys'}) {
+	    $join .= ' USING ' . $self->_quote_identifier($opts->{'join_keys'})
+		if ($opts->{'join_keys'});
+	} else {
+	    $join .= " ON $ts[0]." . $self->_quote_identifier($opts->{'join_keys'}[0])
+		. " = $ts[1]." . $self->_quote_identifier($opts->{'join_keys'}[1]);
+	}
+	$sql = "SELECT $payload FROM $ts[0] $join";
+    } else {
+	$table_name = $self->_quote_identifier($table_name);
+	$sql = {
+	    SELECT => "SELECT $which_cols FROM $table_name",
+	    INSERT => "INSERT INTO $table_name ",
+	    UPDATE => "UPDATE $table_name SET ",
+	    DELETE => "DELETE FROM $table_name ",
+	    COUNT => "SELECT COUNT(*) FROM $table_name",
+	}->{$type};
+    }
     if ($type eq 'INSERT') {
         my (@keys, @values);
         for my $key (sort keys %$data) {

@@ -10,7 +10,7 @@ Dancer::Plugin::Database::Core - Shared core for D1 and D2 Database plugins
 
 =cut
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 my %handles;
 # Hashref used as key for default handle, so we don't have a magic value that
@@ -202,6 +202,7 @@ sub _set_defaults {
 sub _get_connection {
     my ($settings, $logger, $hook_exec) = @_;
 
+    $hook_exec->('database_connection_new', $settings);
     if (!$settings->{dsn} && !$settings->{driver}) {
         die "Can't get a database connection without settings supplied!\n"
             . "Please check you've supplied settings in config as per the "

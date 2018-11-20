@@ -1,5 +1,9 @@
 Revision history for Dancer2-Plugin-Database
 
+2.17    2018-11-20
+        [ ENHANCEMENTS ]
+        - added pre database connection hook
+
 2.17    2016-08-13
 
         [ BUG FIXES ]

@@ -16,7 +16,7 @@ Dancer::Plugin::Database - easy database connections for Dancer applications
 
 =cut
 
-our $VERSION = '2.13';
+our $VERSION = '2.14';
 
 my $settings = undef;
 
@@ -42,7 +42,9 @@ register database => sub {
 register_hook(qw(database_connected
                  database_connection_lost
                  database_connection_failed
-                 database_error));
+                 database_error
+                 database_connection_new
+                 ));
 
 register_plugin;
 
@@ -313,6 +315,12 @@ to connect (as obtained from the config file).
 
 Called when a database error is raised by C<DBI>.  Receives two parameters: the
 error message being returned by DBI, and the database handle in question.
+
+=item C<database_connection_new>
+
+Called when a new database connection is about to be created.  Receives a hashref of
+connection settings as a parameter, containing the settings the plugin will be using
+to connect (as obtained from the config file).
 
 =back
 

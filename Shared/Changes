@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-Database-Core
 
+0.21    2018-11-20
+        [ ENHANCEMENTS ]
+        - added hook for pre database connection
+
 0.20    2016-09-01
         [ ENHANCEMENTS ]
         - Support "ILIKE" for Postgres users (Mario Duhanic)

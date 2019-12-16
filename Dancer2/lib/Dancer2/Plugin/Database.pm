@@ -147,7 +147,11 @@ should be specified as, for example:
             dbi_params:
                 RaiseError: 1
                 AutoCommit: 1
-            on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
+                ShowErrorStatement: 1 # DBI append relevant statement text to error messages
+                mysql_auto_reconnect: 1
+                mysql_enable_utf8: 1 # DBI::mysql support up to 3 byte UTF-8 encoding in older MySQL and DBD::mysql versions
+                mysql_enable_utf8mb4: 1 # from DBI::mysql 4.032 support 4 byte UTF-8 encoding in MySQL version 5.5 or later
+            on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'", "SET SQL_MODE='TRADITIONAL'" ]
             log_queries: 1
             handle_class: 'My::Super::Sexy::Database::Handle'
 
